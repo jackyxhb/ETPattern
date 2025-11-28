@@ -240,7 +240,12 @@ struct StudyView: View {
 
     private func loadAllCards() {
         if let cards = cardSet.cards as? Set<Card> {
+            print("DEBUG: Found \(cards.count) cards in cardSet '\(cardSet.name ?? "unnamed")'")
             cardsDue = Array(cards).sorted { ($0.front ?? "") < ($1.front ?? "") }
+            print("DEBUG: Set cardsDue to \(cardsDue.count) cards")
+        } else {
+            print("DEBUG: No cards found in cardSet '\(cardSet.name ?? "unnamed")'")
+            cardsDue = []
         }
     }
 
@@ -250,17 +255,22 @@ struct StudyView: View {
         
         do {
             let existingSessions = try viewContext.fetch(fetchRequest)
+            print("DEBUG: Found \(existingSessions.count) active sessions for cardSet '\(cardSet.name ?? "unnamed")'")
             if let existingSession = existingSessions.first {
+                print("DEBUG: Resuming existing session")
                 studySession = existingSession
                 if let remaining = existingSession.remainingCards as? Set<Card> {
                     cardsDue = Array(remaining).sorted { ($0.front ?? "") < ($1.front ?? "") }
+                    print("DEBUG: Loaded \(cardsDue.count) remaining cards from session")
                 } else {
                     cardsDue = []
+                    print("DEBUG: No remaining cards in session")
                 }
                 currentCardIndex = Int(existingSession.currentCardIndex)
                 isResumedSession = true
                 // No sessionStartTime for resumed sessions
             } else {
+                print("DEBUG: Creating new session")
                 loadAllCards()
                 studySession = StudySession(context: viewContext)
                 studySession?.date = Date()
@@ -274,8 +284,10 @@ struct StudyView: View {
                 studySession?.isActive = true
                 sessionStartTime = Date()
                 isResumedSession = false
+                print("DEBUG: Created new session with \(cardsDue.count) cards")
             }
         } catch {
+            print("DEBUG: Error fetching sessions: \(error)")
             // Fallback to new session
             loadAllCards()
             studySession = StudySession(context: viewContext)
@@ -290,6 +302,7 @@ struct StudyView: View {
             studySession?.isActive = true
             sessionStartTime = Date()
             isResumedSession = false
+            print("DEBUG: Created fallback session with \(cardsDue.count) cards")
         }
     }
 

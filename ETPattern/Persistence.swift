@@ -75,6 +75,7 @@ struct PersistenceController {
         let fetchRequest: NSFetchRequest<CardSet> = CardSet.fetchRequest()
         do {
             let existingSets = try viewContext.fetch(fetchRequest)
+            print("DEBUG: Found \(existingSets.count) existing card sets")
             if !existingSets.isEmpty {
                 return // Already initialized
             }
@@ -82,9 +83,11 @@ struct PersistenceController {
             print("Error checking existing card sets: \(error)")
         }
 
+        print("DEBUG: Initializing bundled card sets...")
         // Initialize bundled card sets - combine all 12 groups into one cardset
         let csvImporter = CSVImporter(viewContext: viewContext)
         let bundledFiles = FileManagerService.getBundledCSVFiles()
+        print("DEBUG: Found \(bundledFiles.count) bundled CSV files: \(bundledFiles)")
 
         // Create a single cardset for all groups
         let cardSet = CardSet(context: viewContext)
@@ -94,14 +97,18 @@ struct PersistenceController {
         var allCards: [Card] = []
 
         for fileName in bundledFiles {
+            print("DEBUG: Loading CSV file: \(fileName)")
             if let content = FileManagerService.loadBundledCSV(named: fileName) {
+                print("DEBUG: Successfully loaded \(fileName), parsing...")
                 let cards = csvImporter.parseCSV(content, cardSetName: cardSet.name!)
+                print("DEBUG: Parsed \(cards.count) cards from \(fileName)")
                 allCards.append(contentsOf: cards)
             } else {
-                print("Failed to load bundled CSV: \(fileName)")
+                print("DEBUG: Failed to load bundled CSV: \(fileName)")
             }
         }
 
+        print("DEBUG: Total cards parsed: \(allCards.count)")
         // Add all cards to the single cardset
         cardSet.addToCards(NSSet(array: allCards))
 
