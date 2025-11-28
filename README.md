@@ -14,6 +14,8 @@ A beautiful, native iOS flashcard application designed to help users master 300+
 - **300+ English Patterns**: Comprehensive collection covering opinions, suggestions, agreements, and more
 - **Automatic TTS Audio**: Natural voice synthesis speaks each card aloud (American/British English options)
 - **Interactive Card Flipping**: Smooth 180° rotation animation with tap-to-flip functionality
+- **Configurable Card Ordering**: Choose between random order or sequential import order
+- **Linear Progress Tracking**: Clean horizontal progress bar with percentage display during study sessions
 
 ### 📚 Card Management
 - **12 Built-in Groups**: Pre-loaded decks covering different pattern categories
@@ -29,7 +31,7 @@ A beautiful, native iOS flashcard application designed to help users master 300+
 
 ## 📋 Requirements
 
-- **iOS**: 26.1+
+- **iOS**: 16.0+
 - **Xcode**: 15.0+
 - **Swift**: 5.0+
 - **Device**: iPhone 16 or later (optimized for iPhone 16)
@@ -66,6 +68,7 @@ A beautiful, native iOS flashcard application designed to help users master 300+
 - **Card Display**: Each card shows an English pattern on the front
 - **Flip Cards**: Tap anywhere to reveal 5 example sentences on the back
 - **Audio Playback**: Text is automatically spoken aloud when cards appear
+- **Progress Tracking**: Linear progress bar shows completion percentage
 - **Rate Your Knowledge**:
   - Swipe right: "Easy" - Card reviewed successfully
   - Swipe left or tap "Again": Review this card sooner
@@ -78,6 +81,7 @@ A beautiful, native iOS flashcard application designed to help users master 300+
 
 ### Settings
 - **Voice Selection**: Choose between American (en-US) and British (en-GB) English
+- **Card Ordering**: Select "Random Order" for varied learning or "Import Order" for sequential review
 - **Audio Settings**: TTS rate optimized for natural speech (0.48-0.52)
 
 ## 📄 CSV Format
@@ -138,7 +142,13 @@ Run tests with:
 xcodebuild test -project ETPattern.xcodeproj -scheme ETPattern
 ```
 
-## 📊 Learning Algorithm
+## 🔄 Recent Updates
+
+### Version 1.0.1
+- **Linear Progress Bar**: Replaced circular progress indicator with clean horizontal progress bar and percentage display
+- **Configurable Card Ordering**: Added option to study cards in random order or sequential import order
+- **Settings Persistence**: All user preferences are now permanently saved across app sessions
+- **Improved Session Management**: Better handling of study sessions with accurate progress tracking
 
 The app uses a simplified spaced repetition system inspired by the Leitner method:
 
@@ -179,10 +189,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Built with SwiftUI and Core Data
+- Built with SwiftUI and Core Data for iOS 16.0+
 - Spaced repetition algorithm inspired by proven learning techniques
-- TTS powered by AVSpeechSynthesizer
-- Designed specifically for iPhone 16 and iOS 26.1+
+- TTS powered by AVSpeechSynthesizer with voice selection
+- Linear progress indicators for modern UI design
+- Designed specifically for iPhone 16 and latest iOS features
 
 ---
 
