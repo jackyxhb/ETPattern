@@ -82,21 +82,37 @@ struct PersistenceController {
             print("Error checking existing card sets: \(error)")
         }
 
-        // Initialize bundled card sets
+        // Initialize bundled card sets - combine all 12 groups into one cardset
         let csvImporter = CSVImporter(viewContext: viewContext)
         let bundledFiles = FileManagerService.getBundledCSVFiles()
 
+        // Create a single cardset for all groups
+        let cardSet = CardSet(context: viewContext)
+        cardSet.name = "English Thought Pattern 300"
+        cardSet.createdDate = Date()
+
+        var allCards: [Card] = []
+
         for fileName in bundledFiles {
-            let cardSetName = FileManagerService.getCardSetName(from: fileName)
-            if let _ = csvImporter.importBundledCSV(named: fileName, cardSetName: cardSetName) {
-                print("Successfully imported card set: \(cardSetName)")
+            if let content = FileManagerService.loadBundledCSV(named: fileName) {
+                let cards = csvImporter.parseCSV(content, cardSetName: cardSet.name!)
+                allCards.append(contentsOf: cards)
             } else {
-                print("Failed to import card set: \(cardSetName)")
+                print("Failed to load bundled CSV: \(fileName)")
             }
+        }
+
+        // Add all cards to the single cardset
+        cardSet.addToCards(NSSet(array: allCards))
+
+        // Set the cardSet relationship for each card
+        for card in allCards {
+            card.cardSet = cardSet
         }
 
         do {
             try viewContext.save()
+            print("Successfully imported \(allCards.count) cards into 'English Thought Pattern 300'")
         } catch {
             print("Error saving initialized card sets: \(error)")
         }
