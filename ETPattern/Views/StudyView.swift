@@ -115,7 +115,7 @@ struct StudyView: View {
                     // Card display
                     if currentCardIndex < cardsDue.count {
                         VStack {
-                            CardView(card: cardsDue[currentCardIndex])
+                            CardView(card: cardsDue[currentCardIndex], currentIndex: currentCardIndex, totalCards: cardsDue.count)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .padding()
                                 .gesture(

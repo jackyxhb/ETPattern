@@ -11,18 +11,20 @@ import CoreData
 
 struct CardView: View {
     let card: Card
+    let currentIndex: Int
+    let totalCards: Int
     @State private var isFlipped = false
     @State private var ttsService = TTSService()
 
     var body: some View {
         ZStack {
             // Front of card
-            CardFace(text: card.front ?? "No front", pattern: "", isFront: true)
+            CardFace(text: card.front ?? "No front", pattern: "", isFront: true, currentIndex: currentIndex, totalCards: totalCards)
                 .opacity(isFlipped ? 0 : 1)
                 .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
 
             // Back of card
-            CardFace(text: formatBackText(), pattern: card.front ?? "", isFront: false)
+            CardFace(text: formatBackText(), pattern: card.front ?? "", isFront: false, currentIndex: currentIndex, totalCards: totalCards)
                 .opacity(isFlipped ? 1 : 0)
                 .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
         }
@@ -35,6 +37,10 @@ struct CardView: View {
         }
         .onAppear {
             speakCurrentText()
+        }
+        .onChange(of: card) { oldValue, newValue in
+            // Reset to front side when card changes
+            isFlipped = false
         }
     }
 
@@ -54,6 +60,8 @@ struct CardFace: View {
     let text: String
     let pattern: String
     let isFront: Bool
+    let currentIndex: Int
+    let totalCards: Int
 
     var body: some View {
         ZStack {
@@ -66,15 +74,27 @@ struct CardFace: View {
                 )
 
             if isFront {
-                // Front: Just the pattern, bold and centered
+                // Front: Header with card number + pattern below
                 VStack {
+                    // Header with card number
+                    Text("\(currentIndex + 1)/\(totalCards)")
+                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.gray.opacity(0.1))
+                        .cornerRadius(8)
+                    
                     Spacer()
+                    
+                    // Pattern text
                     Text(text)
                         .font(.system(size: 42, weight: .bold, design: .rounded))
                         .multilineTextAlignment(.center)
                         .foregroundColor(.primary)
                         .minimumScaleFactor(0.5)
                         .lineLimit(3)
+                    
                     Spacer()
                 }
                 .padding(32)
@@ -125,5 +145,5 @@ struct CardFace: View {
     card.front = "I think..."
     card.back = "I think it's going to rain.<br>I think you should study more.<br>I think this is a good idea.<br>I think she's coming tomorrow.<br>I think we need to talk."
 
-    return CardView(card: card)
+    return CardView(card: card, currentIndex: 0, totalCards: 300)
 }
