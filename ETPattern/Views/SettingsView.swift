@@ -11,19 +11,41 @@ import AVFoundation
 struct SettingsView: View {
     @StateObject private var ttsService = TTSService()
     @State private var selectedVoice: String
+    @State private var cardOrderMode: String
 
     private let voiceOptions = [
         "en-US": "American English (en-US)",
         "en-GB": "British English (en-GB)"
     ]
 
+    private let orderOptions = [
+        "random": "Random Order",
+        "sequential": "Import Order"
+    ]
+
     init() {
         let currentVoice = UserDefaults.standard.string(forKey: "selectedVoice") ?? "en-US"
         _selectedVoice = State(initialValue: currentVoice)
+        
+        let currentOrder = UserDefaults.standard.string(forKey: "cardOrderMode") ?? "random"
+        _cardOrderMode = State(initialValue: currentOrder)
     }
 
     var body: some View {
         Form {
+            Section(header: Text("Study Mode")) {
+                Picker("Card Order", selection: $cardOrderMode) {
+                    ForEach(orderOptions.keys.sorted(), id: \.self) { orderKey in
+                        Text(orderOptions[orderKey] ?? orderKey)
+                            .tag(orderKey)
+                    }
+                }
+                .pickerStyle(.menu)
+                .onChange(of: cardOrderMode) { newValue in
+                    UserDefaults.standard.set(newValue, forKey: "cardOrderMode")
+                }
+            }
+
             Section(header: Text("Text-to-Speech")) {
                 Picker("Voice", selection: $selectedVoice) {
                     ForEach(voiceOptions.keys.sorted(), id: \.self) { voiceId in

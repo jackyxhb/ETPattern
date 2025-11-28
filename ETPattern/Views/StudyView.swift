@@ -261,6 +261,9 @@ struct StudyView: View {
                 studySession = existingSession
                 if let remaining = existingSession.remainingCards as? Set<Card> {
                     cardsDue = Array(remaining).sorted { ($0.front ?? "") < ($1.front ?? "") }
+                    if shouldShuffleCards() {
+                        cardsDue.shuffle() // Randomize remaining cards
+                    }
                     print("DEBUG: Loaded \(cardsDue.count) remaining cards from session")
                 } else {
                     cardsDue = []
@@ -275,6 +278,9 @@ struct StudyView: View {
                 if cardsDue.isEmpty {
                     print("DEBUG: No cards due, loading all cards")
                     loadAllCards()
+                }
+                if shouldShuffleCards() {
+                    cardsDue.shuffle() // Randomize card order
                 }
                 studySession = StudySession(context: viewContext)
                 studySession?.date = Date()
@@ -297,6 +303,9 @@ struct StudyView: View {
             if cardsDue.isEmpty {
                 print("DEBUG: No cards due, loading all cards")
                 loadAllCards()
+            }
+            if shouldShuffleCards() {
+                cardsDue.shuffle() // Randomize card order
             }
             studySession = StudySession(context: viewContext)
             studySession?.date = Date()
@@ -376,6 +385,10 @@ struct StudyView: View {
 
     private func saveStudySession() {
         try? viewContext.save()
+    }
+
+    private func shouldShuffleCards() -> Bool {
+        return UserDefaults.standard.string(forKey: "cardOrderMode") == "random"
     }
 }
 
