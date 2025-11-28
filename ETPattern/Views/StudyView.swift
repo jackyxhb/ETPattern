@@ -99,7 +99,15 @@ struct StudyView: View {
                             }
                         }
                         Spacer()
-                        ProgressCircle(progress: progress)
+                        VStack(spacing: 8) {
+                            ProgressView(value: progress)
+                                .progressViewStyle(LinearProgressViewStyle(tint: .blue))
+                                .frame(width: 120, height: 6)
+                                .cornerRadius(3)
+                            Text("\(Int(progress * 100))%")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
                         Spacer()
                         VStack(alignment: .trailing) {
                             Text("\(studySession?.correctCount ?? 0) ✓")
