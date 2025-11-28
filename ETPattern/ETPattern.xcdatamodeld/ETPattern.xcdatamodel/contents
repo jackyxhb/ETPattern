@@ -13,6 +13,9 @@
         <attribute name="nextReviewDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="interval" optional="NO" attributeType="Integer 32" defaultValueString="1" usesScalarValueType="YES"/>
         <attribute name="easeFactor" optional="NO" attributeType="Double" defaultValueString="2.5" usesScalarValueType="YES"/>
+        <attribute name="timesReviewed" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="timesCorrect" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="lastReviewedDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="cardSet" optional="NO" maxCount="1" deletionRule="Nullify" destinationEntity="CardSet" inverseName="cards" inverseEntity="CardSet"/>
     </entity>
     <entity name="StudySession" representedClassName="StudySession" syncable="YES" codeGenerationType="category">
