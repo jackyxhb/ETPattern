@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreData
+import UIKit
 
 struct StudyView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -21,6 +22,7 @@ struct StudyView: View {
     @State private var sessionStartTime: Date?
 
     private let spacedRepetitionService = SpacedRepetitionService()
+    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
 
     var body: some View {
         VStack {
@@ -96,6 +98,8 @@ struct StudyView: View {
                             }
                         }
                         Spacer()
+                        ProgressCircle(progress: progress)
+                        Spacer()
                         VStack(alignment: .trailing) {
                             Text("\(studySession?.correctCount ?? 0) ✓")
                                 .foregroundColor(.green)
@@ -122,6 +126,7 @@ struct StudyView: View {
                                             
                                             // Only process horizontal swipes (more horizontal than vertical movement)
                                             if abs(horizontalAmount) > abs(verticalAmount) && abs(horizontalAmount) > 50 {
+                                                feedbackGenerator.impactOccurred()
                                                 if horizontalAmount > 0 {
                                                     // Swipe right = Easy
                                                     markAsEasy()
@@ -182,10 +187,15 @@ struct StudyView: View {
         }
     }
 
+    private var progress: Double {
+        guard !cardsDue.isEmpty else { return 0 }
+        return Double(currentCardIndex) / Double(cardsDue.count)
+    }
+
     private var currentAccuracy: Double? {
-        let reviewed = studySession?.cardsReviewed ?? 0
-        guard reviewed > 0 else { return nil }
-        return Double(studySession?.correctCount ?? 0) / Double(reviewed)
+        guard let cardsReviewed = studySession?.cardsReviewed, cardsReviewed > 0 else { return nil }
+        guard let correctCount = studySession?.correctCount else { return nil }
+        return Double(correctCount) / Double(cardsReviewed)
     }
 
     private var accuracyText: String {
@@ -228,6 +238,7 @@ struct StudyView: View {
         guard currentCardIndex < cardsDue.count else { return }
         let card = cardsDue[currentCardIndex]
 
+        card.recordReview(correct: false)
         spacedRepetitionService.updateCardDifficulty(card, rating: .again)
         studySession?.cardsReviewed += 1
 
@@ -238,6 +249,7 @@ struct StudyView: View {
         guard currentCardIndex < cardsDue.count else { return }
         let card = cardsDue[currentCardIndex]
 
+        card.recordReview(correct: true)
         spacedRepetitionService.updateCardDifficulty(card, rating: .easy)
         studySession?.cardsReviewed += 1
         studySession?.correctCount += 1

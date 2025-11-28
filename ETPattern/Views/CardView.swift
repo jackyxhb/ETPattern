@@ -57,44 +57,65 @@ struct CardFace: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 20)
+            RoundedRectangle(cornerRadius: 24)
                 .fill(Color.white)
-                .shadow(radius: 10)
+                .shadow(color: Color.black.opacity(0.1), radius: 12, x: 0, y: 4)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+                )
 
             if isFront {
                 // Front: Just the pattern, bold and centered
-                Text(text)
-                    .font(.system(size: 48, weight: .bold))
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(.primary)
-                    .padding(40)
+                VStack {
+                    Spacer()
+                    Text(text)
+                        .font(.system(size: 42, weight: .bold, design: .rounded))
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.primary)
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(3)
+                    Spacer()
+                }
+                .padding(32)
             } else {
                 // Back: Pattern at top (smaller) + examples below
-                VStack(spacing: 24) {
+                VStack(spacing: 32) {
                     // Pattern at top
                     Text(pattern)
-                        .font(.system(size: 24, weight: .semibold))
+                        .font(.system(size: 20, weight: .semibold, design: .rounded))
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .background(Color.blue.opacity(0.1))
+                        .cornerRadius(12)
 
                     // Examples below
                     let examples = text.components(separatedBy: "\n")
-                    VStack(spacing: 12) {
-                        ForEach(examples, id: \.self) { example in
+                    VStack(spacing: 16) {
+                        ForEach(examples.indices, id: \.self) { index in
+                            let example = examples[index]
                             if !example.isEmpty {
-                                Text(example)
-                                    .font(.system(size: 18))
-                                    .multilineTextAlignment(.center)
-                                    .foregroundColor(.primary)
-                                    .lineSpacing(4)
+                                HStack(alignment: .top, spacing: 12) {
+                                    Text("\(index + 1).")
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundColor(.secondary)
+                                    Text(example)
+                                        .font(.system(size: 18, weight: .regular, design: .rounded))
+                                        .multilineTextAlignment(.leading)
+                                        .foregroundColor(.primary)
+                                        .lineSpacing(6)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
                             }
                         }
                     }
                 }
-                .padding(40)
+                .padding(32)
             }
         }
-        .padding(20)
+        .padding(24)
     }
 }
 

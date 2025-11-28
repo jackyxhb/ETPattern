@@ -32,7 +32,7 @@ struct SettingsView: View {
                     }
                 }
                 .pickerStyle(.menu)
-                .onChange(of: selectedVoice) { oldValue, newValue in
+                .onChange(of: selectedVoice) { newValue in
                     ttsService.setVoice(newValue)
                 }
 
