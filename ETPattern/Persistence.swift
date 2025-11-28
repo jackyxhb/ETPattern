@@ -88,7 +88,11 @@ struct PersistenceController {
 
         for fileName in bundledFiles {
             let cardSetName = FileManagerService.getCardSetName(from: fileName)
-            csvImporter.importBundledCSV(named: fileName, cardSetName: cardSetName)
+            if let _ = csvImporter.importBundledCSV(named: fileName, cardSetName: cardSetName) {
+                print("Successfully imported card set: \(cardSetName)")
+            } else {
+                print("Failed to import card set: \(cardSetName)")
+            }
         }
 
         do {
