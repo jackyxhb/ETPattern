@@ -20,6 +20,7 @@ struct StudyView: View {
     @State private var studySession: StudySession?
     @State private var showSessionComplete = false
     @State private var sessionStartTime: Date?
+    @State private var isResumedSession = false
 
     private let spacedRepetitionService = SpacedRepetitionService()
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
@@ -89,7 +90,7 @@ struct StudyView: View {
                     // Session stats header
                     HStack {
                         VStack(alignment: .leading) {
-                            Text("Cards: \(currentCardIndex + 1) / \(cardsDue.count)")
+                            Text("Cards: \(reviewedCardsCount + currentCardIndex + 1) / \(totalCardsInSession)")
                                 .font(.headline)
                             if let accuracy = currentAccuracy, accuracy > 0 {
                                 Text("Accuracy: \(Int(accuracy * 100))%")
@@ -115,7 +116,7 @@ struct StudyView: View {
                     // Card display
                     if currentCardIndex < cardsDue.count {
                         VStack {
-                            CardView(card: cardsDue[currentCardIndex], currentIndex: currentCardIndex, totalCards: cardsDue.count)
+                            CardView(card: cardsDue[currentCardIndex], currentIndex: reviewedCardsCount + currentCardIndex, totalCards: totalCardsInSession)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .padding()
                                 .gesture(
@@ -182,14 +183,25 @@ struct StudyView: View {
             }
         }
         .onAppear {
-            loadCardsDue()
-            startStudySession()
+            loadOrCreateSession()
+        }
+        .onDisappear {
+            try? viewContext.save()
         }
     }
 
     private var progress: Double {
-        guard !cardsDue.isEmpty else { return 0 }
-        return Double(currentCardIndex) / Double(cardsDue.count)
+        guard totalCardsInSession > 0 else { return 0 }
+        // Progress is based on completed cards (reviewed + current position in remaining)
+        return Double(reviewedCardsCount + currentCardIndex) / Double(totalCardsInSession)
+    }
+
+    private var totalCardsInSession: Int {
+        return Int(studySession?.totalCards ?? 0)
+    }
+
+    private var reviewedCardsCount: Int {
+        return (studySession?.reviewedCards as? Set<Card>)?.count ?? 0
     }
 
     private var currentAccuracy: Double? {
@@ -226,12 +238,59 @@ struct StudyView: View {
         }
     }
 
-    private func startStudySession() {
-        studySession = StudySession(context: viewContext)
-        studySession?.date = Date()
-        studySession?.cardsReviewed = 0
-        studySession?.correctCount = 0
-        sessionStartTime = Date()
+    private func loadAllCards() {
+        if let cards = cardSet.cards as? Set<Card> {
+            cardsDue = Array(cards).sorted { ($0.front ?? "") < ($1.front ?? "") }
+        }
+    }
+
+    private func loadOrCreateSession() {
+        let fetchRequest: NSFetchRequest<StudySession> = StudySession.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "cardSet == %@ AND isActive == YES", cardSet)
+        
+        do {
+            let existingSessions = try viewContext.fetch(fetchRequest)
+            if let existingSession = existingSessions.first {
+                studySession = existingSession
+                if let remaining = existingSession.remainingCards as? Set<Card> {
+                    cardsDue = Array(remaining).sorted { ($0.front ?? "") < ($1.front ?? "") }
+                } else {
+                    cardsDue = []
+                }
+                currentCardIndex = Int(existingSession.currentCardIndex)
+                isResumedSession = true
+                // No sessionStartTime for resumed sessions
+            } else {
+                loadAllCards()
+                studySession = StudySession(context: viewContext)
+                studySession?.date = Date()
+                studySession?.cardsReviewed = 0
+                studySession?.correctCount = 0
+                studySession?.cardSet = cardSet
+                studySession?.remainingCards = NSSet(array: cardsDue)
+                studySession?.reviewedCards = NSSet()
+                studySession?.currentCardIndex = 0
+                studySession?.totalCards = Int32(cardsDue.count)
+                studySession?.isActive = true
+                sessionStartTime = Date()
+                isResumedSession = false
+            }
+        } catch {
+            // Fallback to new session
+            loadAllCards()
+            studySession = StudySession(context: viewContext)
+            studySession?.date = Date()
+            studySession?.cardsReviewed = 0
+            studySession?.correctCount = 0
+            studySession?.cardSet = cardSet
+            studySession?.remainingCards = NSSet(array: cardsDue)
+            studySession?.reviewedCards = NSSet()
+            studySession?.currentCardIndex = 0
+            studySession?.totalCards = Int32(cardsDue.count)
+            studySession?.isActive = true
+            sessionStartTime = Date()
+            isResumedSession = false
+        }
     }
 
     private func markAsAgain() {
@@ -241,6 +300,17 @@ struct StudyView: View {
         card.recordReview(correct: false)
         spacedRepetitionService.updateCardDifficulty(card, rating: .again)
         studySession?.cardsReviewed += 1
+
+        // Update session relationships
+        if let session = studySession {
+            var reviewed = session.reviewedCards as? Set<Card> ?? Set()
+            reviewed.insert(card)
+            session.reviewedCards = reviewed as NSSet
+            
+            var remaining = session.remainingCards as? Set<Card> ?? Set()
+            remaining.remove(card)
+            session.remainingCards = remaining as NSSet
+        }
 
         moveToNextCard()
     }
@@ -254,11 +324,23 @@ struct StudyView: View {
         studySession?.cardsReviewed += 1
         studySession?.correctCount += 1
 
+        // Update session relationships
+        if let session = studySession {
+            var reviewed = session.reviewedCards as? Set<Card> ?? Set()
+            reviewed.insert(card)
+            session.reviewedCards = reviewed as NSSet
+            
+            var remaining = session.remainingCards as? Set<Card> ?? Set()
+            remaining.remove(card)
+            session.remainingCards = remaining as NSSet
+        }
+
         moveToNextCard()
     }
 
     private func moveToNextCard() {
         currentCardIndex += 1
+        studySession?.currentCardIndex = Int32(currentCardIndex)
 
         if currentCardIndex >= cardsDue.count {
             endStudySession()
@@ -266,6 +348,7 @@ struct StudyView: View {
     }
 
     private func endStudySession() {
+        studySession?.isActive = false
         saveStudySession()
         showSessionComplete = true
     }
