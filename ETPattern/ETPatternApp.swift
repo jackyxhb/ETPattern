@@ -12,6 +12,11 @@ import CoreData
 struct ETPatternApp: App {
     let persistenceController = PersistenceController.shared
 
+    init() {
+        // Initialize bundled card sets on first launch
+        persistenceController.initializeBundledCardSets()
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()

@@ -36,3 +36,121 @@
    - Built-in 12 groups already included as bundled CSV assets
 
 ## Project Structure (create exactly these files)
+
+### Core Data Models
+- `Models/CardSet.swift` - NSManagedObject subclass for deck/cardset
+- `Models/Card.swift` - NSManagedObject subclass for individual flashcards
+- `Models/StudySession.swift` - NSManagedObject for tracking learning progress
+- `ETPattern.xcdatamodeld/ETPattern.xcdatamodel/contents` - Core Data model file with entities:
+  - CardSet: name, createdDate, cards relationship
+  - Card: front, back, tags, difficulty, nextReviewDate, interval, easeFactor
+  - StudySession: date, cardsReviewed, correctCount
+
+### Views
+- `Views/ContentView.swift` - Main deck list view
+- `Views/CardView.swift` - Full-screen card display with flip animation
+- `Views/StudyView.swift` - Learning session interface with swipe gestures
+- `Views/DeckDetailView.swift` - Individual deck management
+- `Views/SettingsView.swift` - TTS voice selection and app settings
+- `Views/ImportView.swift` - CSV file import interface
+
+### Services
+- `Services/CSVImporter.swift` - Parse CSV files with ;; separator, handle <br> line breaks
+- `Services/TTSService.swift` - AVSpeechSynthesizer wrapper with voice selection
+- `Services/SpacedRepetitionService.swift` - Leitner system implementation
+- `Services/FileManagerService.swift` - Handle bundled CSV assets and user imports
+
+### Utilities
+- `Utilities/Constants.swift` - App constants, TTS rates, voice identifiers
+- `Utilities/Extensions.swift` - String extensions for HTML parsing, Date formatters
+
+### Resources
+- `Assets.xcassets/` - App icons, accent colors
+- `Resources/Group1.csv` through `Resources/Group12.csv` - Bundled CSV files
+- `Preview Content/Preview Assets.xcassets/` - Preview assets
+
+### Main App Files
+- `ETPatternApp.swift` - App entry point with dependency injection
+- `Persistence.swift` - Core Data stack (updated for new entities)
+
+### Tests
+- `ETPatternTests/CSVImporterTests.swift` - Test CSV parsing logic
+- `ETPatternTests/SpacedRepetitionTests.swift` - Test learning algorithm
+- `ETPatternUITests/CardFlipTests.swift` - Test card interaction
+- `ETPatternUITests/StudySessionTests.swift` - Test learning flow
+
+## Implementation Guidelines
+
+### CSV Import Logic
+```swift
+// In CSVImporter.swift
+func parseCSV(_ content: String) -> [Card] {
+    let lines = content.components(separatedBy: .newlines)
+    return lines.dropFirst().compactMap { line in
+        let components = line.components(separatedBy: ";;")
+        guard components.count >= 2 else { return nil }
+        let front = components[0]
+        let back = components[1].replacingOccurrences(of: "<br>", with: "\n")
+        let tags = components.count > 2 ? components[2] : ""
+        return Card(front: front, back: back, tags: tags)
+    }
+}
+```
+
+### Card Flip Animation
+```swift
+// In CardView.swift
+struct CardView: View {
+    @State private var isFlipped = false
+    
+    var body: some View {
+        ZStack {
+            CardFace(text: frontText, isFront: true)
+                .opacity(isFlipped ? 0 : 1)
+            CardFace(text: backText, isFront: false)
+                .opacity(isFlipped ? 1 : 0)
+        }
+        .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
+        .onTapGesture { withAnimation { isFlipped.toggle() } }
+    }
+}
+```
+
+### TTS Integration
+```swift
+// In TTSService.swift
+class TTSService {
+    private let synthesizer = AVSpeechSynthesizer()
+    
+    func speak(_ text: String, voice: String = "en-US") {
+        synthesizer.stopSpeaking(at: .immediate)
+        let utterance = AVSpeechUtterance(string: text)
+        utterance.voice = AVSpeechSynthesisVoice(identifier: voice)
+        utterance.rate = 0.5
+        synthesizer.speak(utterance)
+    }
+}
+```
+
+### Spaced Repetition Algorithm
+```swift
+// In SpacedRepetitionService.swift
+func updateCardDifficulty(_ card: Card, rating: DifficultyRating) {
+    switch rating {
+    case .again:
+        card.interval = 1
+        card.easeFactor = max(1.3, card.easeFactor - 0.2)
+    case .easy:
+        card.interval = Int(Double(card.interval) * card.easeFactor * 1.5)
+        card.easeFactor = min(2.5, card.easeFactor + 0.1)
+    }
+    card.nextReviewDate = Date().addingTimeInterval(TimeInterval(card.interval * 86400))
+}
+```
+
+## Key Integration Points
+- Use `FileManager` to access bundled CSV files from `Bundle.main`
+- Implement `UIViewRepresentable` for custom card flip animations if needed
+- Use `AVSpeechSynthesizerDelegate` for TTS state management
+- Store user preferences in `UserDefaults` for voice selection
+- Use Core Data relationships to link cards to cardsets efficiently

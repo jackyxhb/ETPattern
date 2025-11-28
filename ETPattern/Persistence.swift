@@ -14,15 +14,28 @@ struct PersistenceController {
     static let preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
-        for _ in 0..<10 {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
+
+        // Create sample CardSet
+        let cardSet = CardSet(context: viewContext)
+        cardSet.name = "Sample Group"
+        cardSet.createdDate = Date()
+
+        // Create sample cards
+        for i in 1...5 {
+            let card = Card(context: viewContext)
+            card.front = "Sample pattern \(i)"
+            card.back = "Example 1<br>Example 2<br>Example 3<br>Example 4<br>Example 5"
+            card.tags = "sample"
+            card.difficulty = 0
+            card.nextReviewDate = Date()
+            card.interval = 1
+            card.easeFactor = 2.5
+            card.cardSet = cardSet
         }
+
         do {
             try viewContext.save()
         } catch {
-            // Replace this implementation with code to handle the error appropriately.
-            // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
             let nsError = error as NSError
             fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
         }
@@ -53,5 +66,35 @@ struct PersistenceController {
             }
         })
         container.viewContext.automaticallyMergesChangesFromParent = true
+    }
+
+    func initializeBundledCardSets() {
+        let viewContext = container.viewContext
+
+        // Check if card sets are already initialized
+        let fetchRequest: NSFetchRequest<CardSet> = CardSet.fetchRequest()
+        do {
+            let existingSets = try viewContext.fetch(fetchRequest)
+            if !existingSets.isEmpty {
+                return // Already initialized
+            }
+        } catch {
+            print("Error checking existing card sets: \(error)")
+        }
+
+        // Initialize bundled card sets
+        let csvImporter = CSVImporter(viewContext: viewContext)
+        let bundledFiles = FileManagerService.getBundledCSVFiles()
+
+        for fileName in bundledFiles {
+            let cardSetName = FileManagerService.getCardSetName(from: fileName)
+            csvImporter.importBundledCSV(named: fileName, cardSetName: cardSetName)
+        }
+
+        do {
+            try viewContext.save()
+        } catch {
+            print("Error saving initialized card sets: \(error)")
+        }
     }
 }

@@ -12,61 +12,70 @@ struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \CardSet.createdDate, ascending: false)],
         animation: .default)
-    private var items: FetchedResults<Item>
+    private var cardSets: FetchedResults<CardSet>
 
     var body: some View {
         NavigationView {
             List {
-                ForEach(items) { item in
+                ForEach(cardSets) { cardSet in
                     NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
+                        DeckDetailView(cardSet: cardSet)
                     } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
+                        VStack(alignment: .leading) {
+                            Text(cardSet.name ?? "Unnamed Deck")
+                                .font(.headline)
+                            Text("Created: \(cardSet.createdDate ?? Date(), formatter: dateFormatter)")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            if let cards = cardSet.cards as? Set<Card> {
+                                Text("\(cards.count) cards")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
                     }
                 }
-                .onDelete(perform: deleteItems)
+                .onDelete(perform: deleteCardSets)
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     EditButton()
                 }
                 ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                    Button(action: addCardSet) {
+                        Label("Add Deck", systemImage: "plus")
                     }
                 }
             }
-            Text("Select an item")
+            Text("Select a deck")
         }
+        .navigationTitle("Flashcard Decks")
     }
 
-    private func addItem() {
+    private func addCardSet() {
         withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
+            let newCardSet = CardSet(context: viewContext)
+            newCardSet.name = "New Deck"
+            newCardSet.createdDate = Date()
 
             do {
                 try viewContext.save()
             } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
                 let nsError = error as NSError
                 fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
             }
         }
     }
 
-    private func deleteItems(offsets: IndexSet) {
+    private func deleteCardSets(offsets: IndexSet) {
         withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
+            offsets.map { cardSets[$0] }.forEach(viewContext.delete)
 
             do {
                 try viewContext.save()
             } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
                 let nsError = error as NSError
                 fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
             }
@@ -74,10 +83,10 @@ struct ContentView: View {
     }
 }
 
-private let itemFormatter: DateFormatter = {
+private let dateFormatter: DateFormatter = {
     let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .medium
+    formatter.dateStyle = .medium
+    formatter.timeStyle = .none
     return formatter
 }()
 
