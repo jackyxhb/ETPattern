@@ -90,7 +90,7 @@ struct StudyView: View {
                     // Session stats header
                     HStack {
                         VStack(alignment: .leading) {
-                            Text("Cards: \(reviewedCardsCount + currentCardIndex + 1) / \(totalCardsInSession)")
+                            Text("Cards: \(currentCardIndex + 1) / \(totalCardsInSession)")
                                 .font(.headline)
                             if let accuracy = currentAccuracy, accuracy > 0 {
                                 Text("Accuracy: \(Int(accuracy * 100))%")
@@ -271,7 +271,11 @@ struct StudyView: View {
                 // No sessionStartTime for resumed sessions
             } else {
                 print("DEBUG: Creating new session")
-                loadAllCards()
+                loadCardsDue()
+                if cardsDue.isEmpty {
+                    print("DEBUG: No cards due, loading all cards")
+                    loadAllCards()
+                }
                 studySession = StudySession(context: viewContext)
                 studySession?.date = Date()
                 studySession?.cardsReviewed = 0
@@ -289,7 +293,11 @@ struct StudyView: View {
         } catch {
             print("DEBUG: Error fetching sessions: \(error)")
             // Fallback to new session
-            loadAllCards()
+            loadCardsDue()
+            if cardsDue.isEmpty {
+                print("DEBUG: No cards due, loading all cards")
+                loadAllCards()
+            }
             studySession = StudySession(context: viewContext)
             studySession?.date = Date()
             studySession?.cardsReviewed = 0

@@ -71,16 +71,16 @@ struct PersistenceController {
     func initializeBundledCardSets() {
         let viewContext = container.viewContext
 
-        // Check if card sets are already initialized
+        // Check if the main card set is already initialized
         let fetchRequest: NSFetchRequest<CardSet> = CardSet.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "name == %@", "English Thought Pattern 300")
         do {
-            let existingSets = try viewContext.fetch(fetchRequest)
-            print("DEBUG: Found \(existingSets.count) existing card sets")
-            if !existingSets.isEmpty {
+            let existingMainSet = try viewContext.fetch(fetchRequest)
+            if !existingMainSet.isEmpty {
                 return // Already initialized
             }
         } catch {
-            print("Error checking existing card sets: \(error)")
+            print("Error checking existing main card set: \(error)")
         }
 
         print("DEBUG: Initializing bundled card sets...")
