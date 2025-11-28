@@ -41,7 +41,20 @@ struct ContentView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+                    HStack {
+                        NavigationLink(destination: SessionStatsView()) {
+                            Image(systemName: "chart.bar")
+                                .imageScale(.large)
+                        }
+                        NavigationLink(destination: ImportView()) {
+                            Image(systemName: "square.and.arrow.down")
+                                .imageScale(.large)
+                        }
+                        NavigationLink(destination: SettingsView()) {
+                            Image(systemName: "gear")
+                                .imageScale(.large)
+                        }
+                    }
                 }
                 ToolbarItem {
                     Button(action: addCardSet) {

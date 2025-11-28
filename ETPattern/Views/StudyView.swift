@@ -17,6 +17,8 @@ struct StudyView: View {
     @State private var currentCardIndex = 0
     @State private var cardsDue: [Card] = []
     @State private var studySession: StudySession?
+    @State private var showSessionComplete = false
+    @State private var sessionStartTime: Date?
 
     private let spacedRepetitionService = SpacedRepetitionService()
 
@@ -30,76 +32,139 @@ struct StudyView: View {
                     dismiss()
                 }
                 .padding()
-            } else {
-                // Progress indicator
-                HStack {
-                    Text("\(currentCardIndex + 1) / \(cardsDue.count)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    ProgressView(value: Double(currentCardIndex + 1), total: Double(cardsDue.count))
-                        .frame(width: 100)
+            } else if showSessionComplete {
+                // Session complete view
+                VStack(spacing: 20) {
+                    Text("Session Complete!")
+                        .font(.title)
+                        .fontWeight(.bold)
+                    
+                    VStack(spacing: 16) {
+                        HStack {
+                            Text("Cards Reviewed:")
+                            Spacer()
+                            Text("\(studySession?.cardsReviewed ?? 0)")
+                                .fontWeight(.semibold)
+                        }
+                        
+                        HStack {
+                            Text("Correct Answers:")
+                            Spacer()
+                            Text("\(studySession?.correctCount ?? 0)")
+                                .fontWeight(.semibold)
+                        }
+                        
+                        HStack {
+                            Text("Accuracy:")
+                            Spacer()
+                            Text(accuracyText)
+                                .fontWeight(.semibold)
+                        }
+                        
+                        if let duration = sessionDuration {
+                            HStack {
+                                Text("Time Spent:")
+                                Spacer()
+                                Text(duration)
+                                    .fontWeight(.semibold)
+                            }
+                        }
+                    }
+                    .padding()
+                    .background(Color(.systemGray6))
+                    .cornerRadius(12)
+                    
+                    Button("Done") {
+                        dismiss()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .padding(.top)
                 }
-                .padding(.horizontal)
+                .padding()
+            } else {
+                // Study session view
+                VStack {
+                    // Session stats header
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text("Cards: \(currentCardIndex + 1) / \(cardsDue.count)")
+                                .font(.headline)
+                            if let accuracy = currentAccuracy, accuracy > 0 {
+                                Text("Accuracy: \(Int(accuracy * 100))%")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        Spacer()
+                        VStack(alignment: .trailing) {
+                            Text("\(studySession?.correctCount ?? 0) ✓")
+                                .foregroundColor(.green)
+                            Text("\((studySession?.cardsReviewed ?? 0) - (studySession?.correctCount ?? 0)) ✗")
+                                .foregroundColor(.red)
+                        }
+                        .font(.caption)
+                    }
+                    .padding(.horizontal)
 
-                Spacer()
+                    Spacer()
 
-                // Card display
-                if currentCardIndex < cardsDue.count {
-                    VStack {
-                        CardView(card: cardsDue[currentCardIndex])
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .padding()
-                            .gesture(
-                                DragGesture()
-                                    .onEnded { value in
-                                        let horizontalAmount = value.translation.width
-                                        let verticalAmount = value.translation.height
-                                        
-                                        // Only process horizontal swipes (more horizontal than vertical movement)
-                                        if abs(horizontalAmount) > abs(verticalAmount) && abs(horizontalAmount) > 50 {
-                                            if horizontalAmount > 0 {
-                                                // Swipe right = Easy
-                                                markAsEasy()
-                                            } else {
-                                                // Swipe left = Again
-                                                markAsAgain()
+                    // Card display
+                    if currentCardIndex < cardsDue.count {
+                        VStack {
+                            CardView(card: cardsDue[currentCardIndex])
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .padding()
+                                .gesture(
+                                    DragGesture()
+                                        .onEnded { value in
+                                            let horizontalAmount = value.translation.width
+                                            let verticalAmount = value.translation.height
+                                            
+                                            // Only process horizontal swipes (more horizontal than vertical movement)
+                                            if abs(horizontalAmount) > abs(verticalAmount) && abs(horizontalAmount) > 50 {
+                                                if horizontalAmount > 0 {
+                                                    // Swipe right = Easy
+                                                    markAsEasy()
+                                                } else {
+                                                    // Swipe left = Again
+                                                    markAsAgain()
+                                                }
                                             }
                                         }
-                                    }
-                            )
-                        
-                        // Swipe hint
-                        Text("Swipe left for 'Again' • Swipe right for 'Easy'")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .padding(.top, 8)
+                                )
+                            
+                            // Swipe hint
+                            Text("Swipe left for 'Again' • Swipe right for 'Easy'")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .padding(.top, 8)
+                        }
                     }
+
+                    Spacer()
+
+                    // Action buttons
+                    HStack(spacing: 20) {
+                        Button(action: markAsAgain) {
+                            Text("Again")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.red.opacity(0.8))
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        }
+
+                        Button(action: markAsEasy) {
+                            Text("Easy")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.green.opacity(0.8))
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        }
+                    }
+                    .padding(.horizontal)
                 }
-
-                Spacer()
-
-                // Action buttons
-                HStack(spacing: 20) {
-                    Button(action: markAsAgain) {
-                        Text("Again")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.red.opacity(0.8))
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                    }
-
-                    Button(action: markAsEasy) {
-                        Text("Easy")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.green.opacity(0.8))
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                    }
-                }
-                .padding(.horizontal)
             }
         }
         .navigationTitle("Study Session")
@@ -107,8 +172,7 @@ struct StudyView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button("Done") {
-                    saveStudySession()
-                    dismiss()
+                    endStudySession()
                 }
             }
         }
@@ -118,13 +182,36 @@ struct StudyView: View {
         }
     }
 
+    private var currentAccuracy: Double? {
+        let reviewed = studySession?.cardsReviewed ?? 0
+        guard reviewed > 0 else { return nil }
+        return Double(studySession?.correctCount ?? 0) / Double(reviewed)
+    }
+
+    private var accuracyText: String {
+        guard let accuracy = currentAccuracy else { return "0%" }
+        return "\(Int(accuracy * 100))%"
+    }
+
+    private var sessionDuration: String? {
+        guard let startTime = sessionStartTime else { return nil }
+        let duration = Date().timeIntervalSince(startTime)
+        let minutes = Int(duration / 60)
+        let seconds = Int(duration.truncatingRemainder(dividingBy: 60))
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+
     private func loadCardsDue() {
-        cardsDue = spacedRepetitionService.getCardsDueForReview(from: cardSet)
-        
-        // If no cards are due, show all cards (for initial learning)
-        if cardsDue.isEmpty {
-            if let cards = cardSet.cards as? Set<Card> {
-                cardsDue = Array(cards).shuffled()
+        let now = Date()
+        if let cards = cardSet.cards as? Set<Card> {
+            cardsDue = Array(cards).filter { card in
+                // Cards with no nextReviewDate (never reviewed) or past due dates are due
+                card.nextReviewDate == nil || card.nextReviewDate! <= now
+            }.sorted { (card1, card2) in
+                // Sort by nextReviewDate, with nil dates (never reviewed) first
+                let date1 = card1.nextReviewDate ?? Date.distantPast
+                let date2 = card2.nextReviewDate ?? Date.distantPast
+                return date1 < date2
             }
         }
     }
@@ -134,6 +221,7 @@ struct StudyView: View {
         studySession?.date = Date()
         studySession?.cardsReviewed = 0
         studySession?.correctCount = 0
+        sessionStartTime = Date()
     }
 
     private func markAsAgain() {
@@ -161,8 +249,13 @@ struct StudyView: View {
         currentCardIndex += 1
 
         if currentCardIndex >= cardsDue.count {
-            saveStudySession()
+            endStudySession()
         }
+    }
+
+    private func endStudySession() {
+        saveStudySession()
+        showSessionComplete = true
     }
 
     private func saveStudySession() {

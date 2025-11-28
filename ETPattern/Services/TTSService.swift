@@ -7,8 +7,10 @@
 
 import Foundation
 import AVFoundation
+import Combine
 
-class TTSService: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
+class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unchecked Sendable {
+    let objectWillChange = PassthroughSubject<Void, Never>()
     private let synthesizer = AVSpeechSynthesizer()
     private var currentVoice: String
 
