@@ -30,6 +30,10 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
         synthesizer.speak(utterance)
     }
 
+    func stop() {
+        synthesizer.stopSpeaking(at: .immediate)
+    }
+
     func setVoice(_ voiceIdentifier: String) {
         currentVoice = voiceIdentifier
         UserDefaults.standard.set(voiceIdentifier, forKey: "selectedVoice")

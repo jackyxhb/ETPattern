@@ -41,6 +41,8 @@ struct CardView: View {
         .onChange(of: card) { oldValue, newValue in
             // Reset to front side when card changes
             isFlipped = false
+            // Stop any ongoing speech from previous card
+            ttsService.stop()
         }
     }
 
