@@ -1,61 +1,38 @@
-# ETPattern - AI Coding Guidelines
+# GitHub Copilot Instructions – English Chunk Flashcard iOS App
+# Target: Swift + SwiftUI, iOS 16+, Xcode 15+
+# Goal: A beautiful, native iOS app that imports your 12-group CSV files and lets users learn 300 English patterns with auto-TTS audio.
 
-## Architecture Overview
-This is a SwiftUI iOS application with Core Data persistence. The app follows Apple's standard MVVM pattern with SwiftUI views and Core Data for data management.
+## Core Requirements (must be implemented exactly)
+1. The app must import CSV files in this exact format (separator: ;;):
+   Front;;Back;;Tags
+   (Back contains 5 examples separated by <br>)
 
-**Key Components:**
-- `ETPatternApp.swift` - Main app entry point with Core Data context injection
-- `ContentView.swift` - Primary UI showing a list of timestamped items
-- `Persistence.swift` - Core Data stack management with shared and preview controllers
-- `ETPattern.xcdatamodeld` - Data model with `Item` entity (timestamp attribute)
+2. Each imported CSV becomes a CardSet (deck) named after the file or group.
+3. One Card =
+   - front: the pattern (e.g. "I think...")
+   - back: 5 examples with <br> line breaks (HTML displayed as multi-line text)
 
-## Development Workflow
+4. Card display
+   - Full-screen card with big, centred text
+   - Tap anywhere → flip animation (180° rotation)
+   - Front = bold pattern
+   - Back = pattern at the top (smaller) + 5 examples below (nice line spacing)
 
-### Building
-```bash
-xcodebuild -project ETPattern.xcodeproj -scheme ETPattern -sdk iphonesimulator -configuration Debug build
-```
-- Builds for iOS Simulator by default
-- Uses SDK version 26.1 (iOS 18.1 simulator)
-- Debug configuration includes full debugging symbols
+5. Automatic TTS Audio
+   - Every time a side becomes visible → speak its text aloud
+   - Use AVSpeechSynthesizer (en-US or en-GB voice, natural rate 0.48–0.52)
+   - One speaker instance only (stop previous utterance before new one)
+   - Optional: let user choose American / British voice in Settings
 
-### Testing
-- Unit tests in `ETPatternTests/` (currently empty template)
-- UI tests in `ETPatternUITests/` with launch performance measurement
-- Run via Xcode or `xcodebuild test`
+6. Learning flow
+   - "Play" button → starts spaced-repetition session (simple Leitner or basic daily review is enough)
+   - Swipe right = "Easy/Know it" → longer interval
+   - Swipe left or "Again" button = see again soon
+   - Progress circle + cards today counter
 
-## Code Patterns
+7. CardSet management
+   - List of decks (Group 1–12 + any imported CSV)
+   - Long-press → Rename / Delete / Re-import
+   - Built-in 12 groups already included as bundled CSV assets
 
-### Core Data Usage
-- Use `PersistenceController.shared` for production data access
-- Use `PersistenceController.preview` for SwiftUI previews with sample data
-- Follow standard Core Data patterns: `@FetchRequest`, `@Environment(\.managedObjectContext)`
-- Error handling uses `fatalError` in development (replace with proper error handling for production)
-
-### SwiftUI Patterns
-- NavigationView with List for master-detail interfaces
-- `@FetchRequest` for reactive data binding
-- Standard toolbar items (EditButton, plus button)
-- Date formatting with `DateFormatter` (short date, medium time style)
-
-### File Organization
-- Main source in `ETPattern/` directory
-- Tests in separate `ETPatternTests/` and `ETPatternUITests/` directories
-- Assets in `Assets.xcassets/` (standard iOS asset catalog)
-
-## Dependencies
-- SwiftUI framework (iOS 18.1+)
-- CoreData framework
-- Foundation framework (implicit)
-
-## Conventions
-- Standard Swift naming conventions
-- 4-space indentation (Xcode default)
-- Use of SwiftUI property wrappers (`@Environment`, `@FetchRequest`)
-- Preview support with `#Preview` macro
-- Force unwrap optionals in development code (replace with proper unwrapping for production)
-
-## Key Files to Reference
-- `ContentView.swift` - Exemplifies SwiftUI + Core Data integration
-- `Persistence.swift` - Shows proper Core Data setup patterns
-- `ETPatternApp.swift` - Demonstrates app-wide dependency injection
+## Project Structure (create exactly these files)
