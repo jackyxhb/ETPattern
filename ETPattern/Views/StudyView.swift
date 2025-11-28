@@ -176,8 +176,8 @@ struct StudyView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button("Done") {
-                    endStudySession()
+                Button("Home") {
+                    dismiss()
                 }
             }
         }
