@@ -15,7 +15,6 @@ struct StudyView: View {
     let cardSet: CardSet
 
     @State private var currentCardIndex = 0
-    @State private var isShowingFront = true
     @State private var cardsDue: [Card] = []
     @State private var studySession: StudySession?
 
@@ -47,9 +46,35 @@ struct StudyView: View {
 
                 // Card display
                 if currentCardIndex < cardsDue.count {
-                    CardView(card: cardsDue[currentCardIndex], isShowingFront: $isShowingFront)
-                        .frame(maxWidth: .infinity, maxHeight: 400)
-                        .padding()
+                    VStack {
+                        CardView(card: cardsDue[currentCardIndex])
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .padding()
+                            .gesture(
+                                DragGesture()
+                                    .onEnded { value in
+                                        let horizontalAmount = value.translation.width
+                                        let verticalAmount = value.translation.height
+                                        
+                                        // Only process horizontal swipes (more horizontal than vertical movement)
+                                        if abs(horizontalAmount) > abs(verticalAmount) && abs(horizontalAmount) > 50 {
+                                            if horizontalAmount > 0 {
+                                                // Swipe right = Easy
+                                                markAsEasy()
+                                            } else {
+                                                // Swipe left = Again
+                                                markAsAgain()
+                                            }
+                                        }
+                                    }
+                            )
+                        
+                        // Swipe hint
+                        Text("Swipe left for 'Again' • Swipe right for 'Easy'")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .padding(.top, 8)
+                    }
                 }
 
                 Spacer()
@@ -94,11 +119,13 @@ struct StudyView: View {
     }
 
     private func loadCardsDue() {
-        if let cards = cardSet.cards as? Set<Card> {
-            cardsDue = Array(cards).filter { card in
-                // For now, include all cards. Later we'll filter by nextReviewDate
-                return true
-            }.shuffled()
+        cardsDue = spacedRepetitionService.getCardsDueForReview(from: cardSet)
+        
+        // If no cards are due, show all cards (for initial learning)
+        if cardsDue.isEmpty {
+            if let cards = cardSet.cards as? Set<Card> {
+                cardsDue = Array(cards).shuffled()
+            }
         }
     }
 
@@ -131,7 +158,6 @@ struct StudyView: View {
     }
 
     private func moveToNextCard() {
-        isShowingFront = true
         currentCardIndex += 1
 
         if currentCardIndex >= cardsDue.count {
@@ -141,54 +167,6 @@ struct StudyView: View {
 
     private func saveStudySession() {
         try? viewContext.save()
-    }
-}
-
-struct CardView: View {
-    let card: Card
-    @Binding var isShowingFront: Bool
-
-    var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color.white)
-                .shadow(radius: 5)
-
-            VStack {
-                Spacer()
-
-                if isShowingFront {
-                    Text(card.front ?? "No front")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .multilineTextAlignment(.center)
-                        .padding()
-                } else {
-                    VStack(spacing: 16) {
-                        Text(card.front ?? "No front")
-                            .font(.title3)
-                            .foregroundColor(.secondary)
-                        Text(card.back ?? "No back")
-                            .font(.body)
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding()
-                }
-
-                Spacer()
-
-                Text(isShowingFront ? "Tap to reveal" : "Tap to flip back")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding(.bottom)
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: 300)
-        .onTapGesture {
-            withAnimation(.easeInOut(duration: 0.3)) {
-                isShowingFront.toggle()
-            }
-        }
     }
 }
 

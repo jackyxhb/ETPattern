@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1" systemVersion="11A491" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="false" userDefinedModelVersionIdentifier="">
-    <entity name="CardSet" representedClassName="CardSet" syncable="YES" codeGenerationType="class">
+    <entity name="CardSet" representedClassName="CardSet" syncable="YES" codeGenerationType="category">
         <attribute name="name" optional="NO" attributeType="String" usesScalarValueType="NO"/>
         <attribute name="createdDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="cards" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Card" inverseName="cardSet" inverseEntity="Card"/>
     </entity>
-    <entity name="Card" representedClassName="Card" syncable="YES" codeGenerationType="class">
+    <entity name="Card" representedClassName="Card" syncable="YES" codeGenerationType="category">
         <attribute name="front" optional="NO" attributeType="String" usesScalarValueType="NO"/>
         <attribute name="back" optional="NO" attributeType="String" usesScalarValueType="NO"/>
         <attribute name="tags" optional="YES" attributeType="String" usesScalarValueType="NO"/>
@@ -15,7 +15,7 @@
         <attribute name="easeFactor" optional="NO" attributeType="Double" defaultValueString="2.5" usesScalarValueType="YES"/>
         <relationship name="cardSet" optional="NO" maxCount="1" deletionRule="Nullify" destinationEntity="CardSet" inverseName="cards" inverseEntity="CardSet"/>
     </entity>
-    <entity name="StudySession" representedClassName="StudySession" syncable="YES" codeGenerationType="class">
+    <entity name="StudySession" representedClassName="StudySession" syncable="YES" codeGenerationType="category">
         <attribute name="date" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="cardsReviewed" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="correctCount" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
