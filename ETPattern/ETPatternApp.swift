@@ -11,6 +11,7 @@ import CoreData
 @main
 struct ETPatternApp: App {
     let persistenceController = PersistenceController.shared
+    @StateObject private var ttsService = TTSService()
 
     init() {
         // Initialize bundled card sets on first launch
@@ -24,6 +25,7 @@ struct ETPatternApp: App {
         WindowGroup {
             ContentView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                .environmentObject(ttsService)
         }
     }
     

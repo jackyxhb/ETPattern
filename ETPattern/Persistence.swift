@@ -71,55 +71,50 @@ struct PersistenceController {
     func initializeBundledCardSets() {
         let viewContext = container.viewContext
 
-        // Check if the main card set is already initialized
-        let fetchRequest: NSFetchRequest<CardSet> = CardSet.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "name == %@", "English Thought Pattern 300")
-        do {
-            let existingMainSet = try viewContext.fetch(fetchRequest)
-            if !existingMainSet.isEmpty {
-                return // Already initialized
-            }
-        } catch {
-            print("Error checking existing main card set: \(error)")
-        }
-
-        print("DEBUG: Initializing bundled card sets...")
-        // Initialize bundled card sets - combine all 12 groups into one cardset
+        print("DEBUG: Ensuring bundled card sets are initialized...")
         let csvImporter = CSVImporter(viewContext: viewContext)
         let bundledFiles = FileManagerService.getBundledCSVFiles()
-        print("DEBUG: Found \(bundledFiles.count) bundled CSV files: \(bundledFiles)")
-
-        // Create a single cardset for all groups
-        let cardSet = CardSet(context: viewContext)
-        cardSet.name = "English Thought Pattern 300"
-        cardSet.createdDate = Date()
-
-        var allCards: [Card] = []
 
         for fileName in bundledFiles {
-            print("DEBUG: Loading CSV file: \(fileName)")
-            if let content = FileManagerService.loadBundledCSV(named: fileName) {
-                print("DEBUG: Successfully loaded \(fileName), parsing...")
-                let cards = csvImporter.parseCSV(content, cardSetName: cardSet.name!)
-                print("DEBUG: Parsed \(cards.count) cards from \(fileName)")
-                allCards.append(contentsOf: cards)
-            } else {
-                print("DEBUG: Failed to load bundled CSV: \(fileName)")
+            let deckName = FileManagerService.getCardSetName(from: fileName)
+
+            // Skip decks that already exist to keep initialization idempotent
+            let fetchRequest: NSFetchRequest<CardSet> = CardSet.fetchRequest()
+            fetchRequest.fetchLimit = 1
+            fetchRequest.predicate = NSPredicate(format: "name == %@", deckName)
+
+            if let existing = try? viewContext.fetch(fetchRequest), !existing.isEmpty {
+                continue
             }
-        }
 
-        print("DEBUG: Total cards parsed: \(allCards.count)")
-        // Add all cards to the single cardset
-        cardSet.addToCards(NSSet(array: allCards))
+            guard let content = FileManagerService.loadBundledCSV(named: fileName) else {
+                print("DEBUG: Failed to load bundled CSV: \(fileName)")
+                continue
+            }
 
-        // Set the cardSet relationship for each card
-        for card in allCards {
-            card.cardSet = cardSet
+            let cards = csvImporter.parseCSV(content, cardSetName: deckName)
+            guard !cards.isEmpty else {
+                print("DEBUG: \(fileName) did not produce any cards")
+                continue
+            }
+
+            let cardSet = CardSet(context: viewContext)
+            cardSet.name = deckName
+            cardSet.createdDate = Date()
+            cardSet.addToCards(NSSet(array: cards))
+
+            for card in cards {
+                card.cardSet = cardSet
+            }
+
+            print("DEBUG: Imported \(cards.count) cards for deck '\(deckName)'")
         }
 
         do {
-            try viewContext.save()
-            print("Successfully imported \(allCards.count) cards into 'English Thought Pattern 300'")
+            if viewContext.hasChanges {
+                try viewContext.save()
+                print("DEBUG: Bundled decks saved to Core Data")
+            }
         } catch {
             print("Error saving initialized card sets: \(error)")
         }

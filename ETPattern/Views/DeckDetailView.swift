@@ -87,5 +87,6 @@ struct DeckDetailView: View {
     return NavigationView {
         DeckDetailView(cardSet: cardSet)
             .environment(\.managedObjectContext, context)
+            .environmentObject(TTSService())
     }
 }

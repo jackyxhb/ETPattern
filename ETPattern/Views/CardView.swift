@@ -14,7 +14,7 @@ struct CardView: View {
     let currentIndex: Int
     let totalCards: Int
     @State private var isFlipped = false
-    @State private var ttsService = TTSService()
+    @EnvironmentObject private var ttsService: TTSService
 
     var body: some View {
         ZStack {
@@ -43,6 +43,7 @@ struct CardView: View {
             isFlipped = false
             // Stop any ongoing speech from previous card
             ttsService.stop()
+            speakCurrentText()
         }
     }
 
@@ -148,4 +149,5 @@ struct CardFace: View {
     card.back = "I think it's going to rain.<br>I think you should study more.<br>I think this is a good idea.<br>I think she's coming tomorrow.<br>I think we need to talk."
 
     return CardView(card: card, currentIndex: 0, totalCards: 300)
+        .environmentObject(TTSService())
 }

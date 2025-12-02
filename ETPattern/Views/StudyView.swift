@@ -20,22 +20,12 @@ struct StudyView: View {
     @State private var studySession: StudySession?
     @State private var showSessionComplete = false
     @State private var sessionStartTime: Date?
-    @State private var isResumedSession = false
-
     private let spacedRepetitionService = SpacedRepetitionService()
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
 
     var body: some View {
         VStack {
-            if cardsDue.isEmpty {
-                Text("No cards due for review")
-                    .font(.title2)
-                    .foregroundColor(.secondary)
-                Button("Done") {
-                    dismiss()
-                }
-                .padding()
-            } else if showSessionComplete {
+            if showSessionComplete {
                 // Session complete view
                 VStack(spacing: 20) {
                     Text("Session Complete!")
@@ -84,13 +74,24 @@ struct StudyView: View {
                     .padding(.top)
                 }
                 .padding()
+            } else if cardsDue.isEmpty {
+                Text("No cards due for review")
+                    .font(.title2)
+                    .foregroundColor(.secondary)
+                Button("Done") {
+                    dismiss()
+                }
+                .padding()
             } else {
                 // Study session view
                 VStack {
                     // Session stats header
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text("Cards: \(currentCardIndex + 1) / \(totalCardsInSession)")
+                    HStack(alignment: .center, spacing: 16) {
+                        ProgressCircle(progress: progress)
+                            .frame(width: 70, height: 70)
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Card \(currentCardNumber) of \(totalCardsInSession)")
                                 .font(.headline)
                             if let accuracy = currentAccuracy, accuracy > 0 {
                                 Text("Accuracy: \(Int(accuracy * 100))%")
@@ -98,24 +99,19 @@ struct StudyView: View {
                                     .foregroundColor(.secondary)
                             }
                         }
+
                         Spacer()
-                        VStack(spacing: 8) {
-                            ProgressView(value: progress)
-                                .progressViewStyle(LinearProgressViewStyle(tint: .blue))
-                                .frame(width: 120, height: 6)
-                                .cornerRadius(3)
-                            Text("\(Int(progress * 100))%")
-                                .font(.caption2)
+
+                        VStack(alignment: .trailing, spacing: 4) {
+                            Text("Cards Today")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text("\(totalCardsInSession)")
+                                .font(.headline)
+                            Text("Remaining: \(cardsRemaining)")
+                                .font(.caption)
                                 .foregroundColor(.secondary)
                         }
-                        Spacer()
-                        VStack(alignment: .trailing) {
-                            Text("\(studySession?.correctCount ?? 0) ✓")
-                                .foregroundColor(.green)
-                            Text("\((studySession?.cardsReviewed ?? 0) - (studySession?.correctCount ?? 0)) ✗")
-                                .foregroundColor(.red)
-                        }
-                        .font(.caption)
                     }
                     .padding(.horizontal)
 
@@ -124,7 +120,7 @@ struct StudyView: View {
                     // Card display
                     if currentCardIndex < cardsDue.count {
                         VStack {
-                            CardView(card: cardsDue[currentCardIndex], currentIndex: reviewedCardsCount + currentCardIndex, totalCards: totalCardsInSession)
+                            CardView(card: cardsDue[currentCardIndex], currentIndex: cardsReviewedCount, totalCards: totalCardsInSession)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .padding()
                                 .gesture(
@@ -200,16 +196,25 @@ struct StudyView: View {
 
     private var progress: Double {
         guard totalCardsInSession > 0 else { return 0 }
-        // Progress is based on completed cards (reviewed + current position in remaining)
-        return Double(reviewedCardsCount + currentCardIndex) / Double(totalCardsInSession)
+        return Double(cardsReviewedCount) / Double(totalCardsInSession)
     }
 
     private var totalCardsInSession: Int {
         return Int(studySession?.totalCards ?? 0)
     }
 
-    private var reviewedCardsCount: Int {
-        return (studySession?.reviewedCards as? Set<Card>)?.count ?? 0
+    private var cardsReviewedCount: Int {
+        return Int(studySession?.cardsReviewed ?? 0)
+    }
+
+    private var currentCardNumber: Int {
+        guard totalCardsInSession > 0 else { return 0 }
+        let nextNumber = cardsReviewedCount + 1
+        return min(nextNumber, totalCardsInSession)
+    }
+
+    private var cardsRemaining: Int {
+        return max(totalCardsInSession - cardsReviewedCount, 0)
     }
 
     private var currentAccuracy: Double? {
@@ -232,18 +237,17 @@ struct StudyView: View {
     }
 
     private func loadCardsDue() {
-        let now = Date()
-        if let cards = cardSet.cards as? Set<Card> {
-            cardsDue = Array(cards).filter { card in
-                // Cards with no nextReviewDate (never reviewed) or past due dates are due
-                card.nextReviewDate == nil || card.nextReviewDate! <= now
-            }.sorted { (card1, card2) in
-                // Sort by nextReviewDate, with nil dates (never reviewed) first
-                let date1 = card1.nextReviewDate ?? Date.distantPast
-                let date2 = card2.nextReviewDate ?? Date.distantPast
-                return date1 < date2
-            }
+        guard let cards = cardSet.cards as? Set<Card> else {
+            cardsDue = []
+            return
         }
+
+        let now = Date()
+        let dueCards = cards.filter { card in
+            card.nextReviewDate == nil || card.nextReviewDate! <= now
+        }
+
+        cardsDue = sortCardsByDueDate(Array(dueCards))
     }
 
     private func loadAllCards() {
@@ -267,19 +271,18 @@ struct StudyView: View {
             if let existingSession = existingSessions.first {
                 print("DEBUG: Resuming existing session")
                 studySession = existingSession
-                if let remaining = existingSession.remainingCards as? Set<Card> {
-                    cardsDue = Array(remaining).sorted { ($0.front ?? "") < ($1.front ?? "") }
-                    if shouldShuffleCards() {
-                        cardsDue.shuffle() // Randomize remaining cards
-                    }
-                    print("DEBUG: Loaded \(cardsDue.count) remaining cards from session")
-                } else {
-                    cardsDue = []
-                    print("DEBUG: No remaining cards in session")
+                let remainingCards = existingSession.remainingCards as? Set<Card> ?? []
+                cardsDue = sortCardsByDueDate(Array(remainingCards))
+
+                if cardsDue.isEmpty {
+                    endStudySession()
+                    return
                 }
-                currentCardIndex = Int(existingSession.currentCardIndex)
-                isResumedSession = true
-                // No sessionStartTime for resumed sessions
+
+                currentCardIndex = 0
+                existingSession.currentCardIndex = 0
+                sessionStartTime = Date()
+                // Existing sessions resume without shuffling to preserve card order
             } else {
                 print("DEBUG: Creating new session")
                 loadCardsDue()
@@ -301,7 +304,6 @@ struct StudyView: View {
                 studySession?.totalCards = Int32(cardsDue.count)
                 studySession?.isActive = true
                 sessionStartTime = Date()
-                isResumedSession = false
                 print("DEBUG: Created new session with \(cardsDue.count) cards")
             }
         } catch {
@@ -326,7 +328,6 @@ struct StudyView: View {
             studySession?.totalCards = Int32(cardsDue.count)
             studySession?.isActive = true
             sessionStartTime = Date()
-            isResumedSession = false
             print("DEBUG: Created fallback session with \(cardsDue.count) cards")
         }
     }
@@ -398,6 +399,17 @@ struct StudyView: View {
     private func shouldShuffleCards() -> Bool {
         return UserDefaults.standard.string(forKey: "cardOrderMode") == "random"
     }
+
+    private func sortCardsByDueDate(_ cards: [Card]) -> [Card] {
+        return cards.sorted { card1, card2 in
+            let date1 = card1.nextReviewDate ?? Date.distantPast
+            let date2 = card2.nextReviewDate ?? Date.distantPast
+            if date1 == date2 {
+                return (card1.front ?? "") < (card2.front ?? "")
+            }
+            return date1 < date2
+        }
+    }
 }
 
 #Preview {
@@ -413,5 +425,6 @@ struct StudyView: View {
     return NavigationView {
         StudyView(cardSet: cardSet)
             .environment(\.managedObjectContext, context)
+            .environmentObject(TTSService())
     }
 }

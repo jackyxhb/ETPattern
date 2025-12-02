@@ -9,9 +9,9 @@ import SwiftUI
 import AVFoundation
 
 struct SettingsView: View {
-    @StateObject private var ttsService = TTSService()
-    @State private var selectedVoice: String
-    @State private var cardOrderMode: String
+    @EnvironmentObject private var ttsService: TTSService
+    @State private var selectedVoice: String = UserDefaults.standard.string(forKey: "selectedVoice") ?? Constants.TTS.defaultVoice
+    @State private var cardOrderMode: String = UserDefaults.standard.string(forKey: "cardOrderMode") ?? "random"
 
     private let voiceOptions = [
         "en-US": "American English (en-US)",
@@ -22,14 +22,6 @@ struct SettingsView: View {
         "random": "Random Order",
         "sequential": "Import Order"
     ]
-
-    init() {
-        let currentVoice = UserDefaults.standard.string(forKey: "selectedVoice") ?? "en-US"
-        _selectedVoice = State(initialValue: currentVoice)
-        
-        let currentOrder = UserDefaults.standard.string(forKey: "cardOrderMode") ?? "random"
-        _cardOrderMode = State(initialValue: currentOrder)
-    }
 
     var body: some View {
         Form {
@@ -75,6 +67,9 @@ struct SettingsView: View {
             }
         }
         .navigationTitle("Settings")
+        .onAppear {
+            selectedVoice = ttsService.getCurrentVoice()
+        }
     }
 }
 
@@ -82,6 +77,7 @@ struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
             SettingsView()
+                .environmentObject(TTSService())
         }
     }
 }
