@@ -5,13 +5,17 @@
 //  Created by admin on 25/11/2025.
 //
 
-import Testing
+import XCTest
+import CoreData
 @testable import ETPattern
 
-struct ETPatternTests {
+final class ETPatternTests: XCTestCase {
 
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+    @MainActor
+    func testPreviewControllerSeedsSampleCards() throws {
+        let context = PersistenceController.preview.container.viewContext
+        let request: NSFetchRequest<Card> = Card.fetchRequest()
+        let cards = try context.fetch(request)
+        XCTAssertEqual(cards.count, 5, "Preview controller should create five sample cards for SwiftUI previews")
     }
-
 }
