@@ -23,17 +23,25 @@ struct ContentView: View {
     @State private var showingDeleteAlert = false
     @State private var showingExportAlert = false
     @State private var newName = ""
+    @State private var browseCardSet: CardSet?
 
     var body: some View {
         NavigationView {
             List {
                 ForEach(cardSets) { cardSet in
-                    NavigationLink {
-                        DeckDetailView(cardSet: cardSet)
+                    Button {
+                        toggleSelection(for: cardSet)
                     } label: {
-                        VStack(alignment: .leading) {
-                            Text(cardSet.name ?? "Unnamed Deck")
-                                .font(.headline)
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack {
+                                Text(cardSet.name ?? "Unnamed Deck")
+                                    .font(.headline)
+                                if isSelected(cardSet) {
+                                    Spacer()
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.accentColor)
+                                }
+                            }
                             Text("Created: \(cardSet.createdDate ?? Date(), formatter: dateFormatter)")
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
@@ -43,43 +51,32 @@ struct ContentView: View {
                                     .foregroundColor(.secondary)
                             }
                         }
+                        .padding(.vertical, 10)
+                        .padding(.horizontal)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(isSelected(cardSet) ? Color.accentColor.opacity(0.12) : Color(.secondarySystemBackground))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(isSelected(cardSet) ? Color.accentColor : Color.clear, lineWidth: 1.5)
+                        )
                     }
+                    .buttonStyle(.plain)
+                    .listRowInsets(EdgeInsets())
                     .contextMenu {
-                        Button {
-                            // Quick study action
-                            selectedCardSet = cardSet
-                            showingStudyView = true
-                        } label: {
-                            Label("Quick Study", systemImage: "play.fill")
-                        }
-
-                        Button {
-                            selectedCardSet = cardSet
-                            showingRenameAlert = true
-                            newName = cardSet.name ?? ""
-                        } label: {
-                            Label("Rename", systemImage: "pencil")
-                        }
-
                         Button {
                             selectedCardSet = cardSet
                             showingExportAlert = true
                         } label: {
                             Label("Export", systemImage: "square.and.arrow.up")
                         }
-
-                        Divider()
-
-                        Button(role: .destructive) {
-                            selectedCardSet = cardSet
-                            showingDeleteAlert = true
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
                     }
                 }
                 .onDelete(perform: deleteCardSets)
             }
+            .listStyle(.plain)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
@@ -97,6 +94,13 @@ struct ContentView: View {
                         }
                     }
                 }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    if selectedCardSet != nil {
+                        Button("Clear Selection") {
+                            clearSelection()
+                        }
+                    }
+                }
                 ToolbarItem {
                     Button(action: addCardSet) {
                         Label("Add Deck", systemImage: "plus")
@@ -105,9 +109,31 @@ struct ContentView: View {
             }
             Text("Select a deck")
         }
+        .safeAreaInset(edge: .bottom) {
+            if let selectedCardSet {
+                CardSetActionBar(
+                    onStudy: { startStudy(for: selectedCardSet) },
+                    onBrowse: { browseCardSet = selectedCardSet },
+                    onRename: { promptRename(for: selectedCardSet) },
+                    onDelete: { promptDelete(for: selectedCardSet) }
+                )
+            } else {
+                EmptyView()
+            }
+        }
         .sheet(isPresented: $showingStudyView) {
             if let cardSet = selectedCardSet {
                 StudyView(cardSet: cardSet)
+            }
+        }
+        .sheet(item: $browseCardSet) { deck in
+            NavigationView {
+                DeckDetailView(cardSet: deck)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Close") { browseCardSet = nil }
+                        }
+                    }
             }
         }
         .alert("Rename Deck", isPresented: $showingRenameAlert) {
@@ -125,6 +151,7 @@ struct ContentView: View {
             Button("Delete", role: .destructive) {
                 if let cardSet = selectedCardSet {
                     viewContext.delete(cardSet)
+                    clearSelection()
                     try? viewContext.save()
                 }
             }
@@ -161,7 +188,12 @@ struct ContentView: View {
 
     private func deleteCardSets(offsets: IndexSet) {
         withAnimation {
-            offsets.map { cardSets[$0] }.forEach(viewContext.delete)
+            let toDelete = offsets.map { cardSets[$0] }
+            toDelete.forEach(viewContext.delete)
+
+            if let selected = selectedCardSet, toDelete.contains(selected) {
+                clearSelection()
+            }
 
             do {
                 try viewContext.save()
@@ -170,6 +202,38 @@ struct ContentView: View {
                 fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
             }
         }
+    }
+
+    private func toggleSelection(for cardSet: CardSet) {
+        if selectedCardSet == cardSet {
+            clearSelection()
+        } else {
+            selectedCardSet = cardSet
+        }
+    }
+
+    private func isSelected(_ cardSet: CardSet) -> Bool {
+        selectedCardSet == cardSet
+    }
+
+    private func clearSelection() {
+        selectedCardSet = nil
+    }
+
+    private func startStudy(for cardSet: CardSet) {
+        selectedCardSet = cardSet
+        showingStudyView = true
+    }
+
+    private func promptRename(for cardSet: CardSet) {
+        selectedCardSet = cardSet
+        newName = cardSet.name ?? ""
+        showingRenameAlert = true
+    }
+
+    private func promptDelete(for cardSet: CardSet) {
+        selectedCardSet = cardSet
+        showingDeleteAlert = true
     }
 
     private func exportDeck(_ cardSet: CardSet) {
@@ -212,6 +276,48 @@ private let dateFormatter: DateFormatter = {
     formatter.timeStyle = .none
     return formatter
 }()
+
+private struct CardSetActionBar: View {
+    let onStudy: () -> Void
+    let onBrowse: () -> Void
+    let onRename: () -> Void
+    let onDelete: () -> Void
+
+    var body: some View {
+        VStack(spacing: 10) {
+            Divider()
+            HStack(spacing: 12) {
+                ActionButton(title: "Study", systemImage: "play.fill", tint: .accentColor, action: onStudy)
+                ActionButton(title: "Browse", systemImage: "list.bullet", tint: .blue, action: onBrowse)
+                ActionButton(title: "Rename", systemImage: "pencil", tint: .teal, action: onRename)
+                ActionButton(title: "Delete", systemImage: "trash", tint: .red, action: onDelete)
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 8)
+        }
+        .background(.ultraThinMaterial)
+    }
+
+    private struct ActionButton: View {
+        let title: String
+        let systemImage: String
+        let tint: Color
+        let action: () -> Void
+
+        var body: some View {
+            Button(action: action) {
+                Label(title, systemImage: systemImage)
+                    .font(.subheadline.bold())
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(tint.opacity(0.15))
+                    .foregroundColor(tint)
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            }
+            .buttonStyle(.plain)
+        }
+    }
+}
 
 #Preview {
     ContentView()

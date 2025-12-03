@@ -74,46 +74,56 @@ struct PersistenceController {
         print("DEBUG: Ensuring bundled card sets are initialized...")
         let csvImporter = CSVImporter(viewContext: viewContext)
         let bundledFiles = FileManagerService.getBundledCSVFiles()
+        let masterDeckName = Constants.Decks.bundledMasterName
+
+        // Fetch or create the single master deck that will hold all bundled cards
+        let fetchRequest: NSFetchRequest<CardSet> = CardSet.fetchRequest()
+        fetchRequest.fetchLimit = 1
+        fetchRequest.predicate = NSPredicate(format: "name == %@", masterDeckName)
+
+        let masterDeck: CardSet
+        if let existingDeck = (try? viewContext.fetch(fetchRequest))?.first {
+            // If the deck already contains cards, assume initialization has run
+            if let existingCards = existingDeck.cards as? Set<Card>, !existingCards.isEmpty {
+                print("DEBUG: Master deck already initialized with \(existingCards.count) cards")
+                return
+            }
+            masterDeck = existingDeck
+        } else {
+            masterDeck = CardSet(context: viewContext)
+            masterDeck.name = masterDeckName
+            masterDeck.createdDate = Date()
+        }
+
+        var totalImported = 0
 
         for fileName in bundledFiles {
-            let deckName = FileManagerService.getCardSetName(from: fileName)
-
-            // Skip decks that already exist to keep initialization idempotent
-            let fetchRequest: NSFetchRequest<CardSet> = CardSet.fetchRequest()
-            fetchRequest.fetchLimit = 1
-            fetchRequest.predicate = NSPredicate(format: "name == %@", deckName)
-
-            if let existing = try? viewContext.fetch(fetchRequest), !existing.isEmpty {
-                continue
-            }
-
             guard let content = FileManagerService.loadBundledCSV(named: fileName) else {
                 print("DEBUG: Failed to load bundled CSV: \(fileName)")
                 continue
             }
 
-            let cards = csvImporter.parseCSV(content, cardSetName: deckName)
+            let cards = csvImporter.parseCSV(content, cardSetName: masterDeckName)
             guard !cards.isEmpty else {
                 print("DEBUG: \(fileName) did not produce any cards")
                 continue
             }
 
-            let cardSet = CardSet(context: viewContext)
-            cardSet.name = deckName
-            cardSet.createdDate = Date()
-            cardSet.addToCards(NSSet(array: cards))
-
+            masterDeck.addToCards(NSSet(array: cards))
             for card in cards {
-                card.cardSet = cardSet
+                card.cardSet = masterDeck
             }
 
-            print("DEBUG: Imported \(cards.count) cards for deck '\(deckName)'")
+            totalImported += cards.count
+            print("DEBUG: Imported \(cards.count) cards from \(fileName) into '\(masterDeckName)'")
         }
 
         do {
-            if viewContext.hasChanges {
+            if totalImported > 0 && viewContext.hasChanges {
                 try viewContext.save()
-                print("DEBUG: Bundled decks saved to Core Data")
+                print("DEBUG: Saved \(totalImported) bundled cards to deck '\(masterDeckName)'")
+            } else {
+                print("DEBUG: No bundled cards imported; nothing to save")
             }
         } catch {
             print("Error saving initialized card sets: \(error)")

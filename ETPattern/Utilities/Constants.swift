@@ -31,4 +31,8 @@ struct Constants {
         static let cardPadding: CGFloat = 20
         static let animationDuration: Double = 0.6
     }
+
+    struct Decks {
+        static let bundledMasterName = "ETPatterns 300"
+    }
 }
