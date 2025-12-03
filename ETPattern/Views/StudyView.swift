@@ -177,6 +177,11 @@ struct StudyView: View {
                 }
             }
         }
+        .overlay(alignment: .topTrailing) {
+            CloseSessionButton(action: closeSession)
+                .padding(.top, 8)
+                .padding(.trailing, 12)
+        }
         .navigationTitle("Study Session")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -191,6 +196,22 @@ struct StudyView: View {
         }
         .onDisappear {
             try? viewContext.save()
+        }
+    }
+
+    private struct CloseSessionButton: View {
+        let action: () -> Void
+
+        var body: some View {
+            Button(action: action) {
+                Image(systemName: "xmark.circle.fill")
+                    .imageScale(.large)
+                    .foregroundStyle(.white, Color.black.opacity(0.7))
+                    .padding(8)
+            }
+            .background(.thinMaterial, in: Circle())
+            .shadow(radius: 2)
+            .accessibilityLabel("Close session")
         }
     }
 
@@ -390,6 +411,12 @@ struct StudyView: View {
         studySession?.isActive = false
         saveStudySession()
         showSessionComplete = true
+    }
+
+    private func closeSession() {
+        studySession?.isActive = false
+        saveStudySession()
+        dismiss()
     }
 
     private func saveStudySession() {
