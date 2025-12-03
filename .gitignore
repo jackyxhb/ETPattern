@@ -21,3 +21,5 @@ xcuserdata/
 # Simulator install artifacts
 *.ipa
 *.app
+
+.fake
