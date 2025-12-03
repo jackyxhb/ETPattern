@@ -282,7 +282,7 @@ struct ContentView: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(cardSet.name ?? "Unnamed Deck")
+                        Text("(\(cardCount))\(cardSet.name ?? "Unnamed Deck")")
                             .font(.headline)
                             .foregroundColor(.white)
                         Text("Created \(createdText)")
@@ -295,12 +295,6 @@ struct ContentView: View {
                             .foregroundColor(DesignSystem.Colors.highlight)
                             .imageScale(.large)
                     }
-                }
-
-                HStack {
-                    metricPill(title: "Cards", value: "\(cardCount)", icon: "rectangle.stack.fill")
-                    Spacer()
-                    metricPill(title: "Voice", value: UserDefaults.standard.string(forKey: "selectedVoice") ?? Constants.TTS.defaultVoice, icon: "waveform")
                 }
             }
             .padding(.vertical, 16)
@@ -317,25 +311,6 @@ struct ContentView: View {
             .shadow(color: DesignSystem.Metrics.shadow.opacity(0.3), radius: 14, x: 0, y: 10)
         }
         .buttonStyle(.plain)
-    }
-
-    private func metricPill(title: String, value: String, icon: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: icon)
-                .imageScale(.small)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title.uppercased())
-                    .font(.system(size: 9, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.55))
-                Text(value)
-                    .font(.callout.bold())
-                    .foregroundColor(.white)
-            }
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(Color.white.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
 
