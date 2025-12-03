@@ -1,0 +1,23 @@
+# macOS metadata
+.DS_Store
+
+# Xcode build output
+DerivedData/
+build/
+
+# User-specific Xcode settings
+xcuserdata/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+
+# SwiftPM / intermediate artifacts
+.build/
+
+# Generated logs & state
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+
+# Simulator install artifacts
+*.ipa
+*.app
