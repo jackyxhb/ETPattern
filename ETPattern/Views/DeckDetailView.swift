@@ -14,21 +14,27 @@ struct DeckDetailView: View {
 
     let cardSet: CardSet
 
-    @State private var showingStudyView = false
-    @State private var showingRenameAlert = false
-    @State private var newName = ""
+    @State private var previewCard: Card?
 
     var body: some View {
         VStack {
-            if let cards = cardSet.cards as? Set<Card>, !cards.isEmpty {
-                List(Array(cards).sorted(by: { ($0.front ?? "") < ($1.front ?? "") })) { card in
-                    VStack(alignment: .leading) {
-                        Text(card.front ?? "No front")
-                            .font(.headline)
-                        Text(card.back ?? "No back")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .lineLimit(2)
+            if !sortedCards.isEmpty {
+                List {
+                    ForEach(sortedCards) { card in
+                        Button {
+                            previewCard = card
+                        } label: {
+                            CardRow(card: card)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .contextMenu {
+                            Button {
+                                previewCard = card
+                            } label: {
+                                Label("Preview", systemImage: "eye")
+                            }
+                        }
                     }
                 }
             } else {
@@ -38,43 +44,68 @@ struct DeckDetailView: View {
         }
         .navigationTitle(cardSet.name ?? "Unnamed Deck")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Menu {
-                    Button(action: { showingStudyView = true }) {
-                        Label("Study", systemImage: "play.fill")
-                    }
-                    Button(action: {
-                        newName = cardSet.name ?? ""
-                        showingRenameAlert = true
-                    }) {
-                        Label("Rename", systemImage: "pencil")
-                    }
-                    Button(role: .destructive, action: deleteDeck) {
-                        Label("Delete", systemImage: "trash")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                }
-            }
-        }
-        .sheet(isPresented: $showingStudyView) {
-            StudyView(cardSet: cardSet)
-        }
-        .alert("Rename Deck", isPresented: $showingRenameAlert) {
-            TextField("Deck Name", text: $newName)
-            Button("Cancel", role: .cancel) { }
-            Button("Save") {
-                cardSet.name = newName
-                try? viewContext.save()
+        .sheet(item: $previewCard) { card in
+            let cards = sortedCards
+            let index = cards.firstIndex(where: { $0.objectID == card.objectID }) ?? 0
+            CardPreviewContainer(card: card, index: index, total: cards.count) {
+                previewCard = nil
             }
         }
     }
 
-    private func deleteDeck() {
-        viewContext.delete(cardSet)
-        try? viewContext.save()
-        dismiss()
+    private var sortedCards: [Card] {
+        guard let cards = cardSet.cards as? Set<Card> else { return [] }
+        return cards.sorted { ($0.front ?? "") < ($1.front ?? "") }
+    }
+}
+
+private struct CardRow: View {
+    let card: Card
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(card.front ?? "No front")
+                .font(.headline)
+            Text(formattedBack)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .lineLimit(2)
+        }
+        .padding(.vertical, 8)
+    }
+
+    private var formattedBack: String {
+        (card.back ?? "No back").replacingOccurrences(of: "\n", with: " ").replacingOccurrences(of: "<br>", with: " • ")
+    }
+}
+
+private struct CardPreviewContainer: View {
+    let card: Card
+    let index: Int
+    let total: Int
+    let onClose: () -> Void
+
+    @EnvironmentObject private var ttsService: TTSService
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            Color(.systemBackground)
+                .ignoresSafeArea()
+
+            CardView(card: card, currentIndex: index, totalCards: total)
+                .padding(.horizontal)
+
+            Button(action: onClose) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 32))
+                    .foregroundStyle(.secondary)
+                    .padding()
+            }
+            .accessibilityLabel("Close preview")
+        }
+        .onDisappear {
+            ttsService.stop()
+        }
     }
 }
 
