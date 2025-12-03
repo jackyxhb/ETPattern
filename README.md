@@ -113,7 +113,11 @@ xcodebuild test -project ETPattern.xcodeproj -scheme ETPattern
 
 ## Release Notes
 
-### v1.1.0 (Latest)
+### v1.2.0 (Latest)
+- Optimized deck list display: Card counts now prefixed to deck names (e.g., "(36)ETPatterns 300") and voice indicators removed to maximize screen space for more items.
+- Improved UI efficiency for better user experience on smaller screens.
+
+### v1.1.0
 - Auto Play now relies on event-driven speech completion, eliminating drift between audio and flip animations.
 - Modernized study and Auto Play layouts with gradient backgrounds, refreshed buttons, and progress HUD polish.
 - Reliability improvements for install/build automation (`xcodebuild` + `simctl`) and card-order persistence.
