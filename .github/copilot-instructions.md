@@ -1,6 +1,6 @@
-# GitHub Copilot Instructions – English Chunk Flashcard iOS App
+# GitHub Copilot Instructions – English Thought (ET) Flashcard iOS App
 # Target: Swift + SwiftUI, iOS 16+, Xcode 15+
-# Goal: A beautiful, native iOS app that imports your 12-group CSV files and lets users learn 300 English patterns with auto-TTS audio.
+# Goal: Build **English Thought (ET)**, a beautiful native iOS app that imports your 12-group CSV files and helps learners master **300 English expression patterns** with auto-TTS audio. The bundled master deck is always called **“ETPattern 300”** to reflect those 300 patterns.
 
 ## Core Requirements (must be implemented exactly)
 1. The app must import CSV files in this exact format (separator: ;;):
@@ -31,7 +31,7 @@
    - Progress circle + cards today counter
 
 7. CardSet management
-   - List of decks (Group 1–12 + any imported CSV)
+    - List of decks (Group 1–12 + built-in **ETPattern 300** + any imported CSV)
    - Long-press → Rename / Delete / Re-import
    - Built-in 12 groups already included as bundled CSV assets
 
@@ -66,7 +66,7 @@
 
 ### Resources
 - `Assets.xcassets/` - App icons, accent colors
-- `Resources/Group1.csv` through `Resources/Group12.csv` - Bundled CSV files
+- `Resources/Group1.csv` through `Resources/Group12.csv` - Bundled CSV files feeding the master deck named **ETPattern 300** (represents all 300 expression patterns)
 - `Preview Content/Preview Assets.xcassets/` - Preview assets
 
 ### Main App Files

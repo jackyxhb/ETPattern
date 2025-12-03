@@ -1,202 +1,136 @@
-# ETPattern - English Pattern Flashcard App
+# English Thought (ET) — 300 Expression Patterns
 
-A beautiful, native iOS flashcard application designed to help users master 300+ English patterns through spaced repetition learning with automatic text-to-speech audio.
+English Thought (abbreviated **ET**) is a native SwiftUI iOS app that helps learners master **300 English expression patterns** through spaced repetition, full-screen cards, and natural text-to-speech audio. The bundled master deck is always named **ETPattern 300** to emphasize the complete pattern collection.
 
-![iOS](https://img.shields.io/badge/iOS-26.1+-blue.svg)
+![iOS](https://img.shields.io/badge/iOS-16.0+-blue.svg)
 ![Swift](https://img.shields.io/badge/Swift-5.0+-orange.svg)
 ![SwiftUI](https://img.shields.io/badge/SwiftUI-5.0+-green.svg)
 ![Xcode](https://img.shields.io/badge/Xcode-15+-red.svg)
 
-## ✨ Features
+## Highlights
 
-### 🎯 Core Learning Features
-- **Spaced Repetition**: Intelligent algorithm that optimizes review timing based on your performance
-- **300+ English Patterns**: Comprehensive collection covering opinions, suggestions, agreements, and more
-- **Automatic TTS Audio**: Natural voice synthesis speaks each card aloud (American/British English options)
-- **Interactive Card Flipping**: Smooth 180° rotation animation with tap-to-flip functionality
-- **Configurable Card Ordering**: Choose between random order or sequential import order
-- **Linear Progress Tracking**: Clean horizontal progress bar with percentage display during study sessions
+**Learning Flow**
+- Event-driven Auto Play keeps the flip animation and speech perfectly in sync — the card only advances when TTS finishes.
+- Leitner-inspired spaced repetition powers swipe gestures (`Again` vs `Easy`) and keeps daily goals manageable.
+- Full-screen, center-aligned typography with responsive flip animation for both manual and automatic review.
 
-### 📚 Card Management
-- **12 Built-in Groups**: Pre-loaded decks covering different pattern categories
-- **CSV Import**: Import custom flashcard decks using the standard format
-- **Deck Organization**: Create, rename, and manage multiple card sets
-- **Progress Tracking**: Visual progress indicators and daily card counters
+**Audio & TTS**
+- AVSpeechSynthesizer wrapper (single shared instance) speaks every side as it becomes visible.
+- American (en-US) and British (en-GB) voices with natural 0.48–0.52 rate and instant stop/resume support.
 
-### 🎨 User Experience
-- **Full-Screen Cards**: Large, centered text for optimal readability
-- **Swipe Gestures**: Intuitive left/right swipes for "Again" and "Easy" responses
-- **Session Statistics**: Track your learning progress over time
-- **Voice Selection**: Choose between American and British English voices
+**Deck Management**
+- Built-in **ETPattern 300** deck that aggregates the 12 bundled CSV groups (all 300 expression patterns).
+- 12 bundled CSV decks (Groups 1–12) plus unlimited user imports following the `Front;;Back;;Tags` format.
+- Long-press any deck to rename, delete, or re-import; per-deck progress persists between launches.
 
-## 📋 Requirements
+**Experience**
+- Gradient-rich interface, modern buttons, and progress components tuned for iPhone 16 displays.
+- Linear progress bars, session stats, and Auto Play HUD keep learners focused without clutter.
 
-- **iOS**: 16.0+
-- **Xcode**: 15.0+
-- **Swift**: 5.0+
-- **Device**: iPhone 16 or later (optimized for iPhone 16)
+## Requirements
 
-## 🚀 Installation
+- iOS 16.0+ (runs great on iOS 18 simulators)
+- Xcode 15+
+- Swift 5+
+- iPhone 16 simulator or device recommended for previews
 
-### From Source
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/jackyxhb/ETPattern.git
-   cd ETPattern
-   ```
+## Project Structure
 
-2. Open the project in Xcode:
-   ```bash
-   open ETPattern.xcodeproj
-   ```
+```
+ETPattern/
+├── ETPatternApp.swift        // App entry + DI
+├── Persistence.swift         // Core Data stack
+├── Models/                   // Card, CardSet, StudySession entities
+├── Services/                 // CSV, TTS, File, Spaced Repetition
+├── Views/                    // ContentView, StudyView, AutoPlayView, etc.
+├── Utilities/                // Constants + Extensions
+├── Resources/                // Group1–12 CSV bundles feeding the ETPattern 300 deck
+├── Assets.xcassets           // Colors + icons
+├── Tests/                    // Unit tests
+└── UITests/                  // UI automation
+```
 
-3. Select your target device (iPhone 16 recommended) and build:
-   ```bash
-   xcodebuild -project ETPattern.xcodeproj -scheme ETPattern -sdk iphonesimulator -configuration Debug build
-   ```
+## Getting Started
 
-4. Run the app on simulator or device.
+Clone and open in Xcode:
 
-## 📖 Usage
+```bash
+git clone https://github.com/jackyxhb/ETPattern.git
+cd ETPattern
+open ETPattern.xcodeproj
+```
 
-### Getting Started
-1. **Launch the App**: Open ETPattern on your iPhone 16
-2. **Choose a Deck**: Select from 12 pre-loaded groups or import your own CSV
-3. **Start Learning**: Tap "Play" to begin a spaced repetition session
+Build (simulator example):
 
-### Study Session
-- **Card Display**: Each card shows an English pattern on the front
-- **Flip Cards**: Tap anywhere to reveal 5 example sentences on the back
-- **Audio Playback**: Text is automatically spoken aloud when cards appear
-- **Progress Tracking**: Linear progress bar shows completion percentage
-- **Rate Your Knowledge**:
-  - Swipe right: "Easy" - Card reviewed successfully
-  - Swipe left or tap "Again": Review this card sooner
+```bash
+xcodebuild -project ETPattern.xcodeproj -scheme ETPattern -sdk iphonesimulator -configuration Debug build
+```
 
-### Managing Decks
-- **Long-press** any deck in the main list to:
-  - Rename the deck
-  - Delete the deck
-  - Re-import CSV data
+Install/run on a specific simulator:
 
-### Settings
-- **Voice Selection**: Choose between American (en-US) and British (en-GB) English
-- **Card Ordering**: Select "Random Order" for varied learning or "Import Order" for sequential review
-- **Audio Settings**: TTS rate optimized for natural speech (0.48-0.52)
+```bash
+# Replace DEVICE_ID with the simulator identifier from `xcrun simctl list`
+xcrun simctl install DEVICE_ID build/Build/Products/Debug-iphonesimulator/ETPattern.app
+xcrun simctl launch DEVICE_ID aaaa.ETPattern
+```
 
-## 📄 CSV Format
+## CSV Format
 
-Import your own flashcard decks using this exact format:
+ETPattern consumes “chunk” CSVs using `;;` separators and `<br>` line breaks for examples.
 
 ```csv
 Front;;Back;;Tags
-Pattern 1;;Example 1<br>Example 2<br>Example 3<br>Example 4<br>Example 5;;Category
-Pattern 2;;Example 1<br>Example 2<br>Example 3<br>Example 4<br>Example 5;;Category
+I think...;;I think we should leave soon.<br>I think this is perfect.<br>I think you're right.<br>I think we can make it.<br>I think it’s solved.;;Opinions
 ```
 
-**Format Rules:**
-- **Separator**: Use `;;` (double semicolon) between columns
-- **Line Breaks**: Use `<br>` to separate multiple examples in the Back column
-- **Columns**: Front (pattern), Back (examples), Tags (optional category)
-- **Encoding**: UTF-8
+Guidelines:
+- Column order must be `Front`, `Back`, `Tags` (Tags optional).
+- Use `<br>` for the five example sentences; they render as multi-line SwiftUI text.
+- Files must be UTF-8 encoded.
 
-### Example:
-```csv
-Front;;Back;;Tags
-I think...;;I think we should leave in about ten minutes.<br>I think this is the best coffee I've ever had.<br>I think you're going to love the surprise.<br>I think everyone needs at least eight hours of sleep.<br>I think it's going to rain later.;;1-Opinions
-```
+## Architecture Notes
 
-## 🏗️ Architecture
+- **Core Data** keeps Card ↔ CardSet relationships, intervals, ease factors, and session history.
+- **SpacedRepetitionService** updates `interval`, `nextReviewDate`, and `easeFactor` for `Again` vs `Easy` ratings.
+- **TTSService** wraps `AVSpeechSynthesizer` with token-based cancellation so Auto Play and Study views never overlap audio.
+- **CSVImporter** parses bundled/user CSVs, normalizes `<br>` newlines, and persists new Card objects atomically.
+- **FileManagerService** surfaces the 12 bundled CSVs and user-selected documents.
 
-### Core Data Models
-- **CardSet**: Manages collections of flashcards
-- **Card**: Individual flashcard with front/back content and learning metadata
-- **StudySession**: Tracks learning progress and statistics
+## Testing
 
-### Key Services
-- **CSVImporter**: Parses CSV files with custom ;; separator
-- **TTSService**: Manages AVSpeechSynthesizer for audio playback
-- **SpacedRepetitionService**: Implements Leitner system algorithm
-- **FileManagerService**: Handles bundled and imported CSV files
+| Suite | Location | Focus |
+| --- | --- | --- |
+| Unit | `ETPatternTests/CSVImporterTests.swift` | CSV parsing & data integrity |
+| Unit | `ETPatternTests/SpacedRepetitionTests.swift` | Leitner math & scheduling |
+| UI   | `ETPatternUITests/CardFlipTests.swift` | Flip animation and gestures |
+| UI   | `ETPatternUITests/StudySessionTests.swift` | End-to-end review flow |
 
-### Views
-- **ContentView**: Main deck selection interface
-- **CardView**: Full-screen card display with flip animation
-- **StudyView**: Interactive learning session with swipe gestures
-- **SettingsView**: Voice selection and app preferences
+Run everything:
 
-## 🧪 Testing
-
-The project includes comprehensive test suites:
-
-### Unit Tests (`ETPatternTests/`)
-- **CSVImporterTests**: Validates CSV parsing logic
-- **SpacedRepetitionTests**: Tests learning algorithm accuracy
-
-### UI Tests (`ETPatternUITests/`)
-- **CardFlipTests**: Verifies card interaction animations
-- **StudySessionTests**: Tests complete learning flow
-
-Run tests with:
 ```bash
 xcodebuild test -project ETPattern.xcodeproj -scheme ETPattern
 ```
 
-## 🔄 Recent Updates
+## Release Notes
 
-### Version 1.0.1
-- **Linear Progress Bar**: Replaced circular progress indicator with clean horizontal progress bar and percentage display
-- **Configurable Card Ordering**: Added option to study cards in random order or sequential import order
-- **Settings Persistence**: All user preferences are now permanently saved across app sessions
-- **Improved Session Management**: Better handling of study sessions with accurate progress tracking
+### v1.1.0 (Latest)
+- Auto Play now relies on event-driven speech completion, eliminating drift between audio and flip animations.
+- Modernized study and Auto Play layouts with gradient backgrounds, refreshed buttons, and progress HUD polish.
+- Reliability improvements for install/build automation (`xcodebuild` + `simctl`) and card-order persistence.
 
-The app uses a simplified spaced repetition system inspired by the Leitner method:
+### v1.0.0
+- Initial release with 12 bundled decks, Leitner-based study flow, CSV import, and configurable voice options.
 
-- **Easy Rating**: Increases interval by 1.5x current ease factor
-- **Again Rating**: Resets interval to 1 day, slightly decreases ease factor
-- **Smart Scheduling**: Cards appear when due for optimal retention
+## Contributing
 
-## 🔧 Development
+1. Fork and create a feature branch.
+2. Run `xcodebuild` + tests before opening a PR.
+3. Describe UX changes with screenshots or short clips when possible.
 
-### Project Structure
-```
-ETPattern/
-├── Models/                 # Core Data entities
-├── Views/                  # SwiftUI view components
-├── Services/              # Business logic services
-├── Utilities/             # Helper extensions and constants
-├── Resources/             # CSV data files and assets
-└── Tests/                 # Unit and UI test suites
-```
+## License
 
-### Key Technologies
-- **SwiftUI**: Modern declarative UI framework
-- **Core Data**: Local data persistence
-- **AVFoundation**: Text-to-speech synthesis
-- **Combine**: Reactive programming for state management
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Built with SwiftUI and Core Data for iOS 16.0+
-- Spaced repetition algorithm inspired by proven learning techniques
-- TTS powered by AVSpeechSynthesizer with voice selection
-- Linear progress indicators for modern UI design
-- Designed specifically for iPhone 16 and latest iOS features
+MIT — see [LICENSE](LICENSE).
 
 ---
 
-**Happy Learning!** 📚✨
-
-*Master English patterns one card at a time with ETPattern.*
+**Happy learning!** Master English patterns one immersive card at a time.
