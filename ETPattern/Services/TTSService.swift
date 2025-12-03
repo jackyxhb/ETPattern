@@ -13,6 +13,7 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
     let objectWillChange = PassthroughSubject<Void, Never>()
     private let synthesizer = AVSpeechSynthesizer()
     private var currentVoice: String
+    private var completionHandler: (() -> Void)?
 
     override init() {
         self.currentVoice = UserDefaults.standard.string(forKey: "selectedVoice") ?? "en-US"
@@ -20,8 +21,9 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
         synthesizer.delegate = self
     }
 
-    func speak(_ text: String) {
+    func speak(_ text: String, completion: (() -> Void)? = nil) {
         synthesizer.stopSpeaking(at: .immediate)
+        completionHandler = completion
 
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = AVSpeechSynthesisVoice(identifier: currentVoice)
@@ -32,6 +34,7 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
 
     func stop() {
         synthesizer.stopSpeaking(at: .immediate)
+        completionHandler = nil
     }
 
     func setVoice(_ voiceIdentifier: String) {
@@ -51,6 +54,12 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
 
     // MARK: - AVSpeechSynthesizerDelegate
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        // Handle speech completion if needed
+        let handler = completionHandler
+        completionHandler = nil
+        if let handler {
+            DispatchQueue.main.async {
+                handler()
+            }
+        }
     }
 }

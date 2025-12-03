@@ -32,11 +32,11 @@ struct ContentView: View {
                 DesignSystem.Gradients.background
                     .ignoresSafeArea()
 
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 16) {
                     heroHeader
 
                     ScrollView {
-                        LazyVStack(spacing: 18) {
+                        LazyVStack(spacing: 14) {
                             ForEach(cardSets) { cardSet in
                                 deckCard(for: cardSet)
                                     .contextMenu {
@@ -66,11 +66,11 @@ struct ContentView: View {
                                     }
                             }
                         }
-                        .padding(.bottom, 140)
+                        .padding(.bottom, 120)
                     }
                 }
                 .padding(.horizontal)
-                .padding(.top, 24)
+                .padding(.top, 20)
             }
             .navigationTitle("Flashcard Decks")
             .navigationBarTitleDisplayMode(.inline)
@@ -273,10 +273,7 @@ struct ContentView: View {
 
     private var heroHeader: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Your decks")
-                .font(.caption)
-                .foregroundColor(.white.opacity(0.7))
-            Text("Practice smarter")
+            Text("English Thought")
                 .font(.largeTitle.bold())
                 .foregroundColor(.white)
             Text("Tap a deck to jump back in")
@@ -292,7 +289,7 @@ struct ContentView: View {
         return Button {
             toggleSelection(for: cardSet)
         } label: {
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(cardSet.name ?? "Unnamed Deck")
@@ -316,7 +313,8 @@ struct ContentView: View {
                     metricPill(title: "Voice", value: UserDefaults.standard.string(forKey: "selectedVoice") ?? Constants.TTS.defaultVoice, icon: "waveform")
                 }
             }
-            .padding()
+            .padding(.vertical, 16)
+            .padding(.horizontal, 18)
             .background(
                 DesignSystem.Gradients.card
                     .opacity(isSelected(cardSet) ? 1 : 0.85)
@@ -325,8 +323,8 @@ struct ContentView: View {
                 RoundedRectangle(cornerRadius: DesignSystem.Metrics.cornerRadius)
                     .stroke(isSelected(cardSet) ? DesignSystem.Colors.highlight.opacity(0.8) : Color.white.opacity(0.15), lineWidth: 1.5)
             )
-            .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Metrics.cornerRadius, style: .continuous))
-            .shadow(color: DesignSystem.Metrics.shadow.opacity(0.35), radius: 20, x: 0, y: 12)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .shadow(color: DesignSystem.Metrics.shadow.opacity(0.3), radius: 14, x: 0, y: 10)
         }
         .buttonStyle(.plain)
     }
@@ -337,17 +335,17 @@ struct ContentView: View {
                 .imageScale(.small)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title.uppercased())
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.6))
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.55))
                 Text(value)
-                    .font(.subheadline.bold())
+                    .font(.callout.bold())
                     .foregroundColor(.white)
             }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
         .background(Color.white.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
 
@@ -364,23 +362,23 @@ private struct CardSetActionBar: View {
     let onBrowse: () -> Void
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 10) {
             Capsule()
                 .fill(Color.white.opacity(0.3))
-                .frame(width: 40, height: 4)
-                .padding(.top, 8)
+                .frame(width: 34, height: 3)
+                .padding(.top, 6)
 
-            HStack(spacing: 16) {
+            HStack(spacing: 12) {
                 ActionButton(title: "Study", systemImage: "bolt.fill", gradient: DesignSystem.Gradients.accent, action: onStudy)
                 ActionButton(title: "Auto", systemImage: "waveform", gradient: DesignSystem.Gradients.success, action: onAuto)
                 ActionButton(title: "Browse", systemImage: "list.bullet", gradient: DesignSystem.Gradients.card, action: onBrowse)
             }
-            .padding(.horizontal)
-            .padding(.bottom, 18)
+            .padding(.horizontal, 12)
+            .padding(.bottom, 12)
         }
         .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .padding(.horizontal)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .padding(.horizontal, 16)
     }
 
     private struct ActionButton: View {
@@ -394,10 +392,10 @@ private struct CardSetActionBar: View {
                 Label(title, systemImage: systemImage)
                     .font(.subheadline.bold())
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
+                    .padding(.vertical, 10)
                     .background(gradient)
                     .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             .buttonStyle(.plain)
         }

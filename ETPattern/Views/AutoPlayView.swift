@@ -20,9 +20,11 @@ struct AutoPlayView: View {
     @State private var isPlaying = true
     @State private var scheduledTask: DispatchWorkItem?
     @State private var resumePhase: AutoPlayPhase = .front
+    @State private var speechToken = UUID()
+    @State private var activePhase: AutoPlayPhase = .front
 
-    private let frontDuration: TimeInterval = 3.0
-    private let backDuration: TimeInterval = 4.0
+    private let fallbackFrontDelay: TimeInterval = 1.0
+    private let fallbackBackDelay: TimeInterval = 1.5
     private var progressKey: String {
         let id = cardSet.objectID.uriRepresentation().absoluteString
         return "autoPlayProgress-\(id)"
@@ -165,10 +167,7 @@ struct AutoPlayView: View {
         withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
             isFlipped = false
         }
-        speak(text: cards[currentIndex].front ?? "")
-        schedule(after: frontDuration) {
-            flipToBack()
-        }
+        speakPhase(.front)
     }
 
     private func flipToBack() {
@@ -176,10 +175,7 @@ struct AutoPlayView: View {
         withAnimation(.easeInOut(duration: 0.6)) {
             isFlipped = true
         }
-        speak(text: formatBackText(for: cards[currentIndex]))
-        schedule(after: backDuration) {
-            moveToNextCard()
-        }
+        speakPhase(.back)
     }
 
     private func moveToNextCard() {
@@ -190,7 +186,7 @@ struct AutoPlayView: View {
 
     private func advanceToNextManually() {
         guard !cards.isEmpty else { return }
-        scheduledTask?.cancel()
+        resetSpeechFlow()
         currentIndex = (currentIndex + 1) % cards.count
         if isPlaying {
             playFrontSide()
@@ -198,7 +194,6 @@ struct AutoPlayView: View {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                 isFlipped = false
             }
-            ttsService.stop()
         }
         saveProgress()
     }
@@ -214,14 +209,12 @@ struct AutoPlayView: View {
 
     private func pausePlayback() {
         isPlaying = false
-        scheduledTask?.cancel()
-        ttsService.stop()
+        resetSpeechFlow()
         saveProgress()
     }
 
     private func stopPlayback() {
-        scheduledTask?.cancel()
-        ttsService.stop()
+        resetSpeechFlow()
         saveProgress()
     }
 
@@ -230,16 +223,72 @@ struct AutoPlayView: View {
         dismiss()
     }
 
-    private func schedule(after interval: TimeInterval, action: @escaping () -> Void) {
+    private func schedule(after interval: TimeInterval, token: UUID, action: @escaping () -> Void) {
         scheduledTask?.cancel()
-        let workItem = DispatchWorkItem(block: action)
+        let workItem = DispatchWorkItem {
+            guard speechToken == token else { return }
+            action()
+        }
         scheduledTask = workItem
         DispatchQueue.main.asyncAfter(deadline: .now() + interval, execute: workItem)
     }
 
-    private func speak(text: String) {
-        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        ttsService.speak(text)
+    private func resetSpeechFlow() {
+        scheduledTask?.cancel()
+        speechToken = UUID()
+        activePhase = .front
+        ttsService.stop()
+    }
+
+    private func beginPhase(_ phase: AutoPlayPhase) -> UUID {
+        scheduledTask?.cancel()
+        activePhase = phase
+        let token = UUID()
+        speechToken = token
+        return token
+    }
+
+    private func speakPhase(_ phase: AutoPlayPhase) {
+        let token = beginPhase(phase)
+        let text = text(for: phase, at: cards[currentIndex]).trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !text.isEmpty else {
+            schedule(after: fallbackDelay(for: phase), token: token) {
+                guard isPlaying, speechToken == token, activePhase == phase else { return }
+                advance(from: phase)
+            }
+            return
+        }
+
+        ttsService.speak(text) {
+            guard isPlaying, speechToken == token, activePhase == phase else { return }
+            advance(from: phase)
+        }
+    }
+
+    private func advance(from phase: AutoPlayPhase) {
+        switch phase {
+        case .front:
+            flipToBack()
+        case .back:
+            moveToNextCard()
+        }
+    }
+
+    private func fallbackDelay(for phase: AutoPlayPhase) -> TimeInterval {
+        switch phase {
+        case .front: return fallbackFrontDelay
+        case .back: return fallbackBackDelay
+        }
+    }
+
+    private func text(for phase: AutoPlayPhase, at card: Card) -> String {
+        switch phase {
+        case .front:
+            return card.front ?? ""
+        case .back:
+            return formatBackText(for: card)
+        }
     }
 
     private func formatBackText(for card: Card) -> String {
