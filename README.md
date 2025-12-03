@@ -127,6 +127,11 @@ xcodebuild test -project ETPattern.xcodeproj -scheme ETPattern
 2. Run `xcodebuild` + tests before opening a PR.
 3. Describe UX changes with screenshots or short clips when possible.
 
+## Branding Assets
+
+- `Branding/ETLogo.svg` — primary English Thought mark (speech/thought bubble with ET monogram).
+- `Branding/README.md` — palette, spacing, and export guidance for adapting the logo to app icons or marketing.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

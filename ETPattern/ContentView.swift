@@ -72,38 +72,6 @@ struct ContentView: View {
                 .padding(.horizontal)
                 .padding(.top, 20)
             }
-            .navigationTitle("Flashcard Decks")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack {
-                        NavigationLink(destination: SessionStatsView()) {
-                            Image(systemName: "chart.bar")
-                                .imageScale(.large)
-                        }
-                        NavigationLink(destination: ImportView()) {
-                            Image(systemName: "square.and.arrow.down")
-                                .imageScale(.large)
-                        }
-                        NavigationLink(destination: SettingsView()) {
-                            Image(systemName: "gear")
-                                .imageScale(.large)
-                        }
-                    }
-                }
-                ToolbarItem(placement: .navigationBarLeading) {
-                    if selectedCardSet != nil {
-                        Button("Clear Selection") {
-                            clearSelection()
-                        }
-                    }
-                }
-                ToolbarItem {
-                    Button(action: addCardSet) {
-                        Label("Add Deck", systemImage: "plus")
-                    }
-                }
-            }
             Text("Select a deck")
         }
         .safeAreaInset(edge: .bottom) {
@@ -272,14 +240,36 @@ struct ContentView: View {
     }
 
     private var heroHeader: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        HStack(alignment: .center, spacing: 12) {
             Text("English Thought")
                 .font(.largeTitle.bold())
                 .foregroundColor(.white)
-            Text("Tap a deck to jump back in")
-                .font(.subheadline)
-                .foregroundColor(.white.opacity(0.7))
+            Spacer()
+            headerActions
         }
+    }
+
+    private var headerActions: some View {
+        HStack(spacing: 10) {
+            NavigationLink(destination: SessionStatsView()) {
+                headerIcon(systemName: "chart.bar")
+            }
+            NavigationLink(destination: ImportView()) {
+                headerIcon(systemName: "square.and.arrow.down")
+            }
+            NavigationLink(destination: SettingsView()) {
+                headerIcon(systemName: "gear")
+            }
+        }
+    }
+
+    private func headerIcon(systemName: String) -> some View {
+        Image(systemName: systemName)
+            .imageScale(.medium)
+            .foregroundColor(.white)
+            .padding(10)
+            .background(Color.white.opacity(0.15))
+            .clipShape(Circle())
     }
 
     private func deckCard(for cardSet: CardSet) -> some View {

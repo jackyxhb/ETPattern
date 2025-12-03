@@ -25,6 +25,7 @@ struct AutoPlayView: View {
 
     private let fallbackFrontDelay: TimeInterval = 1.0
     private let fallbackBackDelay: TimeInterval = 1.5
+    private let interCardDelay: TimeInterval = 1.0
     private var progressKey: String {
         let id = cardSet.objectID.uriRepresentation().absoluteString
         return "autoPlayProgress-\(id)"
@@ -271,6 +272,14 @@ struct AutoPlayView: View {
         case .front:
             flipToBack()
         case .back:
+            enqueueNextCard()
+        }
+    }
+
+    private func enqueueNextCard() {
+        let token = speechToken
+        schedule(after: interCardDelay, token: token) {
+            guard isPlaying, speechToken == token else { return }
             moveToNextCard()
         }
     }
