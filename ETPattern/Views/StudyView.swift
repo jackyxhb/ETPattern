@@ -24,160 +24,14 @@ struct StudyView: View {
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
 
     var body: some View {
-        VStack {
-            if showSessionComplete {
-                // Session complete view
-                VStack(spacing: 20) {
-                    Text("Session Complete!")
-                        .font(.title)
-                        .fontWeight(.bold)
-                    
-                    VStack(spacing: 16) {
-                        HStack {
-                            Text("Cards Reviewed:")
-                            Spacer()
-                            Text("\(studySession?.cardsReviewed ?? 0)")
-                                .fontWeight(.semibold)
-                        }
-                        
-                        HStack {
-                            Text("Correct Answers:")
-                            Spacer()
-                            Text("\(studySession?.correctCount ?? 0)")
-                                .fontWeight(.semibold)
-                        }
-                        
-                        HStack {
-                            Text("Accuracy:")
-                            Spacer()
-                            Text(accuracyText)
-                                .fontWeight(.semibold)
-                        }
-                        
-                        if let duration = sessionDuration {
-                            HStack {
-                                Text("Time Spent:")
-                                Spacer()
-                                Text(duration)
-                                    .fontWeight(.semibold)
-                            }
-                        }
-                    }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
-                    
-                    Button("Done") {
-                        dismiss()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .padding(.top)
-                }
-                .padding()
-            } else if cardsDue.isEmpty {
-                Text("No cards due for review")
-                    .font(.title2)
-                    .foregroundColor(.secondary)
-                Button("Done") {
-                    dismiss()
-                }
-                .padding()
-            } else {
-                // Study session view
-                VStack {
-                    // Session stats header
-                    HStack(alignment: .center, spacing: 16) {
-                        ProgressCircle(progress: progress)
-                            .frame(width: 70, height: 70)
+        ZStack(alignment: .topTrailing) {
+            DesignSystem.Gradients.background
+                .ignoresSafeArea()
 
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Card \(currentCardNumber) of \(totalCardsInSession)")
-                                .font(.headline)
-                            if let accuracy = currentAccuracy, accuracy > 0 {
-                                Text("Accuracy: \(Int(accuracy * 100))%")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
+            content
+                .padding(.horizontal)
+                .padding(.top, 32)
 
-                        Spacer()
-
-                        VStack(alignment: .trailing, spacing: 4) {
-                            Text("Cards Today")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Text("\(totalCardsInSession)")
-                                .font(.headline)
-                            Text("Remaining: \(cardsRemaining)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .padding(.horizontal)
-
-                    Spacer()
-
-                    // Card display
-                    if currentCardIndex < cardsDue.count {
-                        VStack {
-                            CardView(card: cardsDue[currentCardIndex], currentIndex: cardsReviewedCount, totalCards: totalCardsInSession)
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                .padding()
-                                .gesture(
-                                    DragGesture()
-                                        .onEnded { value in
-                                            let horizontalAmount = value.translation.width
-                                            let verticalAmount = value.translation.height
-                                            
-                                            // Only process horizontal swipes (more horizontal than vertical movement)
-                                            if abs(horizontalAmount) > abs(verticalAmount) && abs(horizontalAmount) > 50 {
-                                                feedbackGenerator.impactOccurred()
-                                                if horizontalAmount > 0 {
-                                                    // Swipe right = Easy
-                                                    markAsEasy()
-                                                } else {
-                                                    // Swipe left = Again
-                                                    markAsAgain()
-                                                }
-                                            }
-                                        }
-                                )
-                            
-                            // Swipe hint
-                            Text("Swipe left for 'Again' • Swipe right for 'Easy'")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .padding(.top, 8)
-                        }
-                    }
-
-                    Spacer()
-
-                    // Action buttons
-                    HStack(spacing: 20) {
-                        Button(action: markAsAgain) {
-                            Text("Again")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.red.opacity(0.8))
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                        }
-
-                        Button(action: markAsEasy) {
-                            Text("Easy")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.green.opacity(0.8))
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                        }
-                    }
-                    .padding(.horizontal)
-                }
-            }
-        }
-        .overlay(alignment: .topTrailing) {
             CloseSessionButton(action: closeSession)
                 .padding(.top, 8)
                 .padding(.trailing, 12)
@@ -199,19 +53,192 @@ struct StudyView: View {
         }
     }
 
+    @ViewBuilder
+    private var content: some View {
+        if showSessionComplete {
+            completionView
+        } else if cardsDue.isEmpty {
+            emptyState
+        } else {
+            studySessionContent
+        }
+    }
+
+    private var completionView: some View {
+        VStack(spacing: 24) {
+            Text("Session Complete")
+                .font(.largeTitle.bold())
+                .foregroundColor(.white)
+
+            VStack(spacing: 18) {
+                CompletionRow(title: "Cards Reviewed", value: "\(studySession?.cardsReviewed ?? 0)")
+                CompletionRow(title: "Correct Answers", value: "\(studySession?.correctCount ?? 0)")
+                CompletionRow(title: "Accuracy", value: accuracyText)
+                if let duration = sessionDuration {
+                    CompletionRow(title: "Time Spent", value: duration)
+                }
+            }
+            .padding()
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+
+            Button(action: { dismiss() }) {
+                Text("Done")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(DesignSystem.Gradients.accent)
+                    .foregroundColor(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.vertical, 60)
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "sparkles")
+                .font(.largeTitle)
+                .foregroundColor(.white.opacity(0.7))
+            Text("No cards due for review")
+                .font(.title2.weight(.semibold))
+                .foregroundColor(.white)
+            Button("Done") {
+                dismiss()
+            }
+            .font(.headline)
+            .padding(.horizontal, 32)
+            .padding(.vertical, 12)
+            .background(.ultraThinMaterial)
+            .foregroundColor(.white)
+            .clipShape(Capsule())
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+    }
+
+    private var studySessionContent: some View {
+        VStack(spacing: 24) {
+            statsHeader
+
+            if currentCardIndex < cardsDue.count {
+                VStack(spacing: 12) {
+                    CardView(card: cardsDue[currentCardIndex], currentIndex: cardsReviewedCount, totalCards: totalCardsInSession)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .gesture(
+                            DragGesture()
+                                .onEnded { value in
+                                    let horizontalAmount = value.translation.width
+                                    let verticalAmount = value.translation.height
+                                    if abs(horizontalAmount) > abs(verticalAmount) && abs(horizontalAmount) > 50 {
+                                        feedbackGenerator.impactOccurred()
+                                        if horizontalAmount > 0 {
+                                            markAsEasy()
+                                        } else {
+                                            markAsAgain()
+                                        }
+                                    }
+                                }
+                        )
+
+                    Text("Swipe left for Again · Swipe right for Easy")
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.7))
+                }
+            }
+
+            actionButtons
+        }
+    }
+
+    private var statsHeader: some View {
+        HStack(spacing: 16) {
+            ProgressCircle(progress: progress)
+                .frame(width: 70, height: 70)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Card \(currentCardNumber) of \(max(totalCardsInSession, 1))")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                if let accuracy = currentAccuracy, accuracy > 0 {
+                    Text("Accuracy \(Int(accuracy * 100))%")
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.7))
+                }
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 6) {
+                Text("Today")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.7))
+                Text("Total: \(totalCardsInSession)")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                Text("Remaining: \(cardsRemaining)")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.7))
+            }
+        }
+        .padding()
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+    }
+
+    private var actionButtons: some View {
+        HStack(spacing: 16) {
+            Button(action: markAsAgain) {
+                Label("Again", systemImage: "arrow.counterclockwise")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(DesignSystem.Gradients.danger)
+                    .foregroundColor(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            }
+            .buttonStyle(.plain)
+
+            Button(action: markAsEasy) {
+                Label("Easy", systemImage: "checkmark.circle")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(DesignSystem.Gradients.success)
+                    .foregroundColor(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
     private struct CloseSessionButton: View {
         let action: () -> Void
 
         var body: some View {
             Button(action: action) {
-                Image(systemName: "xmark.circle.fill")
-                    .imageScale(.large)
-                    .foregroundStyle(.white, Color.black.opacity(0.7))
-                    .padding(8)
+                Image(systemName: "xmark")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding(10)
             }
-            .background(.thinMaterial, in: Circle())
-            .shadow(radius: 2)
+            .background(Color.white.opacity(0.2), in: Circle())
+            .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 4)
             .accessibilityLabel("Close session")
+        }
+    }
+
+    private struct CompletionRow: View {
+        let title: String
+        let value: String
+
+        var body: some View {
+            HStack {
+                Text(title)
+                    .foregroundColor(.white.opacity(0.8))
+                Spacer()
+                Text(value)
+                    .foregroundColor(.white)
+                    .fontWeight(.semibold)
+            }
         }
     }
 

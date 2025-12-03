@@ -28,66 +28,52 @@ struct ContentView: View {
 
     var body: some View {
         NavigationView {
-            List {
-                ForEach(cardSets) { cardSet in
-                    Button {
-                        toggleSelection(for: cardSet)
-                    } label: {
-                        VStack(alignment: .leading, spacing: 6) {
-                            HStack {
-                                Text(cardSet.name ?? "Unnamed Deck")
-                                    .font(.headline)
-                                if isSelected(cardSet) {
-                                    Spacer()
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .foregroundColor(.accentColor)
-                                }
+            ZStack {
+                DesignSystem.Gradients.background
+                    .ignoresSafeArea()
+
+                VStack(alignment: .leading, spacing: 20) {
+                    heroHeader
+
+                    ScrollView {
+                        LazyVStack(spacing: 18) {
+                            ForEach(cardSets) { cardSet in
+                                deckCard(for: cardSet)
+                                    .contextMenu {
+                                        Button {
+                                            promptRename(for: cardSet)
+                                        } label: {
+                                            Label("Rename", systemImage: "pencil")
+                                        }
+                                        Button {
+                                            selectedCardSet = cardSet
+                                            showingExportAlert = true
+                                        } label: {
+                                            Label("Export", systemImage: "square.and.arrow.up")
+                                        }
+                                        Button(role: .destructive) {
+                                            promptDelete(for: cardSet)
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                        Button(role: .destructive) {
+                                            deleteCardSet(cardSet)
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
                             }
-                            Text("Created: \(cardSet.createdDate ?? Date(), formatter: dateFormatter)")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            if let cards = cardSet.cards as? Set<Card> {
-                                Text("\(cards.count) cards")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
                         }
-                        .padding(.vertical, 10)
-                        .padding(.horizontal)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(isSelected(cardSet) ? Color.accentColor.opacity(0.12) : Color(.secondarySystemBackground))
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(isSelected(cardSet) ? Color.accentColor : Color.clear, lineWidth: 1.5)
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .listRowInsets(EdgeInsets())
-                    .contextMenu {
-                        Button {
-                            promptRename(for: cardSet)
-                        } label: {
-                            Label("Rename", systemImage: "pencil")
-                        }
-                        Button {
-                            selectedCardSet = cardSet
-                            showingExportAlert = true
-                        } label: {
-                            Label("Export", systemImage: "square.and.arrow.up")
-                        }
-                        Button(role: .destructive) {
-                            promptDelete(for: cardSet)
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
+                        .padding(.bottom, 140)
                     }
                 }
-                .onDelete(perform: deleteCardSets)
+                .padding(.horizontal)
+                .padding(.top, 24)
             }
-            .listStyle(.plain)
+            .navigationTitle("Flashcard Decks")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
@@ -201,24 +187,6 @@ struct ContentView: View {
         }
     }
 
-    private func deleteCardSets(offsets: IndexSet) {
-        withAnimation {
-            let toDelete = offsets.map { cardSets[$0] }
-            toDelete.forEach(viewContext.delete)
-
-            if let selected = selectedCardSet, toDelete.contains(selected) {
-                clearSelection()
-            }
-
-            do {
-                try viewContext.save()
-            } catch {
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
-    }
-
     private func toggleSelection(for cardSet: CardSet) {
         if selectedCardSet == cardSet {
             clearSelection()
@@ -288,6 +256,99 @@ struct ContentView: View {
             print("Error exporting deck: \(error)")
         }
     }
+
+    private func deleteCardSet(_ cardSet: CardSet) {
+        withAnimation {
+            viewContext.delete(cardSet)
+            if selectedCardSet == cardSet {
+                clearSelection()
+            }
+            do {
+                try viewContext.save()
+            } catch {
+                print("Failed to delete deck: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private var heroHeader: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Your decks")
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.7))
+            Text("Practice smarter")
+                .font(.largeTitle.bold())
+                .foregroundColor(.white)
+            Text("Tap a deck to jump back in")
+                .font(.subheadline)
+                .foregroundColor(.white.opacity(0.7))
+        }
+    }
+
+    private func deckCard(for cardSet: CardSet) -> some View {
+        let cardCount = (cardSet.cards as? Set<Card>)?.count ?? 0
+        let createdText = dateFormatter.string(from: cardSet.createdDate ?? Date())
+
+        return Button {
+            toggleSelection(for: cardSet)
+        } label: {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(cardSet.name ?? "Unnamed Deck")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                        Text("Created \(createdText)")
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                    Spacer()
+                    if isSelected(cardSet) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(DesignSystem.Colors.highlight)
+                            .imageScale(.large)
+                    }
+                }
+
+                HStack {
+                    metricPill(title: "Cards", value: "\(cardCount)", icon: "rectangle.stack.fill")
+                    Spacer()
+                    metricPill(title: "Voice", value: UserDefaults.standard.string(forKey: "selectedVoice") ?? Constants.TTS.defaultVoice, icon: "waveform")
+                }
+            }
+            .padding()
+            .background(
+                DesignSystem.Gradients.card
+                    .opacity(isSelected(cardSet) ? 1 : 0.85)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignSystem.Metrics.cornerRadius)
+                    .stroke(isSelected(cardSet) ? DesignSystem.Colors.highlight.opacity(0.8) : Color.white.opacity(0.15), lineWidth: 1.5)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Metrics.cornerRadius, style: .continuous))
+            .shadow(color: DesignSystem.Metrics.shadow.opacity(0.35), radius: 20, x: 0, y: 12)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func metricPill(title: String, value: String, icon: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .imageScale(.small)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title.uppercased())
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.6))
+                Text(value)
+                    .font(.subheadline.bold())
+                    .foregroundColor(.white)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(Color.white.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
 }
 
 private let dateFormatter: DateFormatter = {
@@ -303,23 +364,29 @@ private struct CardSetActionBar: View {
     let onBrowse: () -> Void
 
     var body: some View {
-        VStack(spacing: 10) {
-            Divider()
-            HStack(spacing: 12) {
-                ActionButton(title: "Study", systemImage: "play.fill", tint: .accentColor, action: onStudy)
-                ActionButton(title: "Auto", systemImage: "play.circle", tint: .purple, action: onAuto)
-                ActionButton(title: "Browse", systemImage: "list.bullet", tint: .blue, action: onBrowse)
+        VStack(spacing: 12) {
+            Capsule()
+                .fill(Color.white.opacity(0.3))
+                .frame(width: 40, height: 4)
+                .padding(.top, 8)
+
+            HStack(spacing: 16) {
+                ActionButton(title: "Study", systemImage: "bolt.fill", gradient: DesignSystem.Gradients.accent, action: onStudy)
+                ActionButton(title: "Auto", systemImage: "waveform", gradient: DesignSystem.Gradients.success, action: onAuto)
+                ActionButton(title: "Browse", systemImage: "list.bullet", gradient: DesignSystem.Gradients.card, action: onBrowse)
             }
             .padding(.horizontal)
-            .padding(.bottom, 8)
+            .padding(.bottom, 18)
         }
         .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .padding(.horizontal)
     }
 
     private struct ActionButton: View {
         let title: String
         let systemImage: String
-        let tint: Color
+        let gradient: LinearGradient
         let action: () -> Void
 
         var body: some View {
@@ -327,10 +394,10 @@ private struct CardSetActionBar: View {
                 Label(title, systemImage: systemImage)
                     .font(.subheadline.bold())
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(tint.opacity(0.15))
-                    .foregroundColor(tint)
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .padding(.vertical, 12)
+                    .background(gradient)
+                    .foregroundColor(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             }
             .buttonStyle(.plain)
         }

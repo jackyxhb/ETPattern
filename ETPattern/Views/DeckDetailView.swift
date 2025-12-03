@@ -17,29 +17,35 @@ struct DeckDetailView: View {
     @State private var previewCard: Card?
 
     var body: some View {
-        VStack {
-            if !sortedCards.isEmpty {
-                List {
-                    ForEach(sortedCards) { card in
-                        Button {
-                            previewCard = card
-                        } label: {
-                            CardRow(card: card)
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .contextMenu {
+        ZStack {
+            DesignSystem.Gradients.background
+                .ignoresSafeArea()
+
+            if sortedCards.isEmpty {
+                Text("No cards in this deck")
+                    .font(.headline)
+                    .foregroundColor(.white.opacity(0.7))
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 16) {
+                        ForEach(sortedCards) { card in
                             Button {
                                 previewCard = card
                             } label: {
-                                Label("Preview", systemImage: "eye")
+                                CardRow(card: card)
+                            }
+                            .buttonStyle(.plain)
+                            .contextMenu {
+                                Button {
+                                    previewCard = card
+                                } label: {
+                                    Label("Preview", systemImage: "eye")
+                                }
                             }
                         }
                     }
+                    .padding()
                 }
-            } else {
-                Text("No cards in this deck")
-                    .foregroundColor(.secondary)
             }
         }
         .navigationTitle(cardSet.name ?? "Unnamed Deck")
@@ -63,15 +69,26 @@ private struct CardRow: View {
     let card: Card
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(card.front ?? "No front")
                 .font(.headline)
+                .foregroundColor(.white)
             Text(formattedBack)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(.white.opacity(0.7))
                 .lineLimit(2)
         }
-        .padding(.vertical, 8)
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: DesignSystem.Metrics.cornerRadius)
+                .fill(DesignSystem.Gradients.card.opacity(0.9))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DesignSystem.Metrics.cornerRadius)
+                .stroke(DesignSystem.Colors.stroke, lineWidth: 1)
+        )
+        .shadow(color: DesignSystem.Metrics.shadow.opacity(0.4), radius: 12, x: 0, y: 8)
     }
 
     private var formattedBack: String {
@@ -89,16 +106,18 @@ private struct CardPreviewContainer: View {
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            Color(.systemBackground)
+            DesignSystem.Gradients.background
                 .ignoresSafeArea()
 
             CardView(card: card, currentIndex: index, totalCards: total)
                 .padding(.horizontal)
 
             Button(action: onClose) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 32))
-                    .foregroundStyle(.secondary)
+                Image(systemName: "xmark")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding(10)
+                    .background(Color.white.opacity(0.2), in: Circle())
                     .padding()
             }
             .accessibilityLabel("Close preview")

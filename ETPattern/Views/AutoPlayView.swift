@@ -29,22 +29,27 @@ struct AutoPlayView: View {
     }
 
     var body: some View {
-        VStack(spacing: 24) {
-            header
+        ZStack(alignment: .topTrailing) {
+            DesignSystem.Gradients.background
+                .ignoresSafeArea()
 
-            if cards.isEmpty {
-                emptyState
-            } else {
-                AutoCardDisplay(card: cards[currentIndex], index: currentIndex, total: cards.count, isFlipped: isFlipped)
-                    .frame(maxHeight: .infinity)
+            VStack(spacing: 28) {
+                header
 
-                playbackInfo
+                if cards.isEmpty {
+                    emptyState
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    AutoCardDisplay(card: cards[currentIndex], index: currentIndex, total: cards.count, isFlipped: isFlipped)
+                        .frame(maxHeight: .infinity)
 
-                playbackControls
+                    playbackInfo
+
+                    playbackControls
+                }
             }
+            .padding()
         }
-        .padding()
-        .background(Color(.systemGroupedBackground).ignoresSafeArea())
         .onAppear {
             prepareCards()
             startPlaybackIfPossible()
@@ -56,18 +61,21 @@ struct AutoPlayView: View {
 
     private var header: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(cardSet.name ?? "Auto Play")
-                    .font(.title2.bold())
+                    .font(.title.bold())
+                    .foregroundColor(.white)
                 Text("Automatic playback")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.white.opacity(0.7))
             }
             Spacer()
             Button(action: dismissAuto) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 30, weight: .medium))
-                    .foregroundStyle(.secondary)
+                Image(systemName: "xmark")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding(10)
+                    .background(Color.white.opacity(0.2), in: Circle())
             }
             .accessibilityLabel("Close")
         }
@@ -75,24 +83,32 @@ struct AutoPlayView: View {
 
     private var emptyState: some View {
         VStack(spacing: 12) {
-            Image(systemName: "exclamationmark.triangle")
+            Image(systemName: "waveform")
                 .font(.largeTitle)
-                .foregroundColor(.orange)
+                .foregroundColor(.white.opacity(0.7))
             Text("This deck has no cards to play.")
                 .font(.headline)
                 .multilineTextAlignment(.center)
+                .foregroundColor(.white)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var playbackInfo: some View {
-        VStack(spacing: 6) {
-            Text("Card \(currentIndex + 1) of \(cards.count)")
-                .font(.headline)
+        VStack(spacing: 10) {
+            HStack {
+                Text("Card \(currentIndex + 1) of \(cards.count)")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                Spacer()
+                Text(isFlipped ? "Examples" : "Pattern")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.7))
+            }
             ProgressView(value: Double(currentIndex + 1), total: Double(cards.count))
-                .tint(.accentColor)
+                .tint(DesignSystem.Colors.highlight)
         }
-        .padding(.horizontal)
+        .padding()
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 
     private var playbackControls: some View {
@@ -101,22 +117,23 @@ struct AutoPlayView: View {
                 Label(isPlaying ? "Pause" : "Play", systemImage: isPlaying ? "pause.fill" : "play.fill")
                     .font(.subheadline.bold())
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Color.accentColor.opacity(0.15))
-                    .foregroundColor(.accentColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .padding(.vertical, 14)
+                    .background(DesignSystem.Gradients.accent)
+                    .foregroundColor(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             }
 
             Button(action: advanceToNextManually) {
                 Label("Skip", systemImage: "forward.end.fill")
                     .font(.subheadline.bold())
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Color.blue.opacity(0.15))
-                    .foregroundColor(.blue)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .padding(.vertical, 14)
+                    .background(DesignSystem.Gradients.success)
+                    .foregroundColor(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             }
         }
+        .buttonStyle(.plain)
     }
 
     private func prepareCards() {

@@ -18,12 +18,10 @@ struct CardView: View {
 
     var body: some View {
         ZStack {
-            // Front of card
             CardFace(text: card.front ?? "No front", pattern: "", isFront: true, currentIndex: currentIndex, totalCards: totalCards)
                 .opacity(isFlipped ? 0 : 1)
                 .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
 
-            // Back of card
             CardFace(text: formatBackText(), pattern: card.front ?? "", isFront: false, currentIndex: currentIndex, totalCards: totalCards)
                 .opacity(isFlipped ? 1 : 0)
                 .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
@@ -68,77 +66,83 @@ struct CardFace: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.1), radius: 12, x: 0, y: 4)
+            RoundedRectangle(cornerRadius: DesignSystem.Metrics.cornerRadius)
+                .fill(DesignSystem.Gradients.card)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 24)
-                        .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: DesignSystem.Metrics.cornerRadius)
+                        .stroke(DesignSystem.Colors.stroke, lineWidth: 1.5)
                 )
+                .shadow(color: DesignSystem.Metrics.shadow, radius: 30, x: 0, y: 30)
 
-            if isFront {
-                // Front: Header with card number + pattern below
-                VStack {
-                    // Header with card number
-                    Text("\(currentIndex + 1)/\(totalCards)")
-                        .font(.system(size: 18, weight: .semibold, design: .rounded))
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(8)
-                    
-                    Spacer()
-                    
-                    // Pattern text
-                    Text(text)
+            VStack(alignment: .leading, spacing: 28) {
+                header
+                Spacer(minLength: 0)
+                if isFront {
+                    Text(text.isEmpty ? "No content" : text)
                         .font(.system(size: 42, weight: .bold, design: .rounded))
                         .multilineTextAlignment(.center)
-                        .foregroundColor(.primary)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
                         .minimumScaleFactor(0.5)
                         .lineLimit(3)
-                    
-                    Spacer()
+                } else {
+                    backContent
                 }
-                .padding(32)
-            } else {
-                // Back: Pattern at top (smaller) + examples below
-                VStack(spacing: 32) {
-                    // Pattern at top
-                    Text(pattern)
-                        .font(.system(size: 20, weight: .semibold, design: .rounded))
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .background(Color.blue.opacity(0.1))
-                        .cornerRadius(12)
-
-                    // Examples below
-                    let examples = text.components(separatedBy: "\n")
-                    VStack(spacing: 16) {
-                        ForEach(examples.indices, id: \.self) { index in
-                            let example = examples[index]
-                            if !example.isEmpty {
-                                HStack(alignment: .top, spacing: 12) {
-                                    Text("\(index + 1).")
-                                        .font(.system(size: 16, weight: .medium))
-                                        .foregroundColor(.secondary)
-                                    Text(example)
-                                        .font(.system(size: 18, weight: .regular, design: .rounded))
-                                        .multilineTextAlignment(.leading)
-                                        .foregroundColor(.primary)
-                                        .lineSpacing(6)
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            }
-                        }
-                    }
-                }
-                .padding(32)
+                Spacer(minLength: 0)
             }
+            .padding(32)
         }
         .padding(24)
+    }
+
+    private var header: some View {
+        HStack {
+            Text("CARD \(currentIndex + 1)/\(max(totalCards, 1))")
+                .font(.caption.monospacedDigit())
+                .foregroundColor(.white.opacity(0.9))
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Color.white.opacity(0.08))
+                .clipShape(Capsule())
+
+            Spacer()
+
+            if !pattern.isEmpty, !isFront {
+                Text(pattern)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(DesignSystem.Colors.highlight)
+                    .lineLimit(1)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color.white.opacity(0.12))
+                    .clipShape(Capsule())
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var backContent: some View {
+        let examples = text.components(separatedBy: "\n").filter { !$0.isEmpty }
+
+        VStack(alignment: .leading, spacing: 18) {
+            ForEach(Array(examples.enumerated()), id: \.offset) { index, example in
+                HStack(alignment: .top, spacing: 12) {
+                    Text(String(format: "%02d", index + 1))
+                        .font(.caption.bold())
+                        .foregroundColor(.white.opacity(0.7))
+                        .padding(8)
+                        .background(Color.white.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+                    Text(example)
+                        .font(.system(size: 18, weight: .medium, design: .rounded))
+                        .foregroundColor(.white)
+                        .lineSpacing(6)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding(.horizontal, 6)
+            }
+        }
     }
 }
 
