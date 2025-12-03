@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 /// Simple wrapper that overlays a branded splash while main content loads.
 struct SplashHostView<Content: View>: View {
@@ -31,9 +32,16 @@ struct SplashHostView<Content: View>: View {
 }
 
 struct SplashView: View {
+    private var backgroundGradient: LinearGradient {
+        LinearGradient(colors: [
+            Color(red: 18/255, green: 22/255, blue: 41/255),
+            Color(red: 42/255, green: 49/255, blue: 89/255)
+        ], startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+    
     var body: some View {
         ZStack {
-            DesignSystem.Gradients.background
+            backgroundGradient
                 .ignoresSafeArea()
 
             VStack(spacing: 18) {
