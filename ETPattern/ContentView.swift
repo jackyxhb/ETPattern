@@ -19,6 +19,7 @@ struct ContentView: View {
 
     @State private var selectedCardSet: CardSet?
     @State private var showingStudyView = false
+    @State private var showingAutoView = false
     @State private var showingRenameAlert = false
     @State private var showingDeleteAlert = false
     @State private var showingExportAlert = false
@@ -67,10 +68,20 @@ struct ContentView: View {
                     .listRowInsets(EdgeInsets())
                     .contextMenu {
                         Button {
+                            promptRename(for: cardSet)
+                        } label: {
+                            Label("Rename", systemImage: "pencil")
+                        }
+                        Button {
                             selectedCardSet = cardSet
                             showingExportAlert = true
                         } label: {
                             Label("Export", systemImage: "square.and.arrow.up")
+                        }
+                        Button(role: .destructive) {
+                            promptDelete(for: cardSet)
+                        } label: {
+                            Label("Delete", systemImage: "trash")
                         }
                     }
                 }
@@ -113,9 +124,8 @@ struct ContentView: View {
             if let selectedCardSet {
                 CardSetActionBar(
                     onStudy: { startStudy(for: selectedCardSet) },
-                    onBrowse: { browseCardSet = selectedCardSet },
-                    onRename: { promptRename(for: selectedCardSet) },
-                    onDelete: { promptDelete(for: selectedCardSet) }
+                    onAuto: { startAuto(for: selectedCardSet) },
+                    onBrowse: { browseCardSet = selectedCardSet }
                 )
             } else {
                 EmptyView()
@@ -124,6 +134,11 @@ struct ContentView: View {
         .sheet(isPresented: $showingStudyView) {
             if let cardSet = selectedCardSet {
                 StudyView(cardSet: cardSet)
+            }
+        }
+        .sheet(isPresented: $showingAutoView) {
+            if let cardSet = selectedCardSet {
+                AutoPlayView(cardSet: cardSet)
             }
         }
         .sheet(item: $browseCardSet) { deck in
@@ -225,6 +240,11 @@ struct ContentView: View {
         showingStudyView = true
     }
 
+    private func startAuto(for cardSet: CardSet) {
+        selectedCardSet = cardSet
+        showingAutoView = true
+    }
+
     private func promptRename(for cardSet: CardSet) {
         selectedCardSet = cardSet
         newName = cardSet.name ?? ""
@@ -279,18 +299,16 @@ private let dateFormatter: DateFormatter = {
 
 private struct CardSetActionBar: View {
     let onStudy: () -> Void
+    let onAuto: () -> Void
     let onBrowse: () -> Void
-    let onRename: () -> Void
-    let onDelete: () -> Void
 
     var body: some View {
         VStack(spacing: 10) {
             Divider()
             HStack(spacing: 12) {
                 ActionButton(title: "Study", systemImage: "play.fill", tint: .accentColor, action: onStudy)
+                ActionButton(title: "Auto", systemImage: "play.circle", tint: .purple, action: onAuto)
                 ActionButton(title: "Browse", systemImage: "list.bullet", tint: .blue, action: onBrowse)
-                ActionButton(title: "Rename", systemImage: "pencil", tint: .teal, action: onRename)
-                ActionButton(title: "Delete", systemImage: "trash", tint: .red, action: onDelete)
             }
             .padding(.horizontal)
             .padding(.bottom, 8)
