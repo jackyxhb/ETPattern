@@ -37,7 +37,7 @@ struct SplashView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 18) {
-                Image("ETLogo")
+                Image("logo")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 180, height: 180)

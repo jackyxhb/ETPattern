@@ -1,15 +1,12 @@
 {
   "images" : [
     {
-      "filename" : "ETLogo.pdf",
+      "filename" : "logo.jpg",
       "idiom" : "universal"
     }
   ],
   "info" : {
     "author" : "xcode",
     "version" : 1
-  },
-  "properties" : {
-    "preserves-vector-representation" : true
   }
 }

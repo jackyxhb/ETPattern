@@ -129,7 +129,7 @@ xcodebuild test -project ETPattern.xcodeproj -scheme ETPattern
 
 ## Branding Assets
 
-- `Branding/ETLogo.svg` — primary English Thought mark (speech/thought bubble with ET monogram).
+- `Branding/logo.jpg` — primary English Thought mark (JPG image).
 - `Branding/README.md` — palette, spacing, and export guidance for adapting the logo to app icons or marketing.
 
 ## License
