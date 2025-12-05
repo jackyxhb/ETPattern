@@ -16,6 +16,7 @@ struct AutoPlayView: View {
     @EnvironmentObject private var ttsService: TTSService
 
     @State private var cards: [Card] = []
+    @State private var originalCards: [Card] = [] // Keep original order for sequential mode
     @State private var currentIndex: Int = 0
     @State private var isFlipped = false
     @State private var isPlaying = true
@@ -23,6 +24,7 @@ struct AutoPlayView: View {
     @State private var resumePhase: AutoPlayPhase = .front
     @State private var speechToken = UUID()
     @State private var activePhase: AutoPlayPhase = .front
+    @State private var isRandomOrder = false
 
     private let fallbackFrontDelay: TimeInterval = 1.0
     private let fallbackBackDelay: TimeInterval = 1.5
@@ -117,25 +119,39 @@ struct AutoPlayView: View {
     }
 
     private var playbackControls: some View {
-        HStack(spacing: 16) {
-            Button(action: togglePlayback) {
-                Label(isPlaying ? "Pause" : "Play", systemImage: isPlaying ? "pause.fill" : "play.fill")
-                    .font(.subheadline.bold())
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(DesignSystem.Gradients.accent)
+        VStack(spacing: 16) {
+            // Order toggle button
+            Button(action: toggleOrderMode) {
+                Label(isRandomOrder ? "Random Order" : "Sequential Order",
+                      systemImage: isRandomOrder ? "shuffle" : "arrow.up.arrow.down")
+                    .font(.caption.bold())
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(Color.white.opacity(0.2))
                     .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
 
-            Button(action: advanceToNextManually) {
-                Label("Skip", systemImage: "forward.end.fill")
-                    .font(.subheadline.bold())
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(DesignSystem.Gradients.success)
-                    .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            HStack(spacing: 16) {
+                Button(action: togglePlayback) {
+                    Label(isPlaying ? "Pause" : "Play", systemImage: isPlaying ? "pause.fill" : "play.fill")
+                        .font(.subheadline.bold())
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(DesignSystem.Gradients.accent)
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                }
+
+                Button(action: advanceToNextManually) {
+                    Label("Skip", systemImage: "forward.end.fill")
+                        .font(.subheadline.bold())
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(DesignSystem.Gradients.success)
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                }
             }
         }
         .buttonStyle(.plain)
@@ -144,9 +160,50 @@ struct AutoPlayView: View {
     private func prepareCards() {
         guard cards.isEmpty, let setCards = cardSet.cards as? Set<Card> else { return }
         let sorted = setCards.sorted { ($0.front ?? "") < ($1.front ?? "") }
-        cards = sorted
-        currentIndex = 0
+        originalCards = sorted
+        isRandomOrder = UserDefaults.standard.string(forKey: "cardOrderMode") == "random"
+        applyOrderMode()
         restoreProgressIfAvailable()
+    }
+
+    private func applyOrderMode() {
+        if isRandomOrder {
+            cards = originalCards.shuffled()
+        } else {
+            cards = originalCards
+        }
+        // Reset to first card when changing order
+        currentIndex = 0
+        isFlipped = false
+        resumePhase = .front
+    }
+
+    private func applyOrderModePreservingCurrentCard() {
+        let currentCard = cards.isEmpty ? nil : cards[currentIndex]
+
+        if isRandomOrder {
+            cards = originalCards.shuffled()
+        } else {
+            cards = originalCards
+        }
+
+        // Try to find the same card in the new order
+        if let currentCard = currentCard,
+           let newIndex = cards.firstIndex(where: { $0.objectID == currentCard.objectID }) {
+            currentIndex = newIndex
+        } else {
+            // If we can't find the card, reset to beginning
+            currentIndex = 0
+            isFlipped = false
+            resumePhase = .front
+        }
+    }
+
+    private func toggleOrderMode() {
+        isRandomOrder.toggle()
+        applyOrderModePreservingCurrentCard()
+        // Continue playing without interruption
+        // No need to stop and restart - just update the order
     }
 
     private func startPlaybackIfPossible() {
@@ -333,7 +390,7 @@ struct AutoPlayView: View {
 
     private func saveProgress() {
         guard !cards.isEmpty else { return }
-        let progress = AutoPlayProgress(index: currentIndex, phase: isFlipped ? .back : .front)
+        let progress = AutoPlayProgress(index: currentIndex, phase: isFlipped ? .back : .front, isRandomOrder: isRandomOrder)
         if let data = try? JSONEncoder().encode(progress) {
             UserDefaults.standard.set(data, forKey: progressKey)
         }
@@ -343,9 +400,14 @@ struct AutoPlayView: View {
         guard
             let data = UserDefaults.standard.data(forKey: progressKey),
             let progress = try? JSONDecoder().decode(AutoPlayProgress.self, from: data),
-            !cards.isEmpty
+            !originalCards.isEmpty
         else { return }
 
+        // Apply the saved order mode
+        isRandomOrder = progress.isRandomOrder
+        applyOrderMode()
+
+        // Restore position
         let safeIndex = min(max(progress.index, 0), cards.count - 1)
         currentIndex = safeIndex
         isFlipped = progress.phase == .back
@@ -406,6 +468,7 @@ private enum AutoPlayPhase: String, Codable {
 private struct AutoPlayProgress: Codable {
     let index: Int
     let phase: AutoPlayPhase
+    let isRandomOrder: Bool
 }
 
 #Preview {
