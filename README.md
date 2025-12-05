@@ -113,7 +113,13 @@ xcodebuild test -project ETPattern.xcodeproj -scheme ETPattern
 
 ## Release Notes
 
-### v1.2.0 (Latest)
+### v1.3.0 (Latest)
+- Enhanced swipe animations: Added visual feedback with checkmark (✓) for "Easy" swipes and X (✗) for "Again" swipes
+- Improved UI layout: Moved swipe instruction text from card area to bottom navbar for cleaner card display
+- Smooth slide animations: Feedback overlays now slide in smoothly during swipe gestures
+- Device testing: Verified functionality on real iPhone 16 Plus device
+
+### v1.2.0
 - Optimized deck list display: Card counts now prefixed to deck names (e.g., "(36)ETPatterns 300") and voice indicators removed to maximize screen space for more items.
 - Improved UI efficiency for better user experience on smaller screens.
 
