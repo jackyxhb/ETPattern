@@ -24,7 +24,14 @@ struct StudyView: View {
     @State private var sessionStartTime: Date?
     @State private var isFlipped = false
     @State private var isRandomOrder = false
+    @State private var swipeDirection: SwipeDirection? = nil
+    @State private var showSwipeFeedback = false
+    
     private let spacedRepetitionService = SpacedRepetitionService()
+    
+    enum SwipeDirection {
+        case left, right
+    }
 
     var body: some View {
         ZStack {
@@ -157,9 +164,27 @@ struct StudyView: View {
                     )
                     .opacity(isFlipped ? 1 : 0)
                     .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
+                    
+                    // Swipe feedback overlay
+                    if showSwipeFeedback, let direction = swipeDirection {
+                        ZStack {
+                            Color.white.opacity(0.9)
+                            VStack {
+                                Image(systemName: direction == .right ? "checkmark.circle.fill" : "arrow.counterclockwise.circle.fill")
+                                    .font(.system(size: 60))
+                                    .foregroundColor(direction == .right ? .green : .red)
+                                Text(direction == .right ? "Easy" : "Again")
+                                    .font(.title.bold())
+                                    .foregroundColor(.black)
+                            }
+                        }
+                        .clipShape(RoundedRectangle(cornerRadius: 24))
+                        .transition(.opacity)
+                    }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(.vertical, 4)
+                .offset(x: swipeOffset)
                 .gesture(
                     DragGesture()
                         .onEnded { value in
@@ -167,11 +192,8 @@ struct StudyView: View {
                             let verticalAmount = value.translation.height
                             if abs(horizontalAmount) > abs(verticalAmount) && abs(horizontalAmount) > 50 {
                                 UIImpactFeedbackGenerator.mediumImpact()
-                                if horizontalAmount > 0 {
-                                    markAsEasy()
-                                } else {
-                                    markAsAgain()
-                                }
+                                let direction: SwipeDirection = horizontalAmount > 0 ? .right : .left
+                                animateSwipe(direction: direction)
                             }
                         }
                 )
@@ -419,6 +441,35 @@ struct StudyView: View {
         let minutes = Int(duration / 60)
         let seconds = Int(duration.truncatingRemainder(dividingBy: 60))
         return String(format: "%d:%02d", minutes, seconds)
+    }
+
+    private var swipeOffset: CGFloat {
+        guard let direction = swipeDirection, showSwipeFeedback else { return 0 }
+        return direction == .right ? 300 : -300
+    }
+
+    private func animateSwipe(direction: SwipeDirection) {
+        swipeDirection = direction
+        withAnimation(.easeInOut(duration: 0.3)) {
+            showSwipeFeedback = true
+        }
+        
+        // Delay the actual action to show the feedback
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                showSwipeFeedback = false
+                swipeDirection = nil
+            }
+            
+            // Perform the actual action after animation completes
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                if direction == .right {
+                    markAsEasy()
+                } else {
+                    markAsAgain()
+                }
+            }
+        }
     }
 
     private func loadCardsDue() {
