@@ -23,9 +23,18 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
     }
 
     func speak(_ text: String, completion: (() -> Void)? = nil) {
+        // Clear any previous state completely
         synthesizer.stopSpeaking(at: .immediate)
-        completionHandler = completion
+        completionHandler = nil
         isManuallyStopped = false
+
+        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            // If text is empty, call completion immediately
+            completion?()
+            return
+        }
+
+        completionHandler = completion
 
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = AVSpeechSynthesisVoice(identifier: currentVoice)
@@ -57,12 +66,15 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
 
     // MARK: - AVSpeechSynthesizerDelegate
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        DispatchQueue.main.async {
-            // Only call completion handler if it hasn't been cleared by stop()
-            if let handler = self.completionHandler, !self.isManuallyStopped {
-                self.completionHandler = nil
-                handler()
-            }
+        // Check state synchronously to prevent race conditions
+        guard !isManuallyStopped, let handler = completionHandler else {
+            return
         }
+
+        // Clear the handler before calling it to prevent double calls
+        completionHandler = nil
+
+        // Call the completion handler
+        handler()
     }
 }

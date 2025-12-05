@@ -194,22 +194,27 @@ struct AutoPlayView: View {
         // Completely stop current speech and reset all state
         ttsService.stop()
         scheduledTask?.cancel()
-        speechToken = UUID()
+
+        // Generate new token to invalidate any pending operations
+        let newToken = UUID()
+        speechToken = newToken
         activePhase = .front
 
         // Move to next card
         currentIndex = (currentIndex + 1) % cards.count
 
-        // Reset card state and start fresh if playing
+        // Reset card state
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+            isFlipped = false
+        }
+
+        // If playing, start fresh auto-play sequence for the new card
+        // Use a small delay to ensure TTS state is fully reset
         if isPlaying {
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                isFlipped = false
-            }
-            // Start fresh auto-play sequence for the new card
-            playFrontSide()
-        } else {
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                isFlipped = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                // Double-check we're still in the same state
+                guard self.isPlaying, self.speechToken == newToken else { return }
+                self.playFrontSide()
             }
         }
 
@@ -281,9 +286,11 @@ struct AutoPlayView: View {
         }
 
         ttsService.speak(text) {
-            // Double-check token is still valid before advancing
-            guard isPlaying, speechToken == token, activePhase == phase else { return }
-            advance(from: phase)
+            // Triple-check token and state are still valid before advancing
+            DispatchQueue.main.async {
+                guard self.isPlaying, self.speechToken == token, self.activePhase == phase else { return }
+                self.advance(from: phase)
+            }
         }
     }
 
