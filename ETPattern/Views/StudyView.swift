@@ -183,9 +183,6 @@ struct StudyView: View {
                     }
                 }
 
-                Text("Swipe left for Again · Swipe right for Easy")
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.7))
             }
         }
         .onAppear {
@@ -339,6 +336,13 @@ struct StudyView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 16)
             .padding(.top, 8)
+            
+            // Swipe instructions at the bottom
+            Text("Swipe left for Again · Swipe right for Easy")
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.7))
+                .padding(.horizontal, 20)
+                .padding(.bottom, 16)
         }
         .background(.ultraThinMaterial)
     }
