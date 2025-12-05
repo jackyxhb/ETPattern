@@ -27,3 +27,13 @@ jobs:
             -configuration Debug \
             -destination "platform=iOS Simulator,name=iPhone 16,OS=latest" \
             | xcpretty && exit ${PIPESTATUS[0]}
+
+      - name: Build for iOS Simulator
+        run: |
+          xcodebuild clean build analyze \
+            -scheme "ETPattern" \
+            -project "ETPattern.xcodeproj" \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,name=iPhone 16,OS=latest" \
+            | xcpretty && exit ${PIPESTATUS[0]}
