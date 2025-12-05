@@ -51,6 +51,7 @@ struct SettingsView: View {
                 }
 
                 Button("Test Voice") {
+                    UIImpactFeedbackGenerator.lightImpact()
                     ttsService.speak("Hello! This is a test of the selected voice.")
                 }
                 .buttonStyle(.bordered)

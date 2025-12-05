@@ -28,7 +28,8 @@ struct CardView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onTapGesture {
-            withAnimation(.easeInOut(duration: 0.6)) {
+            UIImpactFeedbackGenerator.lightImpact()
+            withAnimation(.bouncy) {
                 isFlipped.toggle()
                 speakCurrentText()
             }

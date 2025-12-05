@@ -25,6 +25,8 @@ struct ContentView: View {
     @State private var showingExportAlert = false
     @State private var newName = ""
     @State private var browseCardSet: CardSet?
+    @State private var hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
+    @State private var showingOnboarding = false
 
     var body: some View {
         NavigationView {
@@ -36,37 +38,42 @@ struct ContentView: View {
                     heroHeader
 
                     ScrollView {
-                        LazyVStack(spacing: 14) {
-                            ForEach(cardSets) { cardSet in
-                                deckCard(for: cardSet)
-                                    .contextMenu {
-                                        Button {
-                                            promptRename(for: cardSet)
-                                        } label: {
-                                            Label("Rename", systemImage: "pencil")
+                        if cardSets.isEmpty {
+                            emptyStateView
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        } else {
+                            LazyVStack(spacing: 14) {
+                                ForEach(cardSets) { cardSet in
+                                    deckCard(for: cardSet)
+                                        .contextMenu {
+                                            Button {
+                                                promptRename(for: cardSet)
+                                            } label: {
+                                                Label("Rename", systemImage: "pencil")
+                                            }
+                                            Button {
+                                                selectedCardSet = cardSet
+                                                showingExportAlert = true
+                                            } label: {
+                                                Label("Export", systemImage: "square.and.arrow.up")
+                                            }
+                                            Button(role: .destructive) {
+                                                promptDelete(for: cardSet)
+                                            } label: {
+                                                Label("Delete", systemImage: "trash")
+                                            }
                                         }
-                                        Button {
-                                            selectedCardSet = cardSet
-                                            showingExportAlert = true
-                                        } label: {
-                                            Label("Export", systemImage: "square.and.arrow.up")
+                                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                            Button(role: .destructive) {
+                                                deleteCardSet(cardSet)
+                                            } label: {
+                                                Label("Delete", systemImage: "trash")
+                                            }
                                         }
-                                        Button(role: .destructive) {
-                                            promptDelete(for: cardSet)
-                                        } label: {
-                                            Label("Delete", systemImage: "trash")
-                                        }
-                                    }
-                                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                        Button(role: .destructive) {
-                                            deleteCardSet(cardSet)
-                                        } label: {
-                                            Label("Delete", systemImage: "trash")
-                                        }
-                                    }
+                                }
                             }
+                            .padding(.bottom, 120)
                         }
-                        .padding(.bottom, 120)
                     }
                 }
                 .padding(.horizontal)
@@ -136,6 +143,18 @@ struct ContentView: View {
             }
         } message: {
             Text("Export this deck as a CSV file?")
+        }
+        .fullScreenCover(isPresented: $showingOnboarding) {
+            OnboardingView {
+                UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                hasSeenOnboarding = true
+                showingOnboarding = false
+            }
+        }
+        .onAppear {
+            if !hasSeenOnboarding {
+                showingOnboarding = true
+            }
         }
         .navigationTitle("Flashcard Decks")
     }
@@ -239,6 +258,65 @@ struct ContentView: View {
         }
     }
 
+    private var emptyStateView: some View {
+        VStack(spacing: 24) {
+            ZStack {
+                Circle()
+                    .fill(DesignSystem.Gradients.accent.opacity(0.2))
+                    .frame(width: 120, height: 120)
+
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 60))
+                    .foregroundColor(.white)
+            }
+
+            VStack(spacing: 12) {
+                Text("No Decks Yet")
+                    .font(.title2.bold())
+                    .foregroundColor(.white)
+
+                Text("Create your first flashcard deck or import CSV files to get started with learning English patterns.")
+                    .font(.body)
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+                    .padding(.horizontal, 32)
+            }
+
+            VStack(spacing: 16) {
+                Button(action: {
+                    UIImpactFeedbackGenerator.mediumImpact()
+                    addCardSet()
+                }) {
+                    Label("Create New Deck", systemImage: "plus")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(DesignSystem.Gradients.accent)
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                }
+
+                Button(action: {
+                    UIImpactFeedbackGenerator.lightImpact()
+                    // Navigate to import view
+                }) {
+                    Label("Import CSV", systemImage: "square.and.arrow.down")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(.ultraThinMaterial)
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                }
+            }
+            .padding(.horizontal, 32)
+            .padding(.top, 20)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        .padding(.vertical, 60)
+    }
+
     private var heroHeader: some View {
         HStack(alignment: .center, spacing: 12) {
             Text("English Thought")
@@ -277,6 +355,7 @@ struct ContentView: View {
         let createdText = dateFormatter.string(from: cardSet.createdDate ?? Date())
 
         return Button {
+            UIImpactFeedbackGenerator.lightImpact()
             toggleSelection(for: cardSet)
         } label: {
             VStack(alignment: .leading, spacing: 10) {
@@ -353,7 +432,10 @@ private struct CardSetActionBar: View {
         let action: () -> Void
 
         var body: some View {
-            Button(action: action) {
+            Button(action: {
+                UIImpactFeedbackGenerator.mediumImpact()
+                action()
+            }) {
                 Label(title, systemImage: systemImage)
                     .font(.subheadline.bold())
                     .frame(maxWidth: .infinity)

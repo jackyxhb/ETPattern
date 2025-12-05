@@ -121,7 +121,10 @@ struct AutoPlayView: View {
     private var playbackControls: some View {
         VStack(spacing: 16) {
             // Order toggle button
-            Button(action: toggleOrderMode) {
+            Button(action: {
+                UIImpactFeedbackGenerator.lightImpact()
+                toggleOrderMode()
+            }) {
                 Label(isRandomOrder ? "Random Order" : "Sequential Order",
                       systemImage: isRandomOrder ? "shuffle" : "arrow.up.arrow.down")
                     .font(.caption.bold())
@@ -133,7 +136,10 @@ struct AutoPlayView: View {
             }
 
             HStack(spacing: 16) {
-                Button(action: togglePlayback) {
+                Button(action: {
+                    UIImpactFeedbackGenerator.mediumImpact()
+                    togglePlayback()
+                }) {
                     Label(isPlaying ? "Pause" : "Play", systemImage: isPlaying ? "pause.fill" : "play.fill")
                         .font(.subheadline.bold())
                         .frame(maxWidth: .infinity)
@@ -143,7 +149,10 @@ struct AutoPlayView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                 }
 
-                Button(action: advanceToNextManually) {
+                Button(action: {
+                    UIImpactFeedbackGenerator.lightImpact()
+                    advanceToNextManually()
+                }) {
                     Label("Skip", systemImage: "forward.end.fill")
                         .font(.subheadline.bold())
                         .frame(maxWidth: .infinity)

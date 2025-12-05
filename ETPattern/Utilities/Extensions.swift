@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import SwiftUI
 
 extension String {
     func htmlToAttributedString() -> AttributedString? {
@@ -42,5 +43,90 @@ extension Date {
 extension Int {
     var days: TimeInterval {
         return TimeInterval(self * 86400)
+    }
+}
+
+// MARK: - Haptic Feedback
+extension UIImpactFeedbackGenerator {
+    static func lightImpact() {
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+    }
+
+    static func mediumImpact() {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+    }
+
+    static func heavyImpact() {
+        let generator = UIImpactFeedbackGenerator(style: .heavy)
+        generator.impactOccurred()
+    }
+}
+
+extension UINotificationFeedbackGenerator {
+    static func success() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+    }
+
+    static func warning() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.warning)
+    }
+
+    static func error() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.error)
+    }
+}
+
+// MARK: - View Extensions
+extension View {
+    func withHapticFeedback(_ style: UIImpactFeedbackGenerator.FeedbackStyle = .medium, onTap: @escaping () -> Void) -> some View {
+        self.onTapGesture {
+            let generator = UIImpactFeedbackGenerator(style: style)
+            generator.impactOccurred()
+            onTap()
+        }
+    }
+
+    func withSuccessHaptic() -> some View {
+        self.onTapGesture {
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        }
+    }
+
+    func withErrorHaptic() -> some View {
+        self.onTapGesture {
+            UINotificationFeedbackGenerator().notificationOccurred(.error)
+        }
+    }
+
+    func withSpringAnimation() -> some View {
+        self.animation(.spring(response: 0.3, dampingFraction: 0.7), value: UUID())
+    }
+
+    func withEaseInOutAnimation(duration: Double = 0.3) -> some View {
+        self.animation(.easeInOut(duration: duration), value: UUID())
+    }
+
+    func withBouncyAnimation() -> some View {
+        self.animation(.bouncy, value: UUID())
+    }
+}
+
+// MARK: - Animation Extensions
+extension Animation {
+    static var bouncy: Animation {
+        .spring(response: 0.4, dampingFraction: 0.6)
+    }
+
+    static var smooth: Animation {
+        .easeInOut(duration: 0.3)
+    }
+
+    static var snappy: Animation {
+        .spring(response: 0.2, dampingFraction: 0.8)
     }
 }

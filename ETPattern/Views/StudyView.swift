@@ -21,7 +21,6 @@ struct StudyView: View {
     @State private var showSessionComplete = false
     @State private var sessionStartTime: Date?
     private let spacedRepetitionService = SpacedRepetitionService()
-    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -130,7 +129,7 @@ struct StudyView: View {
                                     let horizontalAmount = value.translation.width
                                     let verticalAmount = value.translation.height
                                     if abs(horizontalAmount) > abs(verticalAmount) && abs(horizontalAmount) > 50 {
-                                        feedbackGenerator.impactOccurred()
+                                        UIImpactFeedbackGenerator.mediumImpact()
                                         if horizontalAmount > 0 {
                                             markAsEasy()
                                         } else {
@@ -186,7 +185,10 @@ struct StudyView: View {
 
     private var actionButtons: some View {
         HStack(spacing: 16) {
-            Button(action: markAsAgain) {
+            Button(action: {
+                UIImpactFeedbackGenerator.mediumImpact()
+                markAsAgain()
+            }) {
                 Label("Again", systemImage: "arrow.counterclockwise")
                     .font(.headline)
                     .frame(maxWidth: .infinity)
@@ -197,7 +199,10 @@ struct StudyView: View {
             }
             .buttonStyle(.plain)
 
-            Button(action: markAsEasy) {
+            Button(action: {
+                UIImpactFeedbackGenerator.mediumImpact()
+                markAsEasy()
+            }) {
                 Label("Easy", systemImage: "checkmark.circle")
                     .font(.headline)
                     .frame(maxWidth: .infinity)

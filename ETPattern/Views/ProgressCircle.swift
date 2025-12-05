@@ -15,32 +15,32 @@ struct ProgressCircle: View {
     var body: some View {
         ZStack {
             Circle()
-                .stroke(Color.gray.opacity(0.2), lineWidth: lineWidth)
+                .stroke(DesignSystem.Colors.stroke, lineWidth: lineWidth)
 
             Circle()
                 .trim(from: 0, to: progress)
                 .stroke(
-                    progressColor,
+                    progressGradient,
                     style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
                 )
                 .rotationEffect(.degrees(-90))
-                .animation(.easeInOut(duration: 0.3), value: progress)
+                .animation(.bouncy, value: progress)
 
             Text("\(Int(progress * 100))%")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.primary)
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .foregroundColor(.white)
         }
         .frame(width: size, height: size)
     }
 
-    private var progressColor: Color {
+    private var progressGradient: LinearGradient {
         switch progress {
-        case 0..<0.5:
-            return .red
-        case 0.5..<0.8:
-            return .orange
+        case 0..<0.3:
+            return DesignSystem.Gradients.danger
+        case 0.3..<0.7:
+            return LinearGradient(colors: [Color.orange, Color.yellow], startPoint: .leading, endPoint: .trailing)
         default:
-            return .green
+            return DesignSystem.Gradients.success
         }
     }
 }
