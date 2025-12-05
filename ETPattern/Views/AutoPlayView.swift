@@ -68,11 +68,11 @@ struct AutoPlayView: View {
                         .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .padding(.vertical)
+                    .padding(.vertical, 4)
                 }
             }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 20)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 8)
             .safeAreaInset(edge: .bottom) {
                 bottomControlBar
             }
@@ -152,7 +152,7 @@ struct AutoPlayView: View {
                     .tint(DesignSystem.Colors.highlight)
                     .frame(height: 4)
                 
-                Text(isFlipped ? "Examples" : "Pattern")
+                Text(cards.count > 0 ? "\(Int((Double(currentIndex + 1) / Double(cards.count)) * 100))%" : "0%")
                     .font(.caption2)
                     .foregroundColor(.white.opacity(0.6))
                     .padding(.horizontal, 8)
@@ -244,7 +244,7 @@ struct AutoPlayView: View {
                 .accessibilityLabel("Close")
             }
             .padding(.horizontal, 20)
-            .padding(.bottom, 20)
+            .padding(.bottom, 16)
             .padding(.top, 8)
         }
         .background(.ultraThinMaterial)

@@ -91,9 +91,9 @@ struct CardFace: View {
                 }
                 Spacer(minLength: 0)
             }
-            .padding(32)
+            .padding(20)
         }
-        .padding(24)
+        .padding(8)
     }
 
     private var header: some View {
