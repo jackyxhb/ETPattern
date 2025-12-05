@@ -54,7 +54,7 @@ open ETPattern.xcodeproj
 
 ### Simulator Testing
 ```bash
-xcodebuild -scheme ETPattern -destination 'platform=iOS Simulator,name=iPhone 17' build
+xcodebuild -scheme ETPattern -destination 'platform=iOS Simulator,name=iPhone 16' build
 xcrun simctl install booted /path/to/ETPattern.app
 xcrun simctl launch booted aaaa.ETPattern
 ```

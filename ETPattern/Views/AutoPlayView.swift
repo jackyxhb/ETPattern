@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreData
+import UIKit
 
 struct AutoPlayView: View {
     let cardSet: CardSet
@@ -59,6 +60,7 @@ struct AutoPlayView: View {
         }
         .onDisappear {
             stopPlayback()
+            enableIdleTimer() // Ensure idle timer is re-enabled when view disappears
         }
     }
 
@@ -150,6 +152,7 @@ struct AutoPlayView: View {
     private func startPlaybackIfPossible() {
         guard !cards.isEmpty else { return }
         isPlaying = true
+        disableIdleTimer() // Prevent device sleep during auto-play
         continueFromResumePhase()
     }
 
@@ -210,11 +213,13 @@ struct AutoPlayView: View {
 
     private func pausePlayback() {
         isPlaying = false
+        enableIdleTimer() // Allow device sleep when paused
         resetSpeechFlow()
         saveProgress()
     }
 
     private func stopPlayback() {
+        enableIdleTimer() // Allow device sleep when stopped
         resetSpeechFlow()
         saveProgress()
     }
@@ -323,6 +328,14 @@ struct AutoPlayView: View {
         currentIndex = safeIndex
         isFlipped = progress.phase == .back
         resumePhase = progress.phase
+    }
+
+    private func disableIdleTimer() {
+        UIApplication.shared.isIdleTimerDisabled = true
+    }
+
+    private func enableIdleTimer() {
+        UIApplication.shared.isIdleTimerDisabled = false
     }
 }
 
