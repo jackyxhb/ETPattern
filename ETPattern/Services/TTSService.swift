@@ -14,6 +14,7 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
     private let synthesizer = AVSpeechSynthesizer()
     private var currentVoice: String
     private var completionHandler: (() -> Void)?
+    private var isManuallyStopped = false
 
     override init() {
         self.currentVoice = UserDefaults.standard.string(forKey: "selectedVoice") ?? "en-US"
@@ -24,6 +25,7 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
     func speak(_ text: String, completion: (() -> Void)? = nil) {
         synthesizer.stopSpeaking(at: .immediate)
         completionHandler = completion
+        isManuallyStopped = false
 
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = AVSpeechSynthesisVoice(identifier: currentVoice)
@@ -33,6 +35,7 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
     }
 
     func stop() {
+        isManuallyStopped = true
         synthesizer.stopSpeaking(at: .immediate)
         completionHandler = nil
     }
@@ -54,10 +57,10 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
 
     // MARK: - AVSpeechSynthesizerDelegate
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        let handler = completionHandler
-        completionHandler = nil
-        if let handler {
-            DispatchQueue.main.async {
+        DispatchQueue.main.async {
+            // Only call completion handler if it hasn't been cleared by stop()
+            if let handler = self.completionHandler, !self.isManuallyStopped {
+                self.completionHandler = nil
                 handler()
             }
         }

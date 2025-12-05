@@ -281,6 +281,7 @@ struct AutoPlayView: View {
         }
 
         ttsService.speak(text) {
+            // Double-check token is still valid before advancing
             guard isPlaying, speechToken == token, activePhase == phase else { return }
             advance(from: phase)
         }
