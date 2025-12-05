@@ -97,7 +97,7 @@ struct ContentView: View {
                 StudyView(cardSet: cardSet)
             }
         }
-        .sheet(isPresented: $showingAutoView) {
+        .fullScreenCover(isPresented: $showingAutoView) {
             if let cardSet = selectedCardSet {
                 AutoPlayView(cardSet: cardSet)
             }

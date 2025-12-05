@@ -39,22 +39,43 @@ struct AutoPlayView: View {
             DesignSystem.Gradients.background
                 .ignoresSafeArea()
 
-            VStack(spacing: 28) {
+            VStack(spacing: 32) {
                 header
 
                 if cards.isEmpty {
                     emptyState
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    AutoCardDisplay(card: cards[currentIndex], index: currentIndex, total: cards.count, isFlipped: isFlipped)
-                        .frame(maxHeight: .infinity)
+                    ZStack {
+                        CardFace(
+                            text: cards[currentIndex].front ?? "No front",
+                            pattern: "",
+                            isFront: true,
+                            currentIndex: currentIndex,
+                            totalCards: cards.count
+                        )
+                        .opacity(isFlipped ? 0 : 1)
+                        .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
 
-                    playbackInfo
-
-                    playbackControls
+                        CardFace(
+                            text: formatBackText,
+                            pattern: cards[currentIndex].front ?? "",
+                            isFront: false,
+                            currentIndex: currentIndex,
+                            totalCards: cards.count
+                        )
+                        .opacity(isFlipped ? 1 : 0)
+                        .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(.vertical)
                 }
             }
-            .padding()
+            .padding(.horizontal, 24)
+            .padding(.vertical, 20)
+            .safeAreaInset(edge: .bottom) {
+                bottomControlBar
+            }
         }
         .onAppear {
             prepareCards()
@@ -77,92 +98,156 @@ struct AutoPlayView: View {
                     .foregroundColor(.white.opacity(0.7))
             }
             Spacer()
-            Button(action: dismissAuto) {
-                Image(systemName: "xmark")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding(10)
-                    .background(Color.white.opacity(0.2), in: Circle())
-            }
-            .accessibilityLabel("Close")
         }
+        .padding(.horizontal, 4)
     }
 
     private var emptyState: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "waveform")
-                .font(.largeTitle)
-                .foregroundColor(.white.opacity(0.7))
-            Text("This deck has no cards to play.")
-                .font(.headline)
-                .multilineTextAlignment(.center)
-                .foregroundColor(.white)
-        }
-    }
+        VStack(spacing: 32) {
+            Spacer()
 
-    private var playbackInfo: some View {
-        VStack(spacing: 10) {
-            HStack {
-                Text("Card \(currentIndex + 1) of \(cards.count)")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                Spacer()
-                Text(isFlipped ? "Examples" : "Pattern")
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.7))
+            ZStack {
+                Circle()
+                    .fill(DesignSystem.Gradients.card.opacity(0.3))
+                    .frame(width: 160, height: 160)
+
+                Image(systemName: "waveform")
+                    .font(.system(size: 60))
+                    .foregroundColor(.white.opacity(0.8))
             }
-            ProgressView(value: Double(currentIndex + 1), total: Double(cards.count))
-                .tint(DesignSystem.Colors.highlight)
+
+            VStack(spacing: 16) {
+                Text("No Cards to Play")
+                    .font(.title.bold())
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+
+                Text("This deck doesn't have any cards yet")
+                    .font(.title3)
+                    .foregroundColor(DesignSystem.Colors.highlight)
+                    .multilineTextAlignment(.center)
+
+                Text("Add some cards to this deck or import a CSV file to start auto-playing through your patterns.")
+                    .font(.body)
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+                    .padding(.horizontal, 32)
+            }
+
+            Spacer()
         }
-        .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .padding(.horizontal, 24)
     }
 
-    private var playbackControls: some View {
-        VStack(spacing: 16) {
-            // Order toggle button
-            Button(action: {
-                UIImpactFeedbackGenerator.lightImpact()
-                toggleOrderMode()
-            }) {
-                Label(isRandomOrder ? "Random Order" : "Sequential Order",
-                      systemImage: isRandomOrder ? "shuffle" : "arrow.up.arrow.down")
+    private var bottomControlBar: some View {
+        VStack(spacing: 0) {
+            // Progress bar at the top of the control bar
+            HStack(spacing: 12) {
+                Text("\(currentIndex + 1)/\(cards.count)")
                     .font(.caption.bold())
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(Color.white.opacity(0.2))
-                    .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .foregroundColor(.white.opacity(0.8))
+                
+                ProgressView(value: Double(currentIndex + 1), total: Double(cards.count))
+                    .tint(DesignSystem.Colors.highlight)
+                    .frame(height: 4)
+                
+                Text(isFlipped ? "Examples" : "Pattern")
+                    .font(.caption2)
+                    .foregroundColor(.white.opacity(0.6))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.white.opacity(0.1))
+                    .clipShape(Capsule())
             }
-
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+            .padding(.bottom, 8)
+            
+            // Main control buttons in one horizontal line
             HStack(spacing: 16) {
+                // Order toggle button
+                Button(action: {
+                    UIImpactFeedbackGenerator.lightImpact()
+                    toggleOrderMode()
+                }) {
+                    Image(systemName: isRandomOrder ? "shuffle" : "arrow.up.arrow.down")
+                        .font(.title3)
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                        .background(Color.white.opacity(0.15))
+                        .clipShape(Circle())
+                }
+                .accessibilityLabel(isRandomOrder ? "Random Order" : "Sequential Order")
+                
+                Spacer()
+                
+                // Previous/Skip back button
+                Button(action: {
+                    UIImpactFeedbackGenerator.lightImpact()
+                    goToPreviousCard()
+                }) {
+                    Image(systemName: "backward.end.fill")
+                        .font(.title3)
+                        .foregroundColor(.white.opacity(0.8))
+                        .frame(width: 44, height: 44)
+                        .background(Color.white.opacity(0.1))
+                        .clipShape(Circle())
+                }
+                .disabled(currentIndex == 0)
+                .opacity(currentIndex == 0 ? 0.3 : 1)
+                .accessibilityLabel("Previous Card")
+                
+                // Play/Pause button (larger, more prominent)
                 Button(action: {
                     UIImpactFeedbackGenerator.mediumImpact()
                     togglePlayback()
                 }) {
-                    Label(isPlaying ? "Pause" : "Play", systemImage: isPlaying ? "pause.fill" : "play.fill")
-                        .font(.subheadline.bold())
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(DesignSystem.Gradients.accent)
+                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                        .font(.title)
                         .foregroundColor(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .frame(width: 60, height: 60)
+                        .background(DesignSystem.Gradients.accent)
+                        .clipShape(Circle())
+                        .shadow(color: DesignSystem.Colors.highlight.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
-
+                .accessibilityLabel(isPlaying ? "Pause" : "Play")
+                
+                // Skip forward button
                 Button(action: {
                     UIImpactFeedbackGenerator.lightImpact()
                     advanceToNextManually()
                 }) {
-                    Label("Skip", systemImage: "forward.end.fill")
-                        .font(.subheadline.bold())
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(DesignSystem.Gradients.success)
+                    Image(systemName: "forward.end.fill")
+                        .font(.title3)
                         .foregroundColor(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .frame(width: 44, height: 44)
+                        .background(DesignSystem.Gradients.success)
+                        .clipShape(Circle())
                 }
+                .accessibilityLabel("Skip")
+                
+                Spacer()
+                
+                // Close button
+                Button(action: {
+                    UIImpactFeedbackGenerator.lightImpact()
+                    dismissAuto()
+                }) {
+                    Image(systemName: "xmark")
+                        .font(.title3)
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                        .background(Color.white.opacity(0.15))
+                        .clipShape(Circle())
+                }
+                .accessibilityLabel("Close")
             }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 20)
+            .padding(.top, 8)
         }
+        .background(.ultraThinMaterial)
         .buttonStyle(.plain)
     }
 
@@ -234,7 +319,7 @@ struct AutoPlayView: View {
 
     private func playFrontSide() {
         guard isPlaying, !cards.isEmpty else { return }
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+        withAnimation(.smooth) {
             isFlipped = false
         }
         speakPhase(.front)
@@ -242,7 +327,7 @@ struct AutoPlayView: View {
 
     private func flipToBack() {
         guard isPlaying, !cards.isEmpty else { return }
-        withAnimation(.easeInOut(duration: 0.6)) {
+        withAnimation(.smooth) {
             isFlipped = true
         }
         speakPhase(.back)
@@ -270,7 +355,40 @@ struct AutoPlayView: View {
         currentIndex = (currentIndex + 1) % cards.count
 
         // Reset card state
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+        withAnimation(.smooth) {
+            isFlipped = false
+        }
+
+        // If playing, start fresh auto-play sequence for the new card
+        // Use a small delay to ensure TTS state is fully reset
+        if isPlaying {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                // Double-check we're still in the same state
+                guard self.isPlaying, self.speechToken == newToken else { return }
+                self.playFrontSide()
+            }
+        }
+
+        saveProgress()
+    }
+
+    private func goToPreviousCard() {
+        guard !cards.isEmpty, currentIndex > 0 else { return }
+
+        // Completely stop current speech and reset all state
+        ttsService.stop()
+        scheduledTask?.cancel()
+
+        // Generate new token to invalidate any pending operations
+        let newToken = UUID()
+        speechToken = newToken
+        activePhase = .front
+
+        // Move to previous card
+        currentIndex -= 1
+
+        // Reset card state
+        withAnimation(.smooth) {
             isFlipped = false
         }
 
@@ -430,44 +548,46 @@ struct AutoPlayView: View {
     private func enableIdleTimer() {
         UIApplication.shared.isIdleTimerDisabled = false
     }
-}
-
-private struct AutoCardDisplay: View {
-    let card: Card
-    let index: Int
-    let total: Int
-    let isFlipped: Bool
-
-    var body: some View {
-        ZStack {
-            CardFace(
-                text: card.front ?? "No front",
-                pattern: "",
-                isFront: true,
-                currentIndex: index,
-                totalCards: total
-            )
-            .opacity(isFlipped ? 0 : 1)
-            .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
-
-            CardFace(
-                text: formatBackText,
-                pattern: card.front ?? "",
-                isFront: false,
-                currentIndex: index,
-                totalCards: total
-            )
-            .opacity(isFlipped ? 1 : 0)
-            .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
-        }
-        .frame(maxWidth: .infinity, maxHeight: 400)
-        .padding(.vertical)
-    }
 
     private var formatBackText: String {
-        (card.back ?? "No back").replacingOccurrences(of: "<br>", with: "\n")
+        (cards[currentIndex].back ?? "No back").replacingOccurrences(of: "<br>", with: "\n")
     }
 }
+//     let card: Card
+//     let index: Int
+//     let total: Int
+//     let isFlipped: Bool
+//
+//     var body: some View {
+//         ZStack {
+//             CardFace(
+//                 text: card.front ?? "No front",
+//                 pattern: "",
+//                 isFront: true,
+//                 currentIndex: index,
+//                 totalCards: total
+//             )
+//             .opacity(isFlipped ? 0 : 1)
+//             .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
+//
+//             CardFace(
+//                 text: formatBackText,
+//                 pattern: card.front ?? "",
+//                 isFront: false,
+//                 currentIndex: index,
+//                 totalCards: total
+//             )
+//             .opacity(isFlipped ? 1 : 0)
+//             .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
+//         }
+//         .frame(maxWidth: .infinity, maxHeight: 400)
+//         .padding(.vertical)
+//     }
+//
+//     private var formatBackText: String {
+//         (card.back ?? "No back").replacingOccurrences(of: "<br>", with: "\n")
+//     }
+// }
 
 private enum AutoPlayPhase: String, Codable {
     case front
