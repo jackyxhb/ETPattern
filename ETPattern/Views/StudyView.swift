@@ -12,35 +12,43 @@ import UIKit
 struct StudyView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var ttsService: TTSService
 
     let cardSet: CardSet
 
     @State private var currentCardIndex = 0
     @State private var cardsDue: [Card] = []
+    @State private var originalCardsDue: [Card] = [] // Keep original order for sequential mode
     @State private var studySession: StudySession?
     @State private var showSessionComplete = false
     @State private var sessionStartTime: Date?
+    @State private var isFlipped = false
+    @State private var isRandomOrder = false
     private let spacedRepetitionService = SpacedRepetitionService()
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
+        ZStack {
             DesignSystem.Gradients.background
                 .ignoresSafeArea()
 
-            content
-                .padding(.horizontal)
-                .padding(.top, 32)
+            VStack(spacing: 32) {
+                header
 
-            CloseSessionButton(action: closeSession)
-                .padding(.top, 8)
-                .padding(.trailing, 12)
-        }
-        .navigationTitle("Study Session")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button("Home") {
-                    dismiss()
+                if showSessionComplete {
+                    completionView
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if cardsDue.isEmpty {
+                    emptyState
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    studySessionContent
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 8)
+            .safeAreaInset(edge: .bottom) {
+                if !showSessionComplete && !cardsDue.isEmpty {
+                    actionButtonsBar
                 }
             }
         }
@@ -49,6 +57,17 @@ struct StudyView: View {
         }
         .onDisappear {
             try? viewContext.save()
+        }
+    }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(cardSet.name ?? "Study Session")
+                .font(.title.bold())
+                .foregroundColor(.white)
+            Text("Spaced repetition learning")
+                .font(.subheadline)
+                .foregroundColor(.white.opacity(0.7))
         }
     }
 
@@ -116,36 +135,68 @@ struct StudyView: View {
     }
 
     private var studySessionContent: some View {
-        VStack(spacing: 24) {
-            statsHeader
-
+        VStack(spacing: 12) {
             if currentCardIndex < cardsDue.count {
-                VStack(spacing: 12) {
-                    CardView(card: cardsDue[currentCardIndex], currentIndex: cardsReviewedCount, totalCards: totalCardsInSession)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .gesture(
-                            DragGesture()
-                                .onEnded { value in
-                                    let horizontalAmount = value.translation.width
-                                    let verticalAmount = value.translation.height
-                                    if abs(horizontalAmount) > abs(verticalAmount) && abs(horizontalAmount) > 50 {
-                                        UIImpactFeedbackGenerator.mediumImpact()
-                                        if horizontalAmount > 0 {
-                                            markAsEasy()
-                                        } else {
-                                            markAsAgain()
-                                        }
-                                    }
-                                }
-                        )
+                ZStack {
+                    CardFace(
+                        text: cardsDue[currentCardIndex].front ?? "No front",
+                        pattern: "",
+                        isFront: true,
+                        currentIndex: cardsReviewedCount,
+                        totalCards: totalCardsInSession
+                    )
+                    .opacity(isFlipped ? 0 : 1)
+                    .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
 
-                    Text("Swipe left for Again · Swipe right for Easy")
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.7))
+                    CardFace(
+                        text: formatBackText(),
+                        pattern: cardsDue[currentCardIndex].front ?? "",
+                        isFront: false,
+                        currentIndex: cardsReviewedCount,
+                        totalCards: totalCardsInSession
+                    )
+                    .opacity(isFlipped ? 1 : 0)
+                    .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
                 }
-            }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.vertical, 4)
+                .gesture(
+                    DragGesture()
+                        .onEnded { value in
+                            let horizontalAmount = value.translation.width
+                            let verticalAmount = value.translation.height
+                            if abs(horizontalAmount) > abs(verticalAmount) && abs(horizontalAmount) > 50 {
+                                UIImpactFeedbackGenerator.mediumImpact()
+                                if horizontalAmount > 0 {
+                                    markAsEasy()
+                                } else {
+                                    markAsAgain()
+                                }
+                            }
+                        }
+                )
+                .onTapGesture {
+                    UIImpactFeedbackGenerator.lightImpact()
+                    withAnimation(.bouncy) {
+                        isFlipped.toggle()
+                        speakCurrentText()
+                    }
+                }
 
-            actionButtons
+                Text("Swipe left for Again · Swipe right for Easy")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.7))
+            }
+        }
+        .onAppear {
+            speakCurrentText()
+        }
+        .onChange(of: currentCardIndex) { oldValue, newValue in
+            // Reset to front side when card changes
+            isFlipped = false
+            // Stop any ongoing speech from previous card
+            ttsService.stop()
+            speakCurrentText()
         }
     }
 
@@ -183,36 +234,113 @@ struct StudyView: View {
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 
-    private var actionButtons: some View {
-        HStack(spacing: 16) {
-            Button(action: {
-                UIImpactFeedbackGenerator.mediumImpact()
-                markAsAgain()
-            }) {
-                Label("Again", systemImage: "arrow.counterclockwise")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(DesignSystem.Gradients.danger)
-                    .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-            }
-            .buttonStyle(.plain)
+    private var actionButtonsBar: some View {
+        VStack(spacing: 0) {
+            // Progress bar at the top of the control bar
+            HStack(spacing: 12) {
+                Text("\(cardsReviewedCount)/\(max(totalCardsInSession, 1))")
+                    .font(.caption.bold())
+                    .foregroundColor(.white.opacity(0.8))
 
-            Button(action: {
-                UIImpactFeedbackGenerator.mediumImpact()
-                markAsEasy()
-            }) {
-                Label("Easy", systemImage: "checkmark.circle")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(DesignSystem.Gradients.success)
-                    .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                ProgressView(value: Double(cardsReviewedCount), total: Double(max(totalCardsInSession, 1)))
+                    .tint(DesignSystem.Colors.highlight)
+                    .frame(height: 4)
+
+                if let accuracy = currentAccuracy, accuracy > 0 {
+                    Text("\(Int(accuracy * 100))%")
+                        .font(.caption2)
+                        .foregroundColor(.white.opacity(0.6))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.white.opacity(0.1))
+                        .clipShape(Capsule())
+                }
             }
-            .buttonStyle(.plain)
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+            .padding(.bottom, 8)
+
+            // Main control buttons - Order, Again, Flip, Easy, Close
+            HStack(spacing: 12) {
+                // Order toggle button
+                Button(action: {
+                    UIImpactFeedbackGenerator.lightImpact()
+                    toggleOrderMode()
+                }) {
+                    Image(systemName: isRandomOrder ? "shuffle" : "arrow.up.arrow.down")
+                        .font(.title3)
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                        .background(Color.white.opacity(0.15))
+                        .clipShape(Circle())
+                }
+                .accessibilityLabel(isRandomOrder ? "Random Order" : "Sequential Order")
+
+                // Again button - put current card into "again" queue
+                Button(action: {
+                    UIImpactFeedbackGenerator.mediumImpact()
+                    markAsAgain()
+                }) {
+                    Image(systemName: "arrow.counterclockwise")
+                        .font(.title3)
+                        .foregroundColor(.white.opacity(0.8))
+                        .frame(width: 44, height: 44)
+                        .background(DesignSystem.Gradients.danger)
+                        .clipShape(Circle())
+                }
+                .accessibilityLabel("Again")
+
+                // Flip button - just flip current card
+                Button(action: {
+                    UIImpactFeedbackGenerator.lightImpact()
+                    withAnimation(.bouncy) {
+                        isFlipped.toggle()
+                        speakCurrentText()
+                    }
+                }) {
+                    Image(systemName: isFlipped ? "arrow.uturn.backward" : "arrow.right")
+                        .font(.title)
+                        .foregroundColor(.white)
+                        .frame(width: 60, height: 60)
+                        .background(Color.white.opacity(0.15))
+                        .clipShape(Circle())
+                        .shadow(color: DesignSystem.Colors.highlight.opacity(0.3), radius: 8, x: 0, y: 4)
+                }
+                .accessibilityLabel("Flip Card")
+
+                // Easy button - current card could be passed due to that it's too easy
+                Button(action: {
+                    UIImpactFeedbackGenerator.mediumImpact()
+                    markAsEasy()
+                }) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.title3)
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                        .background(DesignSystem.Gradients.success)
+                        .clipShape(Circle())
+                }
+                .accessibilityLabel("Easy")
+
+                // Close button - close the view
+                Button(action: {
+                    UIImpactFeedbackGenerator.lightImpact()
+                    closeSession()
+                }) {
+                    Image(systemName: "xmark")
+                        .font(.title3)
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                        .background(Color.white.opacity(0.15))
+                        .clipShape(Circle())
+                }
+                .accessibilityLabel("Close Session")
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 16)
+            .padding(.top, 8)
         }
+        .background(.ultraThinMaterial)
     }
 
     private struct CloseSessionButton: View {
@@ -292,6 +420,7 @@ struct StudyView: View {
     private func loadCardsDue() {
         guard let cards = cardSet.cards as? Set<Card> else {
             cardsDue = []
+            originalCardsDue = []
             return
         }
 
@@ -300,17 +429,20 @@ struct StudyView: View {
             card.nextReviewDate == nil || card.nextReviewDate! <= now
         }
 
-        cardsDue = sortCardsByDueDate(Array(dueCards))
+        originalCardsDue = sortCardsByDueDate(Array(dueCards))
+        cardsDue = originalCardsDue
     }
 
     private func loadAllCards() {
         if let cards = cardSet.cards as? Set<Card> {
             print("DEBUG: Found \(cards.count) cards in cardSet '\(cardSet.name ?? "unnamed")'")
-            cardsDue = Array(cards).sorted { ($0.front ?? "") < ($1.front ?? "") }
+            originalCardsDue = Array(cards).sorted { ($0.front ?? "") < ($1.front ?? "") }
+            cardsDue = originalCardsDue
             print("DEBUG: Set cardsDue to \(cardsDue.count) cards")
         } else {
             print("DEBUG: No cards found in cardSet '\(cardSet.name ?? "unnamed")'")
             cardsDue = []
+            originalCardsDue = []
         }
     }
 
@@ -433,6 +565,7 @@ struct StudyView: View {
     private func moveToNextCard() {
         currentCardIndex += 1
         studySession?.currentCardIndex = Int32(currentCardIndex)
+        isFlipped = false // Reset card to front side
 
         if currentCardIndex >= cardsDue.count {
             endStudySession()
@@ -449,6 +582,20 @@ struct StudyView: View {
         studySession?.isActive = false
         saveStudySession()
         dismiss()
+    }
+
+    private func resetSession() {
+        if let session = studySession {
+            viewContext.delete(session)
+            try? viewContext.save()
+            // Reset local state
+            cardsDue = []
+            currentCardIndex = 0
+            studySession = nil
+            showSessionComplete = false
+            sessionStartTime = nil
+            isFlipped = false
+        }
     }
 
     private func saveStudySession() {
@@ -468,6 +615,46 @@ struct StudyView: View {
             }
             return date1 < date2
         }
+    }
+
+    private func toggleOrderMode() {
+        isRandomOrder.toggle()
+        applyOrderModePreservingCurrentCard()
+    }
+
+    private func applyOrderModePreservingCurrentCard() {
+        let currentCard = cardsDue.isEmpty ? nil : cardsDue[currentCardIndex]
+
+        if isRandomOrder {
+            cardsDue = originalCardsDue.shuffled()
+        } else {
+            cardsDue = originalCardsDue
+        }
+
+        // Try to find the same card in the new order
+        if let currentCard = currentCard,
+           let newIndex = cardsDue.firstIndex(where: { $0.objectID == currentCard.objectID }) {
+            currentCardIndex = newIndex
+        } else {
+            // If we can't find the card, reset to beginning
+            currentCardIndex = 0
+            isFlipped = false
+        }
+    }
+
+    private func formatBackText() -> String {
+        guard let card = currentCardIndex < cardsDue.count ? cardsDue[currentCardIndex] : nil,
+              let backText = card.back else {
+            return "No back"
+        }
+        return backText.replacingOccurrences(of: "<br>", with: "\n")
+    }
+
+    private func speakCurrentText() {
+        guard currentCardIndex < cardsDue.count else { return }
+        let card = cardsDue[currentCardIndex]
+        let textToSpeak = isFlipped ? formatBackText() : (card.front ?? "")
+        ttsService.speak(textToSpeak)
     }
 }
 
