@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: Build and analyse iOS app using xcodebuild
-    runs-on: macos-14
+    runs-on: macos-15
 
     steps:
       - name: Checkout
