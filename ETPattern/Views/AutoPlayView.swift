@@ -190,15 +190,29 @@ struct AutoPlayView: View {
 
     private func advanceToNextManually() {
         guard !cards.isEmpty else { return }
-        resetSpeechFlow()
+
+        // Completely stop current speech and reset all state
+        ttsService.stop()
+        scheduledTask?.cancel()
+        speechToken = UUID()
+        activePhase = .front
+
+        // Move to next card
         currentIndex = (currentIndex + 1) % cards.count
+
+        // Reset card state and start fresh if playing
         if isPlaying {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                isFlipped = false
+            }
+            // Start fresh auto-play sequence for the new card
             playFrontSide()
         } else {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                 isFlipped = false
             }
         }
+
         saveProgress()
     }
 
