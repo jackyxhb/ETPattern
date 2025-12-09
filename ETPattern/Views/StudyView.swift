@@ -210,7 +210,7 @@ struct StudyView: View {
         .onAppear {
             speakCurrentText()
         }
-        .onChange(of: currentCardIndex) { oldValue, newValue in
+        .onChange(of: currentCardIndex) { _ in
             // Reset to front side when card changes
             isFlipped = false
             // Stop any ongoing speech from previous card

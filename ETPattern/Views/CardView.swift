@@ -37,7 +37,7 @@ struct CardView: View {
         .onAppear {
             speakCurrentText()
         }
-        .onChange(of: card) { oldValue, newValue in
+        .onChange(of: currentIndex) { _ in
             // Reset to front side when card changes
             isFlipped = false
             // Stop any ongoing speech from previous card
