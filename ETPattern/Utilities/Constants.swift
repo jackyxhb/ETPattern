@@ -63,6 +63,6 @@ struct Constants {
     }
 
     struct Decks {
-        static let bundledMasterName = "ETPatterns 300"
+        static let bundledMasterName = "ETPattern 300"
     }
 }

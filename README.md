@@ -120,7 +120,7 @@ xcodebuild test -project ETPattern.xcodeproj -scheme ETPattern
 - Device testing: Verified functionality on real iPhone 16 Plus device
 
 ### v1.2.0
-- Optimized deck list display: Card counts now prefixed to deck names (e.g., "(36)ETPatterns 300") and voice indicators removed to maximize screen space for more items.
+- Optimized deck list display: Card counts now prefixed to deck names (e.g., "(36)ETPattern 300") and voice indicators removed to maximize screen space for more items.
 - Improved UI efficiency for better user experience on smaller screens.
 
 ### v1.1.0
