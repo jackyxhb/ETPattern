@@ -38,14 +38,16 @@ class CSVImporter {
                 
                 // Parse groupId and groupName from tags
                 if !tags.isEmpty {
-                    let tagComponents = tags.components(separatedBy: "-")
-                    if tagComponents.count >= 2 {
-                        if let groupIdValue = Int32(tagComponents[0]) {
+                    // Find the first dash after a number (e.g., "2-Agree-Disagree")
+                    if let range = tags.range(of: #"^\d+-"#,
+                                            options: .regularExpression) {
+                        let groupIdString = String(tags[..<range.upperBound].dropLast()) // Remove the dash
+                        if let groupIdValue = Int32(groupIdString) {
                             card.groupId = groupIdValue
                         }
-                        card.groupName = tagComponents[1]
+                        card.groupName = String(tags[range.upperBound...]) // Everything after the first dash
                     } else {
-                        // If no dash separator, use default values
+                        // If no number-dash pattern, use default values
                         card.groupId = 0
                         card.groupName = tags
                     }
