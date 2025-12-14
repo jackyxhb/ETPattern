@@ -43,5 +43,10 @@ struct ETPatternApp: App {
         if defaults.string(forKey: "selectedVoice") == nil {
             defaults.set("en-US", forKey: "selectedVoice")
         }
+        
+        // Set default TTS percentage if not already set
+        if defaults.float(forKey: "ttsPercentage") == 0 {
+            defaults.set(Constants.TTS.defaultPercentage, forKey: "ttsPercentage")
+        }
     }
 }

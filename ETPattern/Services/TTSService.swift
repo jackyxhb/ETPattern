@@ -13,11 +13,15 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
     let objectWillChange = PassthroughSubject<Void, Never>()
     private let synthesizer = AVSpeechSynthesizer()
     private var currentVoice: String
+    private var currentPercentage: Float  // Store as percentage (50-120)
     private var completionHandler: (() -> Void)?
     private var isManuallyStopped = false
 
     override init() {
         self.currentVoice = UserDefaults.standard.string(forKey: "selectedVoice") ?? "en-US"
+        // Load stored percentage, default to 100% if not set
+        let storedPercentage = UserDefaults.standard.float(forKey: "ttsPercentage")
+        self.currentPercentage = storedPercentage > 0 ? storedPercentage : Constants.TTS.defaultPercentage
         super.init()
         synthesizer.delegate = self
     }
@@ -38,7 +42,7 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
 
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = AVSpeechSynthesisVoice(identifier: currentVoice)
-        utterance.rate = 0.5 // Natural rate between 0.48-0.52
+        utterance.rate = Constants.TTS.percentageToRate(currentPercentage)
 
         synthesizer.speak(utterance)
     }
@@ -56,6 +60,15 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
 
     func getCurrentVoice() -> String {
         return currentVoice
+    }
+
+    func setRate(_ rate: Float) {
+        currentPercentage = max(Constants.TTS.minPercentage, min(Constants.TTS.maxPercentage, rate))
+        UserDefaults.standard.set(currentPercentage, forKey: "ttsPercentage")
+    }
+
+    func getCurrentRate() -> Float {
+        return currentPercentage
     }
 
     func getAvailableVoices() -> [AVSpeechSynthesisVoice] {

@@ -13,8 +13,19 @@ struct Constants {
         static let defaultVoice = "en-US"
         static let britishVoice = "en-GB"
         static let naturalRate: Float = 0.5
-        static let minRate: Float = 0.48
-        static let maxRate: Float = 0.52
+        static let minPercentage: Float = 50.0  // 50%
+        static let maxPercentage: Float = 120.0 // 120%
+        static let defaultPercentage: Float = 100.0 // 100%
+        
+        // Convert percentage to AVSpeechSynthesizer rate
+        static func percentageToRate(_ percentage: Float) -> Float {
+            return percentage / 200.0  // 50% = 0.25, 100% = 0.5, 120% = 0.6
+        }
+        
+        // Convert AVSpeechSynthesizer rate to percentage
+        static func rateToPercentage(_ rate: Float) -> Float {
+            return rate * 200.0  // 0.25 = 50%, 0.5 = 100%, 0.6 = 120%
+        }
     }
 
     struct SpacedRepetition {
