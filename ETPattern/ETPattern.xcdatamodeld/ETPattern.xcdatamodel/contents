@@ -11,6 +11,9 @@
         <attribute name="front" optional="NO" attributeType="String" usesScalarValueType="NO"/>
         <attribute name="back" optional="NO" attributeType="String" usesScalarValueType="NO"/>
         <attribute name="tags" optional="YES" attributeType="String" usesScalarValueType="NO"/>
+        <attribute name="cardName" optional="NO" attributeType="String" usesScalarValueType="NO"/>
+        <attribute name="groupId" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="groupName" optional="NO" attributeType="String" usesScalarValueType="NO"/>
         <attribute name="difficulty" optional="NO" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="nextReviewDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="interval" optional="NO" attributeType="Integer 32" defaultValueString="1" usesScalarValueType="YES"/>

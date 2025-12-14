@@ -31,9 +31,29 @@ class CSVImporter {
             if !front.isEmpty && !back.isEmpty {
                 let card = Card(context: viewContext)
                 card.id = Int32(lineNumber) // Assign ID based on line number
-                card.front = front
+                card.cardName = front  // Store the original pattern string
+                card.front = front     // Set front to the same value
                 card.back = back
                 card.tags = tags
+                
+                // Parse groupId and groupName from tags
+                if !tags.isEmpty {
+                    let tagComponents = tags.components(separatedBy: "-")
+                    if tagComponents.count >= 2 {
+                        if let groupIdValue = Int32(tagComponents[0]) {
+                            card.groupId = groupIdValue
+                        }
+                        card.groupName = tagComponents[1]
+                    } else {
+                        // If no dash separator, use default values
+                        card.groupId = 0
+                        card.groupName = tags
+                    }
+                } else {
+                    card.groupId = 0
+                    card.groupName = ""
+                }
+                
                 card.difficulty = 0
                 card.nextReviewDate = Date()
                 card.interval = 1
