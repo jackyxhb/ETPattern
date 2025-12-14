@@ -83,13 +83,12 @@ struct PersistenceController {
 
         let masterDeck: CardSet
         if let existingDeck = (try? viewContext.fetch(fetchRequest))?.first {
-            // Always re-import bundled cards to ensure they are up to date
-            // Remove existing cards first
-            if let existingCards = existingDeck.cards as? Set<Card> {
-                for card in existingCards {
-                    viewContext.delete(card)
-                }
+            // Check if the deck already has cards - if so, skip re-import for performance
+            if let existingCards = existingDeck.cards as? Set<Card>, !existingCards.isEmpty {
+                print("DEBUG: Master deck '\(masterDeckName)' already has \(existingCards.count) cards, skipping re-import")
+                return
             }
+            // Deck exists but has no cards, so we'll re-import
             masterDeck = existingDeck
         } else {
             masterDeck = CardSet(context: viewContext)
