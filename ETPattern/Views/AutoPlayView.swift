@@ -83,7 +83,13 @@ struct AutoPlayView: View {
         }
         .onDisappear {
             stopPlayback()
-            enableIdleTimer() // Ensure idle timer is re-enabled when view disappears
+        }
+        .onChange(of: isPlaying) { playing in
+            if playing {
+                disableIdleTimer()
+            } else {
+                enableIdleTimer()
+            }
         }
     }
 
@@ -410,18 +416,21 @@ struct AutoPlayView: View {
             pausePlayback()
         } else {
             isPlaying = true
-            playFrontSide()
+            disableIdleTimer()
+            continueFromResumePhase()
         }
     }
 
     private func pausePlayback() {
         isPlaying = false
+        resumePhase = isFlipped ? .back : .front
         enableIdleTimer() // Allow device sleep when paused
         resetSpeechFlow()
         saveProgress()
     }
 
     private func stopPlayback() {
+        isPlaying = false
         enableIdleTimer() // Allow device sleep when stopped
         resetSpeechFlow()
         saveProgress()
