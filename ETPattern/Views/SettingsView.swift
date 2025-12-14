@@ -14,6 +14,9 @@ struct SettingsView: View {
     @State private var cardOrderMode: String = UserDefaults.standard.string(forKey: "cardOrderMode") ?? "random"
     @State private var autoPlayOrderMode: String = UserDefaults.standard.string(forKey: "autoPlayOrderMode") ?? "sequential"
     @State private var ttsPercentage: Float = 0 // Will be set in onAppear
+    @State private var ttsPitch: Float = 0
+    @State private var ttsVolume: Float = 0
+    @State private var ttsPause: TimeInterval = 0
 
     private let voiceOptions = [
         "en-US": "American English (en-US)",
@@ -100,6 +103,66 @@ struct SettingsView: View {
                 }
                 .padding(.vertical, 4)
 
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Pitch: \(Int(ttsPitch * 100))%")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    Slider(value: $ttsPitch, in: Constants.TTS.minPitch...Constants.TTS.maxPitch, step: 0.1) {
+                        Text("Pitch")
+                    } minimumValueLabel: {
+                        Text("50%")
+                            .font(.caption)
+                    } maximumValueLabel: {
+                        Text("200%")
+                            .font(.caption)
+                    }
+                    .onChange(of: ttsPitch) { newValue in
+                        ttsService.setPitch(newValue)
+                    }
+                }
+                .padding(.vertical, 4)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Volume: \(Int(ttsVolume * 100))%")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    Slider(value: $ttsVolume, in: Constants.TTS.minVolume...Constants.TTS.maxVolume, step: 0.1) {
+                        Text("Volume")
+                    } minimumValueLabel: {
+                        Text("0%")
+                            .font(.caption)
+                    } maximumValueLabel: {
+                        Text("100%")
+                            .font(.caption)
+                    }
+                    .onChange(of: ttsVolume) { newValue in
+                        ttsService.setVolume(newValue)
+                    }
+                }
+                .padding(.vertical, 4)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Pause: \(String(format: "%.1f", ttsPause))s")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    Slider(value: $ttsPause, in: Constants.TTS.minPause...Constants.TTS.maxPause, step: 0.1) {
+                        Text("Pause")
+                    } minimumValueLabel: {
+                        Text("0s")
+                            .font(.caption)
+                    } maximumValueLabel: {
+                        Text("2s")
+                            .font(.caption)
+                    }
+                    .onChange(of: ttsPause) { newValue in
+                        ttsService.setPause(newValue)
+                    }
+                }
+                .padding(.vertical, 4)
+
                 Button("Test Voice") {
                     UIImpactFeedbackGenerator.lightImpact()
                     ttsService.speak("Hello! This is a test of the selected voice and speed.")
@@ -121,6 +184,9 @@ struct SettingsView: View {
         .onAppear {
             selectedVoice = ttsService.getCurrentVoice()
             ttsPercentage = ttsService.getCurrentRate()
+            ttsPitch = ttsService.getCurrentPitch()
+            ttsVolume = ttsService.getCurrentVolume()
+            ttsPause = ttsService.getCurrentPause()
         }
     }
 }

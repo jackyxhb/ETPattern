@@ -14,6 +14,9 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
     private let synthesizer = AVSpeechSynthesizer()
     private var currentVoice: String
     private var currentPercentage: Float  // Store as percentage (50-120)
+    private var currentPitch: Float
+    private var currentVolume: Float
+    private var currentPause: TimeInterval
     private var completionHandler: (() -> Void)?
     private var isManuallyStopped = false
     private var lastError: AppError?
@@ -26,6 +29,12 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
         // Load stored percentage, default to 100% if not set
         let storedPercentage = UserDefaults.standard.float(forKey: "ttsPercentage")
         self.currentPercentage = storedPercentage > 0 ? storedPercentage : Constants.TTS.defaultPercentage
+        let storedPitch = UserDefaults.standard.float(forKey: "ttsPitch")
+        self.currentPitch = storedPitch > 0 ? storedPitch : Constants.TTS.defaultPitch
+        let storedVolume = UserDefaults.standard.float(forKey: "ttsVolume")
+        self.currentVolume = storedVolume >= 0 ? storedVolume : Constants.TTS.defaultVolume
+        let storedPause = UserDefaults.standard.double(forKey: "ttsPause")
+        self.currentPause = storedPause >= 0 ? storedPause : Constants.TTS.defaultPause
         super.init()
         synthesizer.delegate = self
     }
@@ -61,6 +70,9 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = voice
         utterance.rate = Constants.TTS.percentageToRate(currentPercentage)
+        utterance.pitchMultiplier = currentPitch
+        utterance.volume = currentVolume
+        utterance.preUtteranceDelay = currentPause
 
         synthesizer.speak(utterance)
         isSpeaking = true
@@ -99,6 +111,33 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
 
     func getCurrentRate() -> Float {
         return currentPercentage
+    }
+
+    func setPitch(_ pitch: Float) {
+        currentPitch = max(Constants.TTS.minPitch, min(Constants.TTS.maxPitch, pitch))
+        UserDefaults.standard.set(currentPitch, forKey: "ttsPitch")
+    }
+
+    func getCurrentPitch() -> Float {
+        return currentPitch
+    }
+
+    func setVolume(_ volume: Float) {
+        currentVolume = max(Constants.TTS.minVolume, min(Constants.TTS.maxVolume, volume))
+        UserDefaults.standard.set(currentVolume, forKey: "ttsVolume")
+    }
+
+    func getCurrentVolume() -> Float {
+        return currentVolume
+    }
+
+    func setPause(_ pause: TimeInterval) {
+        currentPause = max(Constants.TTS.minPause, min(Constants.TTS.maxPause, pause))
+        UserDefaults.standard.set(currentPause, forKey: "ttsPause")
+    }
+
+    func getCurrentPause() -> TimeInterval {
+        return currentPause
     }
 
     func getAvailableVoices() -> [AVSpeechSynthesisVoice] {

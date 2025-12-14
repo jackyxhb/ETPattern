@@ -16,6 +16,15 @@ struct Constants {
         static let minPercentage: Float = 50.0  // 50%
         static let maxPercentage: Float = 120.0 // 120%
         static let defaultPercentage: Float = 100.0 // 100%
+        static let defaultPitch: Float = 1.0 // 100%
+        static let minPitch: Float = 0.5 // 50%
+        static let maxPitch: Float = 2.0 // 200%
+        static let defaultVolume: Float = 1.0 // 100%
+        static let minVolume: Float = 0.0 // 0%
+        static let maxVolume: Float = 1.0 // 100%
+        static let defaultPause: TimeInterval = 0.0 // 0 seconds
+        static let minPause: TimeInterval = 0.0 // 0 seconds
+        static let maxPause: TimeInterval = 2.0 // 2 seconds
         
         // Convert percentage to AVSpeechSynthesizer rate
         static func percentageToRate(_ percentage: Float) -> Float {
