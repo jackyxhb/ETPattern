@@ -23,6 +23,10 @@ extension String {
             return nil
         }
     }
+
+    func formatCardBackText() -> String {
+        return self.replacingOccurrences(of: "<br>", with: "\n")
+    }
 }
 
 extension Date {

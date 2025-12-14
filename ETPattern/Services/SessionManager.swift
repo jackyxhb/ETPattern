@@ -172,12 +172,14 @@ class SessionManager: ObservableObject {
         swipeDirection = direction
         withAnimation(.easeInOut(duration: 0.3)) {
             showSwipeFeedback = true
+            swipeOffset = direction == .right ? 300 : -300
         }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             withAnimation(.easeInOut(duration: 0.3)) {
                 self.showSwipeFeedback = false
                 self.swipeDirection = nil
+                self.swipeOffset = 0
             }
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -255,10 +257,7 @@ class SessionManager: ObservableObject {
         return String(format: "%d:%02d", minutes, seconds)
     }
 
-    var swipeOffset: CGFloat {
-        guard let direction = swipeDirection, showSwipeFeedback else { return 0 }
-        return direction == .right ? 300 : -300
-    }
+    @Published var swipeOffset: CGFloat = 0
 
     // MARK: - Private Methods
 

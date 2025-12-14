@@ -139,4 +139,41 @@ class SpacedRepetitionTests: XCTestCase {
         spacedRepetitionService.updateCardDifficulty(testCard, rating: .easy)
         XCTAssertEqual(testCard.easeFactor, 2.5, "Ease factor should not go above maximum")
     }
+
+    func testError_InvalidCardData() {
+        // Test with card that has invalid interval
+        testCard.interval = -1
+        spacedRepetitionService.updateCardDifficulty(testCard, rating: .easy)
+
+        // Should handle gracefully, perhaps reset to valid values
+        XCTAssertGreaterThanOrEqual(testCard.interval, 1, "Interval should be valid after update")
+    }
+
+    func testIntegration_SpacedRepetitionWithMultipleCards() {
+        // Create multiple cards
+        let card2 = Card(context: persistenceController.container.viewContext)
+        card2.front = "Test Pattern 2"
+        card2.back = "Test Example 2"
+        card2.difficulty = 0
+        card2.nextReviewDate = Date()
+        card2.interval = 1
+        card2.easeFactor = Constants.SpacedRepetition.defaultEaseFactor
+
+        let cardSet = CardSet(context: persistenceController.container.viewContext)
+        cardSet.name = "Multi Card Test"
+        cardSet.addToCards([testCard, card2])
+
+        // Get due cards
+        let dueCards = spacedRepetitionService.getCardsDueForReview(from: cardSet)
+        XCTAssertEqual(dueCards.count, 2, "Both new cards should be due")
+
+        // Review first card as easy
+        spacedRepetitionService.updateCardDifficulty(dueCards[0], rating: .easy)
+
+        // Review second as again
+        spacedRepetitionService.updateCardDifficulty(dueCards[1], rating: .again)
+
+        // Check intervals are different
+        XCTAssertGreaterThan(dueCards[0].interval, dueCards[1].interval, "Easy card should have longer interval than again card")
+    }
 }

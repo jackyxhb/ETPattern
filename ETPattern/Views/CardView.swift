@@ -17,44 +17,27 @@ struct CardView: View {
     @EnvironmentObject private var ttsService: TTSService
 
     var body: some View {
-        ZStack {
-            CardFace(text: card.front ?? "No front", pattern: "", isFront: true, currentIndex: currentIndex, totalCards: totalCards)
-                .opacity(isFlipped ? 0 : 1)
-                .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
-
-            CardFace(text: formatBackText(), pattern: card.front ?? "", isFront: false, currentIndex: currentIndex, totalCards: totalCards)
-                .opacity(isFlipped ? 1 : 0)
-                .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onTapGesture {
-            UIImpactFeedbackGenerator.lightImpact()
-            withAnimation(.bouncy) {
-                isFlipped.toggle()
-                speakCurrentText()
-            }
-        }
-        .onAppear {
-            speakCurrentText()
-        }
+        FlippableCardView(
+            frontText: card.front ?? "No front",
+            backText: formatBackText(),
+            pattern: card.front ?? "",
+            currentIndex: currentIndex,
+            totalCards: totalCards,
+            isFlipped: $isFlipped,
+            onFlip: nil,
+            onAppearAction: nil
+        )
         .onChange(of: currentIndex) { _ in
             // Reset to front side when card changes
             isFlipped = false
             // Stop any ongoing speech from previous card
             ttsService.stop()
-            speakCurrentText()
         }
     }
 
     private func formatBackText() -> String {
         guard let backText = card.back else { return "No back" }
-        // Replace <br> with newlines for proper display
-        return backText.replacingOccurrences(of: "<br>", with: "\n")
-    }
-
-    private func speakCurrentText() {
-        let textToSpeak = isFlipped ? formatBackText() : (card.front ?? "")
-        ttsService.speak(textToSpeak)
+        return backText.formatCardBackText()
     }
 }
 

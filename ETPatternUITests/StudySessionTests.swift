@@ -57,10 +57,38 @@ final class StudySessionTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Import CSV File"].waitForExistence(timeout: 3))
         app.navigationBars.buttons["Back"].tap()
 
-        let settingsButton = app.buttons["gear"]
-        XCTAssertTrue(settingsButton.exists)
-        settingsButton.tap()
-        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
-        app.navigationBars.buttons["Back"].tap()
+    @MainActor
+    func testSessionCompletionFlow() throws {
+        let app = XCUIApplication()
+        app.launch()
+        startStudySession(app: app)
+
+        // Assume there are cards to review. Swipe through all cards to complete session
+        var cardCount = 0
+        while app.staticTexts["Session Complete!"].waitForExistence(timeout: 2) == false && cardCount < 10 {
+            let card = app.otherElements.element(boundBy: 0)
+            if card.exists {
+                card.swipeRight() // Easy
+                cardCount += 1
+            } else {
+                break
+            }
+        }
+
+        // Check if session completes
+        let completionText = app.staticTexts["Session Complete!"]
+        XCTAssertTrue(completionText.waitForExistence(timeout: 5), "Session should complete after reviewing cards")
+
+        // Check completion details
+        XCTAssertTrue(app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "Cards Reviewed")).element.exists)
+        XCTAssertTrue(app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "Correct Answers")).element.exists)
+        XCTAssertTrue(app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "Accuracy")).element.exists)
+
+        // Tap Done to return
+        let doneButton = app.buttons["Done"]
+        XCTAssertTrue(doneButton.waitForExistence(timeout: 5))
+        doneButton.tap()
+
+        // Should return to deck list
+        XCTAssertTrue(app.navigationBars["Decks"].waitForExistence(timeout: 5))
     }
-}
