@@ -20,7 +20,7 @@ struct StudyView: View {
 
     init(cardSet: CardSet) {
         self.cardSet = cardSet
-        _sessionManager = StateObject(wrappedValue: SessionManager(viewContext: PersistenceController.shared.container.viewContext, cardSet: cardSet, ttsService: TTSService()))
+        _sessionManager = StateObject(wrappedValue: SessionManager(viewContext: PersistenceController.shared.container.viewContext, cardSet: cardSet))
     }
 
     var body: some View {
@@ -50,10 +50,15 @@ struct StudyView: View {
             }
         }
         .onAppear {
-            sessionManager.loadOrCreateSession()
+            sessionManager.setTTSService(ttsService)
+            Task {
+                await sessionManager.loadOrCreateSession()
+            }
         }
         .onDisappear {
-            try? viewContext.save()
+            Task {
+                await sessionManager.closeSession()
+            }
         }
     }
 

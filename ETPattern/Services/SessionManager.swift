@@ -25,19 +25,23 @@ class SessionManager: ObservableObject {
     private let viewContext: NSManagedObjectContext
     private let cardSet: CardSet
     private let spacedRepetitionService = SpacedRepetitionService()
-    private let ttsService: TTSService
+    private var ttsService: TTSService?
 
     enum SwipeDirection {
         case left, right
     }
 
-    init(viewContext: NSManagedObjectContext, cardSet: CardSet, ttsService: TTSService) {
+    init(viewContext: NSManagedObjectContext, cardSet: CardSet, ttsService: TTSService? = nil) {
         self.viewContext = viewContext
         self.cardSet = cardSet
         self.ttsService = ttsService
     }
 
-    func loadOrCreateSession() {
+    func setTTSService(_ service: TTSService) {
+        self.ttsService = service
+    }
+
+    func loadOrCreateSession() async {
         isRandomOrder = UserDefaults.standard.string(forKey: "cardOrderMode") == "random"
         let fetchRequest: NSFetchRequest<StudySession> = StudySession.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "cardSet == %@ AND isActive == YES", cardSet)
@@ -52,7 +56,7 @@ class SessionManager: ObservableObject {
                 cardsDue = sortCardsByDueDate(Array(remainingCards))
 
                 if cardsDue.isEmpty {
-                    endStudySession()
+                    await endStudySession()
                     return
                 }
 
@@ -132,25 +136,31 @@ class SessionManager: ObservableObject {
         isFlipped = false
 
         if currentCardIndex >= cardsDue.count {
-            endStudySession()
+            Task {
+                await endStudySession()
+            }
         }
     }
 
-    func endStudySession() {
+    func endStudySession() async {
         studySession?.isActive = false
-        saveStudySession()
+        await saveStudySession()
         showSessionComplete = true
     }
 
-    func closeSession() {
+    func closeSession() async {
         studySession?.isActive = false
-        saveStudySession()
+        await saveStudySession()
     }
 
-    func resetSession() {
+    func resetSession() async {
         if let session = studySession {
             viewContext.delete(session)
-            try? viewContext.save()
+            do {
+                try viewContext.save()
+            } catch {
+                print("DEBUG: Error saving after reset: \(error)")
+            }
             cardsDue = []
             currentCardIndex = 0
             studySession = nil
@@ -200,7 +210,7 @@ class SessionManager: ObservableObject {
     }
 
     func speakCurrentText() {
-        guard currentCardIndex < cardsDue.count else { return }
+        guard currentCardIndex < cardsDue.count, let ttsService = ttsService else { return }
         let card = cardsDue[currentCardIndex]
         let textToSpeak = isFlipped ? formatBackText() : (card.front ?? "")
         ttsService.speak(textToSpeak)
@@ -208,7 +218,7 @@ class SessionManager: ObservableObject {
 
     func onCardChange() {
         isFlipped = false
-        ttsService.stop()
+        ttsService?.stop()
         speakCurrentText()
     }
 
@@ -287,8 +297,12 @@ class SessionManager: ObservableObject {
         session.remainingCards = remaining as NSSet
     }
 
-    private func saveStudySession() {
-        try? viewContext.save()
+    private func saveStudySession() async {
+        do {
+            try viewContext.save()
+        } catch {
+            print("DEBUG: Error saving study session: \(error)")
+        }
     }
 
     private func sortCardsByDueDate(_ cards: [Card]) -> [Card] {

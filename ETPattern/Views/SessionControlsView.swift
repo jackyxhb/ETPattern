@@ -101,8 +101,10 @@ struct SessionControlsView: View {
                 // Close button - close the view
                 Button(action: {
                     UIImpactFeedbackGenerator.lightImpact()
-                    sessionManager.closeSession()
-                    closeAction()
+                    Task {
+                        await sessionManager.closeSession()
+                        closeAction()
+                    }
                 }) {
                     Image(systemName: "xmark")
                         .font(.title3)
