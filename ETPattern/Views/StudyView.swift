@@ -18,7 +18,6 @@ struct StudyView: View {
 
     @State private var currentCardIndex = 0
     @State private var cardsDue: [Card] = []
-    @State private var originalCardsDue: [Card] = [] // Keep original order for sequential mode
     @State private var studySession: StudySession?
     @State private var showSessionComplete = false
     @State private var sessionStartTime: Date?
@@ -26,6 +25,8 @@ struct StudyView: View {
     @State private var isRandomOrder = false
     @State private var swipeDirection: SwipeDirection? = nil
     @State private var showSwipeFeedback = false
+    @State private var sessionCardList: [Card] = [] // Exclusive session list for study mode
+    @State private var cardsStudiedInSession: Int = 0 // Progress counter for session
     
     private let spacedRepetitionService = SpacedRepetitionService()
     
@@ -60,6 +61,7 @@ struct StudyView: View {
             }
         }
         .onAppear {
+            isRandomOrder = UserDefaults.standard.string(forKey: "cardOrderMode") == "random"
             loadOrCreateSession()
         }
         .onDisappear {
@@ -257,11 +259,12 @@ struct StudyView: View {
         VStack(spacing: 0) {
             // Progress bar at the top of the control bar
             HStack(spacing: 12) {
-                Text("\(cardsReviewedCount)/\(max(totalCardsInSession, 1))")
+                let currentPosition = sessionCardList.count > 0 ? ((cardsStudiedInSession % sessionCardList.count) + 1) : 0
+                Text("\(currentPosition)/\(sessionCardList.count)")
                     .font(.caption.bold())
                     .foregroundColor(.white.opacity(0.8))
 
-                ProgressView(value: Double(cardsReviewedCount), total: Double(max(totalCardsInSession, 1)))
+                ProgressView(value: progress)
                     .tint(DesignSystem.Colors.highlight)
                     .frame(height: 4)
 
@@ -402,8 +405,9 @@ struct StudyView: View {
     }
 
     private var progress: Double {
-        guard totalCardsInSession > 0 else { return 0 }
-        return Double(cardsReviewedCount) / Double(totalCardsInSession)
+        guard sessionCardList.count > 0 else { return 0 }
+        let currentPosition = (cardsStudiedInSession % sessionCardList.count) + 1
+        return Double(currentPosition) / Double(sessionCardList.count)
     }
 
     private var totalCardsInSession: Int {
@@ -472,32 +476,17 @@ struct StudyView: View {
         }
     }
 
-    private func loadCardsDue() {
-        guard let cards = cardSet.cards as? Set<Card> else {
-            cardsDue = []
-            originalCardsDue = []
+    private func createSessionList() {
+        guard let setCards = cardSet.cards as? Set<Card> else {
+            sessionCardList = []
             return
         }
-
-        let now = Date()
-        let dueCards = cards.filter { card in
-            card.nextReviewDate == nil || card.nextReviewDate! <= now
-        }
-
-        originalCardsDue = sortCardsByDueDate(Array(dueCards))
-        cardsDue = originalCardsDue
-    }
-
-    private func loadAllCards() {
-        if let cards = cardSet.cards as? Set<Card> {
-            print("DEBUG: Found \(cards.count) cards in cardSet '\(cardSet.name ?? "unnamed")'")
-            originalCardsDue = Array(cards).sorted { ($0.front ?? "") < ($1.front ?? "") }
-            cardsDue = originalCardsDue
-            print("DEBUG: Set cardsDue to \(cardsDue.count) cards")
+        
+        let sorted = setCards.sorted { ($0.front ?? "") < ($1.front ?? "") }
+        if isRandomOrder {
+            sessionCardList = sorted.shuffled()
         } else {
-            print("DEBUG: No cards found in cardSet '\(cardSet.name ?? "unnamed")'")
-            cardsDue = []
-            originalCardsDue = []
+            sessionCardList = sorted
         }
     }
 
@@ -519,20 +508,19 @@ struct StudyView: View {
                     return
                 }
 
+                // Recreate session list in the same order as when session was created
+                createSessionList()
+                cardsStudiedInSession = Int(existingSession.cardsReviewed)
                 currentCardIndex = 0
                 existingSession.currentCardIndex = 0
                 sessionStartTime = Date()
-                // Existing sessions resume without shuffling to preserve card order
+                // Existing sessions resume without changing order to preserve card sequence
             } else {
                 print("DEBUG: Creating new session")
-                loadCardsDue()
-                if cardsDue.isEmpty {
-                    print("DEBUG: No cards due, loading all cards")
-                    loadAllCards()
-                }
-                if shouldShuffleCards() {
-                    cardsDue.shuffle() // Randomize card order
-                }
+                createSessionList()
+                cardsDue = sessionCardList // Start with all cards in session
+                cardsStudiedInSession = 0
+                
                 studySession = StudySession(context: viewContext)
                 studySession?.date = Date()
                 studySession?.cardsReviewed = 0
@@ -541,7 +529,7 @@ struct StudyView: View {
                 studySession?.remainingCards = NSSet(array: cardsDue)
                 studySession?.reviewedCards = NSSet()
                 studySession?.currentCardIndex = 0
-                studySession?.totalCards = Int32(cardsDue.count)
+                studySession?.totalCards = Int32(sessionCardList.count)
                 studySession?.isActive = true
                 sessionStartTime = Date()
                 print("DEBUG: Created new session with \(cardsDue.count) cards")
@@ -549,14 +537,9 @@ struct StudyView: View {
         } catch {
             print("DEBUG: Error fetching sessions: \(error)")
             // Fallback to new session
-            loadCardsDue()
-            if cardsDue.isEmpty {
-                print("DEBUG: No cards due, loading all cards")
-                loadAllCards()
-            }
-            if shouldShuffleCards() {
-                cardsDue.shuffle() // Randomize card order
-            }
+            createSessionList()
+            cardsDue = sessionCardList
+            cardsStudiedInSession = 0
             studySession = StudySession(context: viewContext)
             studySession?.date = Date()
             studySession?.cardsReviewed = 0
@@ -565,7 +548,7 @@ struct StudyView: View {
             studySession?.remainingCards = NSSet(array: cardsDue)
             studySession?.reviewedCards = NSSet()
             studySession?.currentCardIndex = 0
-            studySession?.totalCards = Int32(cardsDue.count)
+            studySession?.totalCards = Int32(sessionCardList.count)
             studySession?.isActive = true
             sessionStartTime = Date()
             print("DEBUG: Created fallback session with \(cardsDue.count) cards")
@@ -618,6 +601,7 @@ struct StudyView: View {
     }
 
     private func moveToNextCard() {
+        cardsStudiedInSession += 1
         currentCardIndex += 1
         studySession?.currentCardIndex = Int32(currentCardIndex)
         isFlipped = false // Reset card to front side
@@ -650,6 +634,8 @@ struct StudyView: View {
             showSessionComplete = false
             sessionStartTime = nil
             isFlipped = false
+            sessionCardList = []
+            cardsStudiedInSession = 0
         }
     }
 
@@ -658,7 +644,7 @@ struct StudyView: View {
     }
 
     private func shouldShuffleCards() -> Bool {
-        return UserDefaults.standard.string(forKey: "cardOrderMode") == "random"
+        return isRandomOrder
     }
 
     private func sortCardsByDueDate(_ cards: [Card]) -> [Card] {
@@ -674,17 +660,19 @@ struct StudyView: View {
 
     private func toggleOrderMode() {
         isRandomOrder.toggle()
+        UserDefaults.standard.set(isRandomOrder ? "random" : "sequential", forKey: "cardOrderMode")
         applyOrderModePreservingCurrentCard()
     }
 
     private func applyOrderModePreservingCurrentCard() {
         let currentCard = cardsDue.isEmpty ? nil : cardsDue[currentCardIndex]
 
-        if isRandomOrder {
-            cardsDue = originalCardsDue.shuffled()
-        } else {
-            cardsDue = originalCardsDue
-        }
+        // Recreate session list with new order
+        createSessionList()
+        
+        // Filter session list to only include remaining cards
+        let remainingCardIDs = Set(cardsDue.map { $0.objectID })
+        cardsDue = sessionCardList.filter { remainingCardIDs.contains($0.objectID) }
 
         // Try to find the same card in the new order
         if let currentCard = currentCard,
@@ -695,6 +683,9 @@ struct StudyView: View {
             currentCardIndex = 0
             isFlipped = false
         }
+        
+        // Reset session progress when order changes
+        cardsStudiedInSession = Int(studySession?.cardsReviewed ?? 0)
     }
 
     private func formatBackText() -> String {

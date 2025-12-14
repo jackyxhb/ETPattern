@@ -12,6 +12,7 @@ struct SettingsView: View {
     @EnvironmentObject private var ttsService: TTSService
     @State private var selectedVoice: String = UserDefaults.standard.string(forKey: "selectedVoice") ?? Constants.TTS.defaultVoice
     @State private var cardOrderMode: String = UserDefaults.standard.string(forKey: "cardOrderMode") ?? "random"
+    @State private var autoPlayOrderMode: String = UserDefaults.standard.string(forKey: "autoPlayOrderMode") ?? "sequential"
     @State private var ttsPercentage: Float = 0 // Will be set in onAppear
 
     private let voiceOptions = [
@@ -36,6 +37,19 @@ struct SettingsView: View {
                 .pickerStyle(.menu)
                 .onChange(of: cardOrderMode) { newValue in
                     UserDefaults.standard.set(newValue, forKey: "cardOrderMode")
+                }
+            }
+
+            Section(header: Text("Auto Play Mode")) {
+                Picker("Card Order", selection: $autoPlayOrderMode) {
+                    ForEach(orderOptions.keys.sorted(), id: \.self) { orderKey in
+                        Text(orderOptions[orderKey] ?? orderKey)
+                            .tag(orderKey)
+                    }
+                }
+                .pickerStyle(.menu)
+                .onChange(of: autoPlayOrderMode) { newValue in
+                    UserDefaults.standard.set(newValue, forKey: "autoPlayOrderMode")
                 }
             }
 

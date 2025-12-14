@@ -25,6 +25,7 @@ struct AutoPlayView: View {
     @State private var speechToken = UUID()
     @State private var activePhase: AutoPlayPhase = .front
     @State private var isRandomOrder = false
+    @State private var cardsPlayedInSession: Int = 0
 
     private let fallbackFrontDelay: TimeInterval = 1.0
     private let fallbackBackDelay: TimeInterval = 1.5
@@ -150,15 +151,16 @@ struct AutoPlayView: View {
         VStack(spacing: 0) {
             // Progress bar at the top of the control bar
             HStack(spacing: 12) {
-                Text("\(currentIndex + 1)/\(cards.count)")
+                let currentCardInCycle = cards.count > 0 ? ((cardsPlayedInSession - 1) % cards.count) + 1 : 0
+                Text("\(currentCardInCycle)/\(cards.count)")
                     .font(.caption.bold())
                     .foregroundColor(.white.opacity(0.8))
                 
-                ProgressView(value: Double(currentIndex + 1), total: Double(cards.count))
+                ProgressView(value: Double(currentCardInCycle), total: Double(cards.count))
                     .tint(DesignSystem.Colors.highlight)
                     .frame(height: 4)
                 
-                Text(cards.count > 0 ? "\(Int((Double(currentIndex + 1) / Double(cards.count)) * 100))%" : "0%")
+                Text(cards.count > 0 ? "\(Int((Double(currentCardInCycle) / Double(cards.count)) * 100))%" : "0%")
                     .font(.caption2)
                     .foregroundColor(.white.opacity(0.6))
                     .padding(.horizontal, 8)
@@ -261,7 +263,8 @@ struct AutoPlayView: View {
         guard cards.isEmpty, let setCards = cardSet.cards as? Set<Card> else { return }
         let sorted = setCards.sorted { ($0.front ?? "") < ($1.front ?? "") }
         originalCards = sorted
-        isRandomOrder = UserDefaults.standard.string(forKey: "cardOrderMode") == "random"
+        isRandomOrder = UserDefaults.standard.string(forKey: "autoPlayOrderMode") == "random"
+        cardsPlayedInSession = 0 // Reset for fresh session
         applyOrderMode()
         restoreProgressIfAvailable()
     }
@@ -310,6 +313,12 @@ struct AutoPlayView: View {
         guard !cards.isEmpty else { return }
         isPlaying = true
         disableIdleTimer() // Prevent device sleep during auto-play
+        
+        // If this is the start of a fresh session (not resuming), count the first card
+        if cardsPlayedInSession == 0 {
+            cardsPlayedInSession = 1
+        }
+        
         continueFromResumePhase()
     }
 
@@ -342,6 +351,7 @@ struct AutoPlayView: View {
     private func moveToNextCard() {
         guard isPlaying, !cards.isEmpty else { return }
         currentIndex = (currentIndex + 1) % cards.count
+        cardsPlayedInSession += 1
         playFrontSide()
     }
 
@@ -359,6 +369,7 @@ struct AutoPlayView: View {
 
         // Move to next card
         currentIndex = (currentIndex + 1) % cards.count
+        cardsPlayedInSession += 1
 
         // Reset card state
         withAnimation(.smooth) {
@@ -548,6 +559,9 @@ struct AutoPlayView: View {
         currentIndex = safeIndex
         isFlipped = progress.phase == .back
         resumePhase = progress.phase
+        
+        // Set played count to current position (resumed session)
+        cardsPlayedInSession = currentIndex + 1
     }
 
     private func disableIdleTimer() {

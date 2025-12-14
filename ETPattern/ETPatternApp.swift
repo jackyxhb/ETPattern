@@ -39,6 +39,11 @@ struct ETPatternApp: App {
             defaults.set("random", forKey: "cardOrderMode")
         }
         
+        // Set default autoplay order mode if not already set
+        if defaults.string(forKey: "autoPlayOrderMode") == nil {
+            defaults.set("sequential", forKey: "autoPlayOrderMode")
+        }
+        
         // Set default voice if not already set
         if defaults.string(forKey: "selectedVoice") == nil {
             defaults.set("en-US", forKey: "selectedVoice")
