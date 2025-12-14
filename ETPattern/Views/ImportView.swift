@@ -126,10 +126,13 @@ struct ImportView: View {
             let cardSet = CardSet(context: viewContext)
             cardSet.name = cardSetName
             cardSet.createdDate = Date()
-            cardSet.addToCards(NSSet(array: cards))
+
+            // Sort cards by ID to ensure proper order
+            let sortedCards = cards.sorted { $0.id < $1.id }
+            cardSet.addToCards(NSSet(array: sortedCards))
 
             // Set the cardSet relationship for each card
-            for card in cards {
+            for card in sortedCards {
                 card.cardSet = cardSet
             }
 

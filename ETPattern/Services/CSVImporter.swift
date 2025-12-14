@@ -18,6 +18,7 @@ class CSVImporter {
     func parseCSV(_ content: String, cardSetName: String) -> [Card] {
         let lines = content.components(separatedBy: .newlines)
         var cards: [Card] = []
+        var lineNumber = 1 // Start from 1 since we skip the header
 
         for line in lines.dropFirst() { // Skip header
             let components = line.components(separatedBy: ";;")
@@ -29,6 +30,7 @@ class CSVImporter {
 
             if !front.isEmpty && !back.isEmpty {
                 let card = Card(context: viewContext)
+                card.id = Int32(lineNumber) // Assign ID based on line number
                 card.front = front
                 card.back = back
                 card.tags = tags
@@ -37,6 +39,7 @@ class CSVImporter {
                 card.interval = 1
                 card.easeFactor = 2.5
                 cards.append(card)
+                lineNumber += 1
             }
         }
 
@@ -56,10 +59,13 @@ class CSVImporter {
             let cardSet = CardSet(context: viewContext)
             cardSet.name = cardSetName
             cardSet.createdDate = Date()
-            cardSet.addToCards(NSSet(array: cards))
+
+            // Sort cards by ID to ensure proper order
+            let sortedCards = cards.sorted { $0.id < $1.id }
+            cardSet.addToCards(NSSet(array: sortedCards))
 
             // Set the cardSet relationship for each card
-            for card in cards {
+            for card in sortedCards {
                 card.cardSet = cardSet
             }
 

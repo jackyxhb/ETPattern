@@ -7,6 +7,7 @@
         <relationship name="studySessions" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="StudySession" inverseName="cardSet" inverseEntity="StudySession"/>
     </entity>
     <entity name="Card" representedClassName="Card" syncable="YES" codeGenerationType="category">
+        <attribute name="id" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="front" optional="NO" attributeType="String" usesScalarValueType="NO"/>
         <attribute name="back" optional="NO" attributeType="String" usesScalarValueType="NO"/>
         <attribute name="tags" optional="YES" attributeType="String" usesScalarValueType="NO"/>
