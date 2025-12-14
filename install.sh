@@ -52,12 +52,21 @@ if [ $? -eq 0 ]; then
     echo "Build successful!"
     echo "Installing to device..."
     
-    xcodebuild -project ETPattern.xcodeproj \
-               -scheme ETPattern \
-               -sdk iphoneos \
-               -configuration Debug \
-               -destination "$DESTINATION" \
-               install
+    if [ "$DEVICE_TYPE" = "physical" ]; then
+        # Use devicectl for physical devices
+        APP_PATH="/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphoneos/ETPattern.app"
+        # Extract device ID from destination
+        DEVICE_ID=$(echo "$DESTINATION" | sed 's/platform=iOS,id=//')
+        xcrun devicectl device install app --device "$DEVICE_ID" "$APP_PATH"
+    else
+        # Use xcodebuild install for simulator
+        xcodebuild -project ETPattern.xcodeproj \
+                   -scheme ETPattern \
+                   -sdk iphoneos \
+                   -configuration Debug \
+                   -destination "$DESTINATION" \
+                   install
+    fi
     
     if [ $? -eq 0 ]; then
         echo "Installation successful!"
