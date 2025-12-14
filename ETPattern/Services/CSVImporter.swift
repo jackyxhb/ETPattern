@@ -68,15 +68,18 @@ class CSVImporter {
         return cards
     }
 
-    func importBundledCSV(named fileName: String, cardSetName: String) -> CardSet? {
+    func importBundledCSV(named fileName: String, cardSetName: String) throws -> CardSet {
         guard let url = Bundle.main.url(forResource: fileName, withExtension: "csv") else {
-            print("Could not find bundled CSV file: \(fileName)")
-            return nil
+            throw AppError.csvFileNotFound(fileName: fileName)
         }
 
         do {
             let content = try String(contentsOf: url, encoding: .utf8)
             let cards = parseCSV(content, cardSetName: cardSetName)
+
+            if cards.isEmpty {
+                throw AppError.csvParsingFailed(reason: "No valid cards found in \(fileName)")
+            }
 
             let cardSet = CardSet(context: viewContext)
             cardSet.name = cardSetName
@@ -93,9 +96,10 @@ class CSVImporter {
 
             try viewContext.save()
             return cardSet
+        } catch let error as AppError {
+            throw error
         } catch {
-            print("Error importing CSV: \(error)")
-            return nil
+            throw AppError.csvImportFailed(reason: error.localizedDescription)
         }
     }
 }

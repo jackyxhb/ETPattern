@@ -16,6 +16,10 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
     private var currentPercentage: Float  // Store as percentage (50-120)
     private var completionHandler: (() -> Void)?
     private var isManuallyStopped = false
+    private var lastError: AppError?
+
+    @Published var isSpeaking = false
+    @Published var errorMessage: String?
 
     override init() {
         self.currentVoice = UserDefaults.standard.string(forKey: "selectedVoice") ?? "en-US"
@@ -27,6 +31,10 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
     }
 
     func speak(_ text: String, completion: (() -> Void)? = nil) {
+        // Clear any previous error
+        errorMessage = nil
+        lastError = nil
+
         // Clear any previous state completely
         synthesizer.stopSpeaking(at: .immediate)
         completionHandler = nil
@@ -38,24 +46,46 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
             return
         }
 
+        // Check if the current voice is available
+        guard let voice = AVSpeechSynthesisVoice(identifier: currentVoice),
+              voice.language.starts(with: "en-") else {
+            let error = AppError.ttsVoiceNotAvailable(voice: currentVoice)
+            lastError = error
+            errorMessage = error.localizedDescription
+            print("TTS Error: \(error.localizedDescription)")
+            return
+        }
+
         completionHandler = completion
 
         let utterance = AVSpeechUtterance(string: text)
-        utterance.voice = AVSpeechSynthesisVoice(identifier: currentVoice)
+        utterance.voice = voice
         utterance.rate = Constants.TTS.percentageToRate(currentPercentage)
 
         synthesizer.speak(utterance)
+        isSpeaking = true
     }
 
     func stop() {
         isManuallyStopped = true
         synthesizer.stopSpeaking(at: .immediate)
         completionHandler = nil
+        isSpeaking = false
     }
 
     func setVoice(_ voiceIdentifier: String) {
-        currentVoice = voiceIdentifier
-        UserDefaults.standard.set(voiceIdentifier, forKey: "selectedVoice")
+        // Validate that the voice exists
+        if AVSpeechSynthesisVoice(identifier: voiceIdentifier) != nil {
+            currentVoice = voiceIdentifier
+            UserDefaults.standard.set(voiceIdentifier, forKey: "selectedVoice")
+            errorMessage = nil
+            lastError = nil
+        } else {
+            let error = AppError.ttsVoiceNotAvailable(voice: voiceIdentifier)
+            lastError = error
+            errorMessage = error.localizedDescription
+            print("TTS Error: \(error.localizedDescription)")
+        }
     }
 
     func getCurrentVoice() -> String {
@@ -87,7 +117,19 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
         // Clear the handler before calling it to prevent double calls
         completionHandler = nil
 
+        // Update speaking state
+        isSpeaking = false
+
         // Call the completion handler
         handler()
+    }
+
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
+        isSpeaking = false
+        completionHandler = nil
+    }
+
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
+        isSpeaking = true
     }
 }

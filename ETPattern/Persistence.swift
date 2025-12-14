@@ -98,26 +98,21 @@ struct PersistenceController {
         }
 
         var totalImported = 0
+        var importErrors: [String] = []
 
         for fileName in bundledFiles {
-            guard let content = FileManagerService.loadBundledCSV(named: fileName) else {
-                print("DEBUG: Failed to load bundled CSV: \(fileName)")
-                continue
+            do {
+                let cardSet = try csvImporter.importBundledCSV(named: fileName, cardSetName: masterDeckName)
+                if let cards = cardSet.cards {
+                    let cardCount = cards.count
+                    totalImported += Int(cardCount)
+                    print("DEBUG: Imported \(cardCount) cards from \(fileName) into '\(masterDeckName)'")
+                }
+            } catch {
+                let errorMessage = "Failed to import \(fileName): \(error.localizedDescription)"
+                importErrors.append(errorMessage)
+                print("ERROR: \(errorMessage)")
             }
-
-            let cards = csvImporter.parseCSV(content, cardSetName: masterDeckName)
-            guard !cards.isEmpty else {
-                print("DEBUG: \(fileName) did not produce any cards")
-                continue
-            }
-
-            masterDeck.addToCards(NSSet(array: cards))
-            for card in cards {
-                card.cardSet = masterDeck
-            }
-
-            totalImported += cards.count
-            print("DEBUG: Imported \(cards.count) cards from \(fileName) into '\(masterDeckName)'")
         }
 
         do {
@@ -128,7 +123,14 @@ struct PersistenceController {
                 print("DEBUG: No bundled cards imported; nothing to save")
             }
         } catch {
-            print("Error saving initialized card sets: \(error)")
+            let errorMessage = "Failed to save bundled card sets: \(error.localizedDescription)"
+            importErrors.append(errorMessage)
+            print("ERROR: \(errorMessage)")
+        }
+
+        // Store any import errors for potential user notification
+        if !importErrors.isEmpty {
+            UserDefaults.standard.set(importErrors, forKey: "bundledImportErrors")
         }
     }
 }

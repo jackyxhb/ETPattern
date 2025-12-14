@@ -27,6 +27,9 @@ struct ContentView: View {
     @State private var browseCardSet: CardSet?
     @State private var hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
     @State private var showingOnboarding = false
+    @State private var showErrorAlert = false
+    @State private var errorMessage = ""
+    @State private var errorTitle = ""
 
     var body: some View {
         NavigationView {
@@ -144,6 +147,11 @@ struct ContentView: View {
         } message: {
             Text("Export this deck as a CSV file?")
         }
+        .alert(errorTitle, isPresented: $showErrorAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(errorMessage)
+        }
         .fullScreenCover(isPresented: $showingOnboarding) {
             OnboardingView {
                 UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
@@ -168,8 +176,11 @@ struct ContentView: View {
             do {
                 try viewContext.save()
             } catch {
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+                errorTitle = "Failed to Create Deck"
+                errorMessage = error.localizedDescription
+                showErrorAlert = true
+                // Rollback the unsaved changes
+                viewContext.rollback()
             }
         }
     }
@@ -253,7 +264,11 @@ struct ContentView: View {
             do {
                 try viewContext.save()
             } catch {
-                print("Failed to delete deck: \(error.localizedDescription)")
+                errorTitle = "Failed to Delete Deck"
+                errorMessage = error.localizedDescription
+                showErrorAlert = true
+                // Rollback the deletion
+                viewContext.rollback()
             }
         }
     }
