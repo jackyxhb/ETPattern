@@ -25,7 +25,20 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
     @Published var errorMessage: String?
 
     override init() {
-        self.currentVoice = UserDefaults.standard.string(forKey: "selectedVoice") ?? "en-US"
+        let availableVoices = AVSpeechSynthesisVoice.speechVoices().filter { $0.language.starts(with: "en-") }
+        let storedVoice = UserDefaults.standard.string(forKey: "selectedVoice") ?? "en-US"
+        
+        // Check if stored voice is available, otherwise pick the first available English voice
+        if let voice = availableVoices.first(where: { $0.identifier == storedVoice }) {
+            self.currentVoice = storedVoice
+        } else if let defaultVoice = availableVoices.first {
+            self.currentVoice = defaultVoice.identifier
+            UserDefaults.standard.set(defaultVoice.identifier, forKey: "selectedVoice")
+        } else {
+            // Fallback to system default if no English voices
+            self.currentVoice = AVSpeechSynthesisVoice.currentLanguageCode()
+        }
+        
         // Load stored percentage, default to 100% if not set
         let storedPercentage = UserDefaults.standard.float(forKey: "ttsPercentage")
         self.currentPercentage = storedPercentage > 0 ? storedPercentage : Constants.TTS.defaultPercentage
