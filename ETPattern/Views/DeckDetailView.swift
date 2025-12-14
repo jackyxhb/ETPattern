@@ -22,12 +22,59 @@ struct DeckDetailView: View {
                 .ignoresSafeArea()
 
             if sortedGroupNames.isEmpty {
-                Text("No cards in this deck")
-                    .font(.headline)
-                    .foregroundColor(.white.opacity(0.7))
+                VStack {
+                    Spacer()
+                    Text("No cards in this deck")
+                        .font(.headline)
+                        .foregroundColor(.white.opacity(0.7))
+                    Spacer()
+                }
             } else {
                 ScrollView {
                     LazyVStack(spacing: 16) {
+                        // Progress Section
+                        VStack(spacing: 16) {
+                            HStack {
+                                Text("Mastery")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                Spacer()
+                                Text("\(Int(masteryPercentage))%")
+                                    .font(.title2)
+                                    .foregroundColor(.white)
+                            }
+                            ProgressView(value: masteryPercentage / 100)
+                                .progressViewStyle(LinearProgressViewStyle(tint: .green))
+                                .scaleEffect(y: 2)
+                            
+                            DisclosureGroup("Review History") {
+                                LazyVStack(spacing: 8) {
+                                    ForEach(sortedStudySessions) { session in
+                                        HStack {
+                                            Text(session.date ?? Date(), style: .date)
+                                                .foregroundColor(.white.opacity(0.8))
+                                            Spacer()
+                                            Text("\(session.correctCount)/\(session.cardsReviewed) correct")
+                                                .foregroundColor(.white.opacity(0.6))
+                                        }
+                                        .padding(.vertical, 4)
+                                    }
+                                }
+                                .padding(.top, 8)
+                            }
+                            .tint(.white)
+                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: DesignSystem.Metrics.cornerRadius)
+                                .fill(DesignSystem.Gradients.card.opacity(0.9))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: DesignSystem.Metrics.cornerRadius)
+                                .stroke(DesignSystem.Colors.stroke, lineWidth: 1)
+                        )
+                        
+                        // Cards Section
                         ForEach(sortedGroupNames, id: \.self) { groupName in
                             DisclosureGroup {
                                 LazyVStack(spacing: 12) {
@@ -84,6 +131,18 @@ struct DeckDetailView: View {
                 previewCard = nil
             }
         }
+    }
+
+    private var masteryPercentage: Double {
+        guard let cards = cardSet.cards as? Set<Card>, !cards.isEmpty else { return 0 }
+        let totalReviewed = cards.reduce(0) { $0 + Int($1.timesReviewed) }
+        let totalCorrect = cards.reduce(0) { $0 + Int($1.timesCorrect) }
+        return totalReviewed > 0 ? Double(totalCorrect) / Double(totalReviewed) * 100 : 0
+    }
+
+    private var sortedStudySessions: [StudySession] {
+        guard let sessions = cardSet.studySessions as? Set<StudySession> else { return [] }
+        return sessions.sorted { ($0.date ?? Date()) > ($1.date ?? Date()) }
     }
 
     private var groupedCards: [String: [Card]] {
