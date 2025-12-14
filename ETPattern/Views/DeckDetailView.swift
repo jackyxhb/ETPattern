@@ -21,27 +21,54 @@ struct DeckDetailView: View {
             DesignSystem.Gradients.background
                 .ignoresSafeArea()
 
-            if sortedCards.isEmpty {
+            if sortedGroupNames.isEmpty {
                 Text("No cards in this deck")
                     .font(.headline)
                     .foregroundColor(.white.opacity(0.7))
             } else {
                 ScrollView {
                     LazyVStack(spacing: 16) {
-                        ForEach(sortedCards) { card in
-                            Button {
-                                previewCard = card
-                            } label: {
-                                CardRow(card: card)
-                            }
-                            .buttonStyle(.plain)
-                            .contextMenu {
-                                Button {
-                                    previewCard = card
-                                } label: {
-                                    Label("Preview", systemImage: "eye")
+                        ForEach(sortedGroupNames, id: \.self) { groupName in
+                            DisclosureGroup {
+                                LazyVStack(spacing: 12) {
+                                    ForEach(groupedCards[groupName] ?? []) { card in
+                                        Button {
+                                            previewCard = card
+                                        } label: {
+                                            CardRow(card: card)
+                                        }
+                                        .buttonStyle(.plain)
+                                        .contextMenu {
+                                            Button {
+                                                previewCard = card
+                                            } label: {
+                                                Label("Preview", systemImage: "eye")
+                                            }
+                                        }
+                                    }
                                 }
+                                .padding(.leading, 16)
+                            } label: {
+                                HStack {
+                                    Text(groupName)
+                                        .font(.headline)
+                                        .foregroundColor(.white)
+                                    Spacer()
+                                    Text("\(groupedCards[groupName]?.count ?? 0) cards")
+                                        .font(.subheadline)
+                                        .foregroundColor(.white.opacity(0.7))
+                                }
+                                .padding()
+                                .background(
+                                    RoundedRectangle(cornerRadius: DesignSystem.Metrics.cornerRadius)
+                                        .fill(DesignSystem.Gradients.card.opacity(0.9))
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: DesignSystem.Metrics.cornerRadius)
+                                        .stroke(DesignSystem.Colors.stroke, lineWidth: 1)
+                                )
                             }
+                            .tint(.white)
                         }
                     }
                     .padding()
@@ -51,17 +78,26 @@ struct DeckDetailView: View {
         .navigationTitle(cardSet.name ?? "Unnamed Deck")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $previewCard) { card in
-            let cards = sortedCards
-            let index = cards.firstIndex(where: { $0.objectID == card.objectID }) ?? 0
-            CardPreviewContainer(card: card, index: index, total: cards.count) {
+            let allCards = sortedGroupNames.flatMap { groupedCards[$0] ?? [] }
+            let index = allCards.firstIndex(where: { $0.objectID == card.objectID }) ?? 0
+            CardPreviewContainer(card: card, index: index, total: allCards.count) {
                 previewCard = nil
             }
         }
     }
 
-    private var sortedCards: [Card] {
-        guard let cards = cardSet.cards as? Set<Card> else { return [] }
-        return cards.sorted { ($0.front ?? "") < ($1.front ?? "") }
+    private var groupedCards: [String: [Card]] {
+        guard let cards = cardSet.cards as? Set<Card> else { return [:] }
+        let sortedCards = cards.sorted { ($0.front ?? "") < ($1.front ?? "") }
+        return Dictionary(grouping: sortedCards) { $0.groupName ?? "Ungrouped" }
+    }
+
+    private var sortedGroupNames: [String] {
+        groupedCards.keys.sorted { groupName1, groupName2 in
+            let groupId1 = groupedCards[groupName1]?.first?.groupId ?? Int32.max
+            let groupId2 = groupedCards[groupName2]?.first?.groupId ?? Int32.max
+            return groupId1 < groupId2
+        }
     }
 }
 
