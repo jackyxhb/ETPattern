@@ -42,9 +42,18 @@ struct Constants {
         static let minEaseFactor: Double = 1.3
         static let maxEaseFactor: Double = 2.5
         static let againInterval: Int32 = 1
+        static let initialInterval: Int32 = 1
         static let easyMultiplier: Double = 1.5
         static let easeIncrement: Double = 0.1
         static let easeDecrement: Double = 0.2
+        static let secondsInDay: TimeInterval = 86400
+        static let secondsInTwoDays: TimeInterval = 172800
+    }
+
+    struct AutoPlay {
+        static let fallbackFrontDelay: TimeInterval = 1.0
+        static let fallbackBackDelay: TimeInterval = 1.5
+        static let interCardDelay: TimeInterval = 1.0
     }
 
     struct UI {

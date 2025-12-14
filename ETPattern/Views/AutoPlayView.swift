@@ -27,9 +27,9 @@ struct AutoPlayView: View {
     @State private var isRandomOrder = false
     @State private var cardsPlayedInSession: Int = 0
 
-    private let fallbackFrontDelay: TimeInterval = 1.0
-    private let fallbackBackDelay: TimeInterval = 1.5
-    private let interCardDelay: TimeInterval = 1.0
+    private let fallbackFrontDelay: TimeInterval = Constants.AutoPlay.fallbackFrontDelay
+    private let fallbackBackDelay: TimeInterval = Constants.AutoPlay.fallbackBackDelay
+    private let interCardDelay: TimeInterval = Constants.AutoPlay.interCardDelay
     private var progressKey: String {
         let id = cardSet.objectID.uriRepresentation().absoluteString
         return "autoPlayProgress-\(id)"

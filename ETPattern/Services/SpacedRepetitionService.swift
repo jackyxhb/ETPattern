@@ -16,14 +16,14 @@ class SpacedRepetitionService {
     func updateCardDifficulty(_ card: Card, rating: DifficultyRating) {
         switch rating {
         case .again:
-            card.interval = 1
-            card.easeFactor = max(1.3, card.easeFactor - 0.2)
+            card.interval = Constants.SpacedRepetition.againInterval
+            card.easeFactor = max(Constants.SpacedRepetition.minEaseFactor, card.easeFactor - Constants.SpacedRepetition.easeDecrement)
         case .easy:
-            card.interval = Int32(max(1, Int(Double(card.interval) * card.easeFactor * 1.5)))
-            card.easeFactor = min(2.5, card.easeFactor + 0.1)
+            card.interval = Int32(max(1, Int(Double(card.interval) * card.easeFactor * Constants.SpacedRepetition.easyMultiplier)))
+            card.easeFactor = min(Constants.SpacedRepetition.maxEaseFactor, card.easeFactor + Constants.SpacedRepetition.easeIncrement)
         }
 
-        card.nextReviewDate = Date().addingTimeInterval(TimeInterval(card.interval * 86400))
+        card.nextReviewDate = Date().addingTimeInterval(TimeInterval(card.interval) * Constants.SpacedRepetition.secondsInDay)
     }
 
     func getCardsDueForReview(from cardSet: CardSet) -> [Card] {
@@ -39,6 +39,6 @@ class SpacedRepetitionService {
     }
 
     func getNextReviewDate(for card: Card) -> Date {
-        return Date().addingTimeInterval(TimeInterval(card.interval * 86400))
+        return Date().addingTimeInterval(TimeInterval(card.interval) * Constants.SpacedRepetition.secondsInDay)
     }
 }

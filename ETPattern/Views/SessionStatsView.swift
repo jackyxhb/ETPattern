@@ -132,12 +132,12 @@ struct SessionStatsView: View {
     session1.correctCount = 8
 
     let session2 = StudySession(context: context)
-    session2.date = Date().addingTimeInterval(-86400) // Yesterday
+    session2.date = Date().addingTimeInterval(-Constants.SpacedRepetition.secondsInDay) // Yesterday
     session2.cardsReviewed = 15
     session2.correctCount = 12
 
     let session3 = StudySession(context: context)
-    session3.date = Date().addingTimeInterval(-172800) // 2 days ago
+    session3.date = Date().addingTimeInterval(-Constants.SpacedRepetition.secondsInTwoDays) // 2 days ago
     session3.cardsReviewed = 8
     session3.correctCount = 5
 

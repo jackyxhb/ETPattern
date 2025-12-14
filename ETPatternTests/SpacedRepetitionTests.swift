@@ -27,7 +27,7 @@ class SpacedRepetitionTests: XCTestCase {
         testCard.difficulty = 0
         testCard.nextReviewDate = Date()
         testCard.interval = 1
-        testCard.easeFactor = 2.5
+        testCard.easeFactor = Constants.SpacedRepetition.defaultEaseFactor
     }
 
     override func tearDown() {
@@ -46,8 +46,8 @@ class SpacedRepetitionTests: XCTestCase {
         spacedRepetitionService.updateCardDifficulty(testCard, rating: .again)
 
         // Then
-        XCTAssertEqual(testCard.interval, 1, "Interval should reset to 1 for 'again' rating")
-        XCTAssertEqual(testCard.easeFactor, max(1.3, initialEaseFactor - 0.2), "Ease factor should decrease for 'again' rating")
+        XCTAssertEqual(testCard.interval, Constants.SpacedRepetition.againInterval, "Interval should reset to 1 for 'again' rating")
+        XCTAssertEqual(testCard.easeFactor, max(Constants.SpacedRepetition.minEaseFactor, initialEaseFactor - Constants.SpacedRepetition.easeDecrement), "Ease factor should decrease for 'again' rating")
         XCTAssertNotNil(testCard.nextReviewDate, "Next review date should be set")
     }
 
@@ -60,9 +60,9 @@ class SpacedRepetitionTests: XCTestCase {
         spacedRepetitionService.updateCardDifficulty(testCard, rating: .easy)
 
         // Then
-        let expectedInterval = Int32(max(1, Int(Double(2) * initialEaseFactor * 1.5)))
+        let expectedInterval = Int32(max(1, Int(Double(2) * initialEaseFactor * Constants.SpacedRepetition.easyMultiplier)))
         XCTAssertEqual(testCard.interval, expectedInterval, "Interval should increase for 'easy' rating")
-        XCTAssertEqual(testCard.easeFactor, min(2.5, initialEaseFactor + 0.1), "Ease factor should increase for 'easy' rating")
+        XCTAssertEqual(testCard.easeFactor, min(Constants.SpacedRepetition.maxEaseFactor, initialEaseFactor + Constants.SpacedRepetition.easeIncrement), "Ease factor should increase for 'easy' rating")
         XCTAssertNotNil(testCard.nextReviewDate, "Next review date should be set")
     }
 

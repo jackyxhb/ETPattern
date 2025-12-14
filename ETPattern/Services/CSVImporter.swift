@@ -58,8 +58,8 @@ class CSVImporter {
                 
                 card.difficulty = 0
                 card.nextReviewDate = Date()
-                card.interval = 1
-                card.easeFactor = 2.5
+                card.interval = Constants.SpacedRepetition.initialInterval
+                card.easeFactor = Constants.SpacedRepetition.defaultEaseFactor
                 cards.append(card)
                 lineNumber += 1
             }
