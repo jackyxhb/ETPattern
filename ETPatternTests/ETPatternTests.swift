@@ -11,18 +11,6 @@ import CoreData
 
 final class ETPatternTests: XCTestCase {
 
-    var persistenceController: PersistenceController!
-
-    override func setUp() {
-        super.setUp()
-        persistenceController = PersistenceController(inMemory: true)
-    }
-
-    override func tearDown() {
-        persistenceController = nil
-        super.tearDown()
-    }
-
     @MainActor
     func testPreviewControllerSeedsSampleCards() throws {
         let context = PersistenceController.preview.container.viewContext

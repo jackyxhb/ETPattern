@@ -31,7 +31,6 @@ struct FlippableCardView: View {
                 .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .accessibilityIdentifier("CardView")
         .onTapGesture {
             UIImpactFeedbackGenerator.lightImpact()
             withAnimation(.bouncy) {
@@ -97,9 +96,6 @@ struct SwipeableCardView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .accessibilityElement(children: .ignore)
-        .accessibilityIdentifier("StudyCard")
-        .accessibilityLabel(isFlipped ? backText : frontText)
         .padding(.vertical, 4)
         .offset(x: swipeOffset)
         .gesture(

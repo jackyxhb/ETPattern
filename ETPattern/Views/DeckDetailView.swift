@@ -15,7 +15,6 @@ struct DeckDetailView: View {
     let cardSet: CardSet
 
     @State private var previewCard: Card?
-    @State private var navigateToStudy = false
 
     var body: some View {
         ZStack {
@@ -125,22 +124,6 @@ struct DeckDetailView: View {
         }
         .navigationTitle(cardSet.name ?? "Unnamed Deck")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: { navigateToStudy = true }) {
-                    Text("Study")
-                        .font(.headline)
-                        .foregroundColor(DesignSystem.Colors.highlight)
-                }
-                .accessibilityIdentifier("Study")
-            }
-        }
-        .background(
-            NavigationLink(destination: StudyView(cardSet: cardSet), isActive: $navigateToStudy) {
-                EmptyView()
-            }
-            .hidden()
-        )
         .sheet(item: $previewCard) { card in
             let allCards = sortedGroupNames.flatMap { groupedCards[$0] ?? [] }
             let index = allCards.firstIndex(where: { $0.objectID == card.objectID }) ?? 0

@@ -68,7 +68,6 @@ struct SessionControlsView: View {
                         .clipShape(Circle())
                 }
                 .accessibilityLabel("Again")
-                .accessibilityIdentifier("AgainButton")
 
                 // Flip button - just flip current card
                 Button(action: {
@@ -98,7 +97,6 @@ struct SessionControlsView: View {
                         .clipShape(Circle())
                 }
                 .accessibilityLabel("Easy")
-                .accessibilityIdentifier("EasyButton")
 
                 // Close button - close the view
                 Button(action: {
@@ -116,7 +114,6 @@ struct SessionControlsView: View {
                         .clipShape(Circle())
                 }
                 .accessibilityLabel("Close Session")
-                .accessibilityIdentifier("CloseSessionButton")
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 16)

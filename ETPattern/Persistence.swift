@@ -5,13 +5,10 @@
 //  Created by admin on 25/11/2025.
 //
 
-import Foundation
 import CoreData
 
-class PersistenceController {
+struct PersistenceController {
     static let shared = PersistenceController()
-
-    private final class ModelBundleToken {}
 
     @MainActor
     static let preview: PersistenceController = {
@@ -26,13 +23,9 @@ class PersistenceController {
         // Create sample cards
         for i in 1...5 {
             let card = Card(context: viewContext)
-            card.id = Int32(i)
             card.front = "Sample pattern \(i)"
             card.back = "Example 1<br>Example 2<br>Example 3<br>Example 4<br>Example 5"
             card.tags = "sample"
-            card.cardName = card.front ?? "Sample pattern \(i)"
-            card.groupId = 1
-            card.groupName = cardSet.name ?? "Sample Group"
             card.difficulty = 0
             card.nextReviewDate = Date()
             card.interval = Constants.SpacedRepetition.initialInterval
@@ -50,32 +43,11 @@ class PersistenceController {
     }()
 
     let container: NSPersistentContainer
-    private var isStoreLoaded = false
 
     init(inMemory: Bool = false) {
-        let modelName = "ETPattern"
-
-        let modelURL = Bundle(for: ModelBundleToken.self).url(forResource: modelName, withExtension: "momd")
-            ?? Bundle.main.url(forResource: modelName, withExtension: "momd")
-
-        guard let modelURL, let loadedModel = NSManagedObjectModel(contentsOf: modelURL) else {
-            fatalError("Unable to locate Core Data model \(modelName).momd in bundle")
-        }
-
-        // Create a mutable copy of the model to allow binding managed object classes
-        let model = loadedModel.copy() as! NSManagedObjectModel
-
-        // Defensive: ensure entities resolve to the intended Swift subclasses.
-        // This prevents crashes like: "Expected CardSet but found NSManagedObject".
-        PersistenceController.bindManagedObjectClasses(to: model)
-
-        container = NSPersistentContainer(name: modelName, managedObjectModel: model)
-
+        container = NSPersistentContainer(name: "ETPattern")
         if inMemory {
-            let description = NSPersistentStoreDescription()
-            description.type = NSInMemoryStoreType
-            description.url = URL(fileURLWithPath: "/dev/null")
-            container.persistentStoreDescriptions = [description]
+            container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
         }
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
@@ -92,22 +64,8 @@ class PersistenceController {
                  */
                 fatalError("Unresolved error \(error), \(error.userInfo)")
             }
-            self.isStoreLoaded = true
         })
         container.viewContext.automaticallyMergesChangesFromParent = true
-    }
-
-    private static func bindManagedObjectClasses(to model: NSManagedObjectModel) {
-        let mapping: [String: NSManagedObject.Type] = [
-            "CardSet": CardSet.self,
-            "Card": Card.self,
-            "StudySession": StudySession.self,
-        ]
-
-        for (entityName, cls) in mapping {
-            guard let entity = model.entitiesByName[entityName] else { continue }
-            entity.managedObjectClassName = NSStringFromClass(cls)
-        }
     }
 
     func initializeBundledCardSets() {
@@ -172,62 +130,6 @@ class PersistenceController {
         // Store any import errors for potential user notification
         if !importErrors.isEmpty {
             UserDefaults.standard.set(importErrors, forKey: "bundledImportErrors")
-        }
-    }
-
-    /// UI-test-only: seed a tiny, deterministic dataset so the app launches quickly.
-    /// The full bundled import is intentionally skipped when `UITESTING` launch arg is present.
-    func initializeUITestSeedData() {
-        while !isStoreLoaded {
-            usleep(10000)
-        }
-        UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
-        let viewContext = container.viewContext
-        let masterDeckName = Constants.Decks.bundledMasterName
-
-        let fetchRequest: NSFetchRequest<CardSet> = CardSet.fetchRequest()
-        fetchRequest.fetchLimit = 1
-        fetchRequest.predicate = NSPredicate(format: "name == %@", masterDeckName)
-
-        let deck: CardSet
-        if let existingDeck = (try? viewContext.fetch(fetchRequest))?.first {
-            deck = existingDeck
-        } else {
-            let newDeck = CardSet(context: viewContext)
-            newDeck.name = masterDeckName
-            newDeck.createdDate = Date()
-            deck = newDeck
-        }
-
-        if let existingCards = deck.cards as? Set<Card>, !existingCards.isEmpty {
-            return
-        }
-
-        for i in 1...5 {
-            let card = Card(context: viewContext)
-            card.id = Int32(i)
-            card.front = "I think… (UI Test \(i))"
-            card.back = "Example 1\nExample 2\nExample 3\nExample 4\nExample 5"
-            card.tags = "ui-test"
-            card.cardName = card.front ?? "I think… (UI Test \(i))"
-            card.groupId = 1
-            card.groupName = "UI Test"
-            card.difficulty = 0
-            card.nextReviewDate = Date()
-            card.interval = Constants.SpacedRepetition.initialInterval
-            card.easeFactor = Constants.SpacedRepetition.defaultEaseFactor
-            card.timesReviewed = 0
-            card.timesCorrect = 0
-            card.lastReviewedDate = nil
-            card.cardSet = deck
-        }
-
-        do {
-            if viewContext.hasChanges {
-                try viewContext.save()
-            }
-        } catch {
-            print("ERROR: Failed to seed UI test data: \(error.localizedDescription)")
         }
     }
 }

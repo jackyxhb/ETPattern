@@ -4,15 +4,10 @@ import Foundation
 /// Simple wrapper that overlays a branded splash while main content loads.
 struct SplashHostView<Content: View>: View {
     private let content: () -> Content
-    @State private var showSplash: Bool
-
-    private var isUITesting: Bool {
-        ProcessInfo.processInfo.arguments.contains("UITESTING")
-    }
+    @State private var showSplash = true
 
     init(@ViewBuilder content: @escaping () -> Content) {
         self.content = content
-        self._showSplash = State(initialValue: !ProcessInfo.processInfo.arguments.contains("UITESTING"))
     }
 
     var body: some View {
@@ -27,10 +22,6 @@ struct SplashHostView<Content: View>: View {
             }
         }
         .task {
-            if isUITesting {
-                showSplash = false
-                return
-            }
             guard showSplash else { return }
             try? await Task.sleep(nanoseconds: 1_200_000_000)
             withAnimation(.easeInOut(duration: 0.4)) {
