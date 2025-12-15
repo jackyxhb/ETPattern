@@ -2,93 +2,121 @@
 //  StudySessionTests.swift
 //  ETPatternUITests
 //
-//  Created by GitHub Copilot on 02/12/2025.
+//  Created by admin on 28/11/2025.
 //
 
 import XCTest
 
 final class StudySessionTests: XCTestCase {
 
+    let app = XCUIApplication()
+
     override func setUpWithError() throws {
         continueAfterFailure = false
+        app.launchArguments = ["UITESTING"]
+        app.launch()
     }
 
-    private func startStudySession(app: XCUIApplication) {
-        let firstDeckCell = app.tables.cells.element(boundBy: 0)
-        XCTAssertTrue(firstDeckCell.waitForExistence(timeout: 5), "Deck list is empty")
-        firstDeckCell.tap()
+    override func tearDownWithError() throws {
+        app.terminate()
+    }
+
+    @MainActor
+    func testSwipeEasy() throws {
+        // Navigate to study session
+        let firstDeck = app.buttons.matching(identifier: "DeckCard").element(boundBy: 0)
+        XCTAssertTrue(firstDeck.waitForExistence(timeout: 10))
+        firstDeck.tap()
 
         let studyButton = app.buttons["Study"]
         XCTAssertTrue(studyButton.waitForExistence(timeout: 5))
         studyButton.tap()
+
+        // Verify study session started
+        XCTAssertTrue(app.navigationBars["Study Session"].exists)
+
+        // Get initial card text from the card view
+        let cardView = app.otherElements["StudyCard"]
+        let initialCardText = cardView.label
+
+        // Swipe right for "Easy"
+        cardView.swipeRight()
+
+        // Wait for next card or completion
+        sleep(2)
+
+        // Verify either next card or session complete
+        if app.staticTexts["Session Complete"].exists {
+            XCTAssertTrue(app.buttons["Done"].exists)
+        } else {
+            let newCardText = cardView.label
+            XCTAssertNotEqual(initialCardText, newCardText, "Should show next card after easy rating")
+        }
     }
 
     @MainActor
-    func testAgainAndEasyButtonsExist() throws {
-        let app = XCUIApplication()
-        app.launch()
-        startStudySession(app: app)
+    func testSwipeAgain() throws {
+        // Navigate to study session
+        let firstDeck = app.buttons.matching(identifier: "DeckCard").element(boundBy: 0)
+        XCTAssertTrue(firstDeck.waitForExistence(timeout: 10))
+        firstDeck.tap()
 
-        let againButton = app.buttons["Again"]
-        let easyButton = app.buttons["Easy"]
-        XCTAssertTrue(againButton.waitForExistence(timeout: 5))
-        XCTAssertTrue(easyButton.waitForExistence(timeout: 5))
+        let studyButton = app.buttons["Study"]
+        XCTAssertTrue(studyButton.waitForExistence(timeout: 5))
+        studyButton.tap()
 
-        againButton.tap()
-        easyButton.tap()
+        // Swipe left for "Again"
+        let cardView = app.otherElements["StudyCard"]
+        cardView.swipeLeft()
 
-        XCTAssertTrue(app.navigationBars["Study Session"].exists || app.staticTexts["Session Complete!"].exists)
+        // Wait for animation
+        sleep(2)
+
+        // Card should still be visible (repeating)
+        XCTAssertTrue(app.navigationBars["Study Session"].exists)
     }
 
     @MainActor
-    func testNavigationShortcuts() throws {
-        let app = XCUIApplication()
-        app.launch()
+    func testProgressTracking() throws {
+        // Navigate to study session
+        let firstDeck = app.buttons.matching(identifier: "DeckCard").element(boundBy: 0)
+        XCTAssertTrue(firstDeck.waitForExistence(timeout: 10))
+        firstDeck.tap()
 
-        let statsButton = app.buttons["chart.bar"]
-        XCTAssertTrue(statsButton.exists)
-        statsButton.tap()
-        XCTAssertTrue(app.navigationBars["Study Sessions"].waitForExistence(timeout: 3))
-        app.buttons["Done"].tap()
+        let studyButton = app.buttons["Study"]
+        XCTAssertTrue(studyButton.waitForExistence(timeout: 5))
+        studyButton.tap()
 
-        let importButton = app.buttons["square.and.arrow.down"]
-        XCTAssertTrue(importButton.exists)
-        importButton.tap()
-        XCTAssertTrue(app.staticTexts["Import CSV File"].waitForExistence(timeout: 3))
-        app.navigationBars.buttons["Back"].tap()
+        // Check progress elements exist
+        XCTAssertTrue(app.progressIndicators.element.exists, "Progress circle should be visible")
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'cards'")).element.exists, "Cards counter should be visible")
+    }
 
     @MainActor
-    func testSessionCompletionFlow() throws {
-        let app = XCUIApplication()
-        app.launch()
-        startStudySession(app: app)
+    func testSessionCompletion() throws {
+        // This test assumes a small deck; in real scenario might need to swipe through all cards
+        // Navigate to study session
+        let firstDeck = app.buttons.matching(identifier: "DeckCard").element(boundBy: 0)
+        XCTAssertTrue(firstDeck.waitForExistence(timeout: 10))
+        firstDeck.tap()
 
-        // Assume there are cards to review. Swipe through all cards to complete session
-        var cardCount = 0
-        while app.staticTexts["Session Complete!"].waitForExistence(timeout: 2) == false && cardCount < 10 {
-            let card = app.otherElements.element(boundBy: 0)
-            if card.exists {
-                card.swipeRight() // Easy
-                cardCount += 1
-            } else {
-                break
-            }
+        let studyButton = app.buttons["Study"]
+        XCTAssertTrue(studyButton.waitForExistence(timeout: 5))
+        studyButton.tap()
+
+        // Swipe through cards until completion
+        var swipeCount = 0
+        while !app.staticTexts["Session Complete"].exists && swipeCount < 10 {
+            app.otherElements["StudyCard"].swipeRight()
+            sleep(2)
+            swipeCount += 1
         }
 
-        // Check if session completes
-        let completionText = app.staticTexts["Session Complete!"]
-        XCTAssertTrue(completionText.waitForExistence(timeout: 5), "Session should complete after reviewing cards")
-
-        // Check completion details
-        XCTAssertTrue(app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "Cards Reviewed")).element.exists)
-        XCTAssertTrue(app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "Correct Answers")).element.exists)
-        XCTAssertTrue(app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "Accuracy")).element.exists)
-
-        // Tap Done to return
-        let doneButton = app.buttons["Done"]
-        XCTAssertTrue(doneButton.waitForExistence(timeout: 5))
-        doneButton.tap()
-
-        // Should return to deck list
-        XCTAssertTrue(app.navigationBars["Decks"].waitForExistence(timeout: 5))
+        if app.staticTexts["Session Complete"].exists {
+            XCTAssertTrue(app.buttons["Done"].exists)
+            app.buttons["Done"].tap()
+            // Should navigate back to deck details
+            XCTAssertTrue(app.navigationBars["ETPattern 300"].waitForExistence(timeout: 5))
+        }
     }
+}

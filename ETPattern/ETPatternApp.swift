@@ -14,8 +14,14 @@ struct ETPatternApp: App {
     @StateObject private var ttsService = TTSService()
 
     init() {
-        // Initialize bundled card sets on first launch
-        persistenceController.initializeBundledCardSets()
+        // Keep UI tests fast and deterministic: seed a tiny deck instead of importing all bundled CSVs.
+        // Production still imports the bundled CSVs into the built-in master deck.
+        if ProcessInfo.processInfo.arguments.contains("UITESTING") {
+            persistenceController.initializeUITestSeedData()
+        } else {
+            // Initialize bundled card sets on first launch
+            persistenceController.initializeBundledCardSets()
+        }
         
         // Initialize default settings if not already set
         initializeDefaultSettings()

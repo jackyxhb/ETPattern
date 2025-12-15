@@ -27,6 +27,10 @@ class SessionManager: ObservableObject {
     private let spacedRepetitionService = SpacedRepetitionService()
     private var ttsService: TTSService?
 
+    private var isUITesting: Bool {
+        ProcessInfo.processInfo.arguments.contains("UITESTING")
+    }
+
     enum SwipeDirection {
         case left, right
     }
@@ -282,6 +286,10 @@ class SessionManager: ObservableObject {
             sessionCardList = sorted.shuffled()
         } else {
             sessionCardList = sorted
+        }
+
+        if isUITesting {
+            sessionCardList = Array(sessionCardList.prefix(3))
         }
     }
 
