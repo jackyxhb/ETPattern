@@ -60,6 +60,8 @@ struct StudyView: View {
                 await sessionManager.closeSession()
             }
         }
+        .navigationTitle("Study Session")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     private var header: some View {

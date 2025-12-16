@@ -69,21 +69,30 @@ class CSVImporter {
     }
 
     func importBundledCSV(named fileName: String, cardSetName: String) throws -> CardSet {
-        guard let url = Bundle.main.url(forResource: fileName, withExtension: "csv") else {
+        guard let content = FileManagerService.loadBundledCSV(named: fileName) else {
             throw AppError.csvFileNotFound(fileName: fileName)
         }
 
         do {
-            let content = try String(contentsOf: url, encoding: .utf8)
             let cards = parseCSV(content, cardSetName: cardSetName)
 
             if cards.isEmpty {
                 throw AppError.csvParsingFailed(reason: "No valid cards found in \(fileName)")
             }
 
-            let cardSet = CardSet(context: viewContext)
-            cardSet.name = cardSetName
-            cardSet.createdDate = Date()
+            let fetchRequest: NSFetchRequest<CardSet> = CardSet.fetchRequest()
+            fetchRequest.fetchLimit = 1
+            fetchRequest.predicate = NSPredicate(format: "name == %@", cardSetName)
+
+            let cardSet: CardSet
+            if let existingDeck = (try? viewContext.fetch(fetchRequest))?.first {
+                cardSet = existingDeck
+            } else {
+                let newDeck = CardSet(context: viewContext)
+                newDeck.name = cardSetName
+                newDeck.createdDate = Date()
+                cardSet = newDeck
+            }
 
             // Sort cards by ID to ensure proper order
             let sortedCards = cards.sorted { $0.id < $1.id }

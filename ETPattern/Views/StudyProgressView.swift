@@ -32,7 +32,7 @@ struct StudyProgressView: View {
                 Text("Today")
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.7))
-                Text("Total: \(sessionManager.totalCardsInSession)")
+                Text("Total: \(sessionManager.totalCardsInSession) cards")
                     .font(.headline)
                     .foregroundColor(.white)
                 Text("Remaining: \(sessionManager.cardsRemaining)")
