@@ -35,8 +35,8 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
             self.currentVoice = defaultVoice.identifier
             UserDefaults.standard.set(defaultVoice.identifier, forKey: "selectedVoice")
         } else {
-            // Fallback to system default if no English voices
-            self.currentVoice = AVSpeechSynthesisVoice.currentLanguageCode()
+            // Fallback to a known working voice for simulator
+            self.currentVoice = "com.apple.ttsbundle.Samantha-compact"
         }
         
         // Load stored percentage, default to 100% if not set
@@ -44,8 +44,8 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
         self.currentPercentage = storedPercentage > 0 ? storedPercentage : Constants.TTS.defaultPercentage
         let storedPitch = UserDefaults.standard.float(forKey: "ttsPitch")
         self.currentPitch = storedPitch > 0 ? storedPitch : Constants.TTS.defaultPitch
-        let storedVolume = UserDefaults.standard.float(forKey: "ttsVolume")
-        self.currentVolume = storedVolume >= 0 ? storedVolume : Constants.TTS.defaultVolume
+        let storedVolume = UserDefaults.standard.object(forKey: "ttsVolume") as? Float
+        self.currentVolume = storedVolume ?? Constants.TTS.defaultVolume
         let storedPause = UserDefaults.standard.double(forKey: "ttsPause")
         self.currentPause = storedPause >= 0 ? storedPause : Constants.TTS.defaultPause
         super.init()
@@ -69,8 +69,7 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
         }
 
         // Check if the current voice is available
-        guard let voice = AVSpeechSynthesisVoice(identifier: currentVoice),
-              voice.language.starts(with: "en-") else {
+        guard let voice = AVSpeechSynthesisVoice(identifier: currentVoice) else {
             let error = AppError.ttsVoiceNotAvailable(voice: currentVoice)
             lastError = error
             errorMessage = error.localizedDescription
@@ -88,6 +87,7 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
         utterance.preUtteranceDelay = currentPause
 
         synthesizer.speak(utterance)
+        isSpeaking = true
         isSpeaking = true
     }
 
