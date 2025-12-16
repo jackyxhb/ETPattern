@@ -20,10 +20,12 @@ if [ ! -z "$CONNECTED_IPHONE" ]; then
     echo "Found iPhone device: $DEVICE_NAME - installing to physical device..."
     DESTINATION="platform=iOS,id=$DEVICE_ID"
     DEVICE_TYPE="physical"
+    SDK="iphoneos"
 else
     echo "No connected iPhone devices found - using iPhone 16 Simulator..."
     DESTINATION="platform=iOS Simulator,id=0B067B2D-FE51-486D-8EBB-D71DB5D757BD"
     DEVICE_TYPE="simulator"
+    SDK="iphonesimulator"
 fi
 
 echo "Building and installing ETPattern..."
@@ -32,9 +34,10 @@ cd /Users/macbook1/work/ETPattern
 
 xcodebuild -project ETPattern.xcodeproj \
            -scheme ETPattern \
-           -sdk iphoneos \
+           -sdk $SDK \
            -configuration Debug \
            -destination "$DESTINATION" \
+           -allowProvisioningUpdates \
            build
 
 if [ $? -eq 0 ]; then
@@ -51,9 +54,10 @@ if [ $? -eq 0 ]; then
         # Use xcodebuild install for simulator
         xcodebuild -project ETPattern.xcodeproj \
                    -scheme ETPattern \
-                   -sdk iphoneos \
+                   -sdk $SDK \
                    -configuration Debug \
                    -destination "$DESTINATION" \
+                   -allowProvisioningUpdates \
                    install
     fi
     

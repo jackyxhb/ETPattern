@@ -8,6 +8,13 @@
 import Foundation
 import SwiftUI
 
+enum AppNavigation: Hashable {
+    case deck(CardSet)
+    case study(CardSet)
+    case auto(CardSet)
+    case browse(CardSet)
+}
+
 struct Constants {
     struct TTS {
         static let defaultVoice = "en-US"

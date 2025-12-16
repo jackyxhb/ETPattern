@@ -15,34 +15,32 @@ struct DeckDetailView: View {
     let cardSet: CardSet
 
     @State private var previewCard: Card?
-    @State private var navigateToStudy = false
 
     var body: some View {
         ZStack {
-            DesignSystem.Gradients.background
-                .ignoresSafeArea()
+                DesignSystem.Gradients.background
+                    .ignoresSafeArea()
 
-            if sortedGroupNames.isEmpty {
-                VStack {
-                    Spacer()
-                    Text("No cards in this deck")
-                        .font(.headline)
-                        .foregroundColor(.white.opacity(0.7))
-                    Spacer()
-                }
-            } else {
-                ScrollView {
-                    LazyVStack(spacing: 16) {
-                        // Progress Section
-                        VStack(spacing: 16) {
-                            HStack {
-                                Text("Mastery")
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                                Spacer()
-                                Text("\(Int(masteryPercentage))%")
-                                    .font(.title2)
-                                    .foregroundColor(.white)
+                if sortedGroupNames.isEmpty {
+                    VStack {
+                        Spacer()
+                        Text("No cards in this deck")
+                            .font(.headline)
+                            .foregroundColor(.white.opacity(0.7))
+                        Spacer()
+                    }
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 16) {
+                            // Progress Section
+                            VStack(spacing: 16) {
+                                HStack {
+                                    Text("Mastery")
+                                        .font(.headline)
+                                        .foregroundColor(.white)
+                                    Spacer()
+                                    Text("\(Int(masteryPercentage))%")
+                                        .font(.title2)
                             }
                             ProgressView(value: masteryPercentage / 100)
                                 .progressViewStyle(LinearProgressViewStyle(tint: .green))
@@ -126,21 +124,14 @@ struct DeckDetailView: View {
         .navigationTitle(cardSet.name ?? "Unnamed Deck")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: { navigateToStudy = true }) {
+            NavigationLink(value: AppNavigation.study(cardSet)) {
+                Button(action: {}) {
                     Text("Study")
                         .font(.headline)
                         .foregroundColor(DesignSystem.Colors.highlight)
                 }
                 .accessibilityIdentifier("Study")
             }
-        }
-        .background(
-            NavigationLink(destination: StudyView(cardSet: cardSet), isActive: $navigateToStudy) {
-                EmptyView()
-            }
-            .hidden()
-        )
         .sheet(item: $previewCard) { card in
             let allCards = sortedGroupNames.flatMap { groupedCards[$0] ?? [] }
             let index = allCards.firstIndex(where: { $0.objectID == card.objectID }) ?? 0
@@ -149,6 +140,7 @@ struct DeckDetailView: View {
             }
         }
     }
+}
 
     private var masteryPercentage: Double {
         guard let cards = cardSet.cards as? Set<Card>, !cards.isEmpty else { return 0 }
@@ -246,9 +238,7 @@ private struct CardPreviewContainer: View {
     cardSet.name = "Sample Deck"
     cardSet.createdDate = Date()
 
-    return NavigationView {
-        DeckDetailView(cardSet: cardSet)
-            .environment(\.managedObjectContext, context)
-            .environmentObject(TTSService())
-    }
+    return DeckDetailView(cardSet: cardSet)
+        .environment(\.managedObjectContext, context)
+        .environmentObject(TTSService())
 }

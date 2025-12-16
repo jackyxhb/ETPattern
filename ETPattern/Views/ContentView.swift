@@ -18,26 +18,87 @@ struct ContentView: View {
     private var cardSets: FetchedResults<CardSet>
 
     @State private var showingImportView = false
-    @State private var showingSettings = false
+    @State private var selectedCardSet: CardSet?
 
     var body: some View {
-        NavigationView {
-            ZStack {
-                DesignSystem.Gradients.background
-                    .ignoresSafeArea()
-
-                VStack {
-                    header
-                    deckList
+        TabView {
+            Group {
+                if let cardSet = selectedCardSet {
+                    StudyView(cardSet: cardSet)
+                        .environment(\.managedObjectContext, viewContext)
+                        .environmentObject(ttsService)
+                } else {
+                    ZStack {
+                        DesignSystem.Gradients.background
+                            .ignoresSafeArea()
+                        VStack {
+                            Spacer()
+                            Text("Select a deck from Browse tab")
+                                .font(.title)
+                                .foregroundColor(.white)
+                            Spacer()
+                        }
+                    }
                 }
             }
-            .navigationBarHidden(true)
-            .sheet(isPresented: $showingImportView) {
-                ImportView()
-                    .environment(\.managedObjectContext, viewContext)
+            .tabItem {
+                Label("Study", systemImage: "book")
             }
-            .sheet(isPresented: $showingSettings) {
-                SettingsView()
+
+            Group {
+                if let cardSet = selectedCardSet {
+                    AutoPlayView(cardSet: cardSet)
+                        .environment(\.managedObjectContext, viewContext)
+                        .environmentObject(ttsService)
+                } else {
+                    ZStack {
+                        DesignSystem.Gradients.background
+                            .ignoresSafeArea()
+                        VStack {
+                            Spacer()
+                            Text("Select a deck from Browse tab")
+                                .font(.title)
+                                .foregroundColor(.white)
+                            Spacer()
+                        }
+                    }
+                }
+            }
+            .tabItem {
+                Label("Auto", systemImage: "play.circle")
+            }
+
+            NavigationStack {
+                ZStack {
+                    DesignSystem.Gradients.background
+                        .ignoresSafeArea()
+
+                    VStack {
+                        header
+                        deckList(navigationValue: { cardSet in
+                            self.selectedCardSet = cardSet
+                            return .deck(cardSet)
+                        })
+                    }
+                }
+                .navigationBarHidden(true)
+                .sheet(isPresented: $showingImportView) {
+                    ImportView()
+                        .environment(\.managedObjectContext, viewContext)
+                }
+                .navigationDestination(for: AppNavigation.self) { navigation in
+                    switch navigation {
+                    case .deck(let cardSet):
+                        DeckDetailView(cardSet: cardSet)
+                            .environment(\.managedObjectContext, viewContext)
+                            .environmentObject(ttsService)
+                    default:
+                        EmptyView()
+                    }
+                }
+            }
+            .tabItem {
+                Label("Browse", systemImage: "magnifyingglass")
             }
         }
     }
@@ -50,18 +111,10 @@ struct ContentView: View {
 
             Spacer()
 
-            HStack(spacing: 16) {
-                Button(action: { showingImportView = true }) {
-                    Image(systemName: "square.and.arrow.down")
-                        .font(.title2)
-                        .foregroundColor(.white)
-                }
-
-                Button(action: { showingSettings = true }) {
-                    Image(systemName: "gear")
-                        .font(.title2)
-                        .foregroundColor(.white)
-                }
+            Button(action: { showingImportView = true }) {
+                Image(systemName: "square.and.arrow.down")
+                    .font(.title2)
+                    .foregroundColor(.white)
             }
         }
         .padding(.horizontal)
@@ -69,11 +122,13 @@ struct ContentView: View {
         .padding(.bottom, 20)
     }
 
-    private var deckList: some View {
+    private func deckList(navigationValue: @escaping (CardSet) -> AppNavigation) -> some View {
         ScrollView {
             LazyVStack(spacing: 16) {
                 ForEach(cardSets) { cardSet in
-                    DeckCard(cardSet: cardSet)
+                    NavigationLink(value: navigationValue(cardSet)) {
+                        DeckCard(cardSet: cardSet)
+                    }
                 }
             }
             .padding(.horizontal)
@@ -83,7 +138,6 @@ struct ContentView: View {
 
 struct DeckCard: View {
     let cardSet: CardSet
-    @State private var navigateToDetail = false
 
     var body: some View {
         ZStack {
@@ -108,7 +162,7 @@ struct DeckCard: View {
 
                     Spacer()
 
-                    Button(action: { navigateToDetail = true }) {
+                    Button(action: {}) {
                         Text("Study")
                             .font(.headline)
                             .foregroundColor(DesignSystem.Colors.highlight)
@@ -120,12 +174,6 @@ struct DeckCard: View {
         }
         .frame(height: 120)
         .accessibilityIdentifier("DeckCard")
-        .background(
-            NavigationLink(destination: DeckDetailView(cardSet: cardSet), isActive: $navigateToDetail) {
-                EmptyView()
-            }
-            .hidden()
-        )
     }
 }
 
