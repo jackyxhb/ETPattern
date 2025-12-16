@@ -13,8 +13,35 @@ struct DeckDetailView: View {
     @Environment(\.dismiss) private var dismiss
 
     let cardSet: CardSet
+    let onStudy: () -> Void
+    let onAuto: () -> Void
 
     @State private var previewCard: Card?
+
+    private var masteryPercentage: Double {
+        guard let cards = cardSet.cards as? Set<Card>, !cards.isEmpty else { return 0 }
+        let total = cards.reduce(0.0) { $0 + ($1.successRate ?? 0) }
+        return total / Double(cards.count)
+    }
+
+    private var sortedStudySessions: [StudySession] {
+        guard let sessions = cardSet.studySessions as? Set<StudySession> else { return [] }
+        return sessions.sorted { ($0.date ?? Date()) > ($1.date ?? Date()) }
+    }
+
+    private var groupedCards: [String: [Card]] {
+        guard let cards = cardSet.cards as? Set<Card> else { return [:] }
+        let sortedCards = cards.sorted { ($0.front ?? "") < ($1.front ?? "") }
+        return Dictionary(grouping: sortedCards) { $0.groupName ?? "Ungrouped" }
+    }
+
+    private var sortedGroupNames: [String] {
+        groupedCards.keys.sorted { groupName1, groupName2 in
+            let groupId1 = groupedCards[groupName1]?.first?.groupId ?? Int32.max
+            let groupId2 = groupedCards[groupName2]?.first?.groupId ?? Int32.max
+            return groupId1 < groupId2
+        }
+    }
 
     var body: some View {
         ZStack {
@@ -124,14 +151,19 @@ struct DeckDetailView: View {
         .navigationTitle(cardSet.name ?? "Unnamed Deck")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            NavigationLink(value: AppNavigation.study(cardSet)) {
-                Button(action: {}) {
-                    Text("Study")
-                        .font(.headline)
-                        .foregroundColor(DesignSystem.Colors.highlight)
+            ToolbarItemGroup(placement: .navigationBarTrailing) {
+                Button("Study") {
+                    dismiss()
+                    onStudy()
                 }
                 .accessibilityIdentifier("Study")
+                
+                Button("Auto") {
+                    dismiss()
+                    onAuto()
+                }
             }
+        }
         .sheet(item: $previewCard) { card in
             let allCards = sortedGroupNames.flatMap { groupedCards[$0] ?? [] }
             let index = allCards.firstIndex(where: { $0.objectID == card.objectID }) ?? 0
@@ -140,33 +172,7 @@ struct DeckDetailView: View {
             }
         }
     }
-}
 
-    private var masteryPercentage: Double {
-        guard let cards = cardSet.cards as? Set<Card>, !cards.isEmpty else { return 0 }
-        let totalReviewed = cards.reduce(0) { $0 + Int($1.timesReviewed) }
-        let totalCorrect = cards.reduce(0) { $0 + Int($1.timesCorrect) }
-        return totalReviewed > 0 ? Double(totalCorrect) / Double(totalReviewed) * 100 : 0
-    }
-
-    private var sortedStudySessions: [StudySession] {
-        guard let sessions = cardSet.studySessions as? Set<StudySession> else { return [] }
-        return sessions.sorted { ($0.date ?? Date()) > ($1.date ?? Date()) }
-    }
-
-    private var groupedCards: [String: [Card]] {
-        guard let cards = cardSet.cards as? Set<Card> else { return [:] }
-        let sortedCards = cards.sorted { ($0.front ?? "") < ($1.front ?? "") }
-        return Dictionary(grouping: sortedCards) { $0.groupName ?? "Ungrouped" }
-    }
-
-    private var sortedGroupNames: [String] {
-        groupedCards.keys.sorted { groupName1, groupName2 in
-            let groupId1 = groupedCards[groupName1]?.first?.groupId ?? Int32.max
-            let groupId2 = groupedCards[groupName2]?.first?.groupId ?? Int32.max
-            return groupId1 < groupId2
-        }
-    }
 }
 
 private struct CardRow: View {
@@ -238,7 +244,7 @@ private struct CardPreviewContainer: View {
     cardSet.name = "Sample Deck"
     cardSet.createdDate = Date()
 
-    return DeckDetailView(cardSet: cardSet)
+    return DeckDetailView(cardSet: cardSet, onStudy: {}, onAuto: {})
         .environment(\.managedObjectContext, context)
         .environmentObject(TTSService())
 }

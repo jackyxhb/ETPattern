@@ -19,9 +19,58 @@ struct ContentView: View {
 
     @State private var showingImportView = false
     @State private var selectedCardSet: CardSet?
+    @State private var selectedTab = 0  // 0: Browse, 1: Study, 2: Auto
 
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
+            NavigationStack {
+                ZStack {
+                    DesignSystem.Gradients.background
+                        .ignoresSafeArea()
+
+                    VStack {
+                        header
+                        deckList(navigationValue: { cardSet in
+                            self.selectedCardSet = cardSet
+                            return .deck(cardSet)
+                        })
+                    }
+                }
+                .navigationBarHidden(true)
+                .sheet(isPresented: $showingImportView) {
+                    ImportView()
+                        .environment(\.managedObjectContext, viewContext)
+                }
+                .navigationDestination(for: AppNavigation.self) { navigation in
+                    switch navigation {
+                    case .deck(let cardSet):
+                        DeckDetailView(cardSet: cardSet, onStudy: {
+                            self.selectedCardSet = cardSet
+                            self.selectedTab = 1
+                        }, onAuto: {
+                            self.selectedCardSet = cardSet
+                            self.selectedTab = 2
+                        })
+                            .environment(\.managedObjectContext, viewContext)
+                            .environmentObject(ttsService)
+                    case .study(let cardSet):
+                        StudyView(cardSet: cardSet)
+                            .environment(\.managedObjectContext, viewContext)
+                            .environmentObject(ttsService)
+                    case .auto(let cardSet):
+                        AutoPlayView(cardSet: cardSet)
+                            .environment(\.managedObjectContext, viewContext)
+                            .environmentObject(ttsService)
+                    case .browse:
+                        EmptyView()
+                    }
+                }
+            }
+            .tabItem {
+                Label("Browse", systemImage: "magnifyingglass")
+            }
+            .tag(0)
+
             Group {
                 if let cardSet = selectedCardSet {
                     StudyView(cardSet: cardSet)
@@ -44,6 +93,7 @@ struct ContentView: View {
             .tabItem {
                 Label("Study", systemImage: "book")
             }
+            .tag(1)
 
             Group {
                 if let cardSet = selectedCardSet {
@@ -67,39 +117,7 @@ struct ContentView: View {
             .tabItem {
                 Label("Auto", systemImage: "play.circle")
             }
-
-            NavigationStack {
-                ZStack {
-                    DesignSystem.Gradients.background
-                        .ignoresSafeArea()
-
-                    VStack {
-                        header
-                        deckList(navigationValue: { cardSet in
-                            self.selectedCardSet = cardSet
-                            return .deck(cardSet)
-                        })
-                    }
-                }
-                .navigationBarHidden(true)
-                .sheet(isPresented: $showingImportView) {
-                    ImportView()
-                        .environment(\.managedObjectContext, viewContext)
-                }
-                .navigationDestination(for: AppNavigation.self) { navigation in
-                    switch navigation {
-                    case .deck(let cardSet):
-                        DeckDetailView(cardSet: cardSet)
-                            .environment(\.managedObjectContext, viewContext)
-                            .environmentObject(ttsService)
-                    default:
-                        EmptyView()
-                    }
-                }
-            }
-            .tabItem {
-                Label("Browse", systemImage: "magnifyingglass")
-            }
+            .tag(2)
         }
     }
 
@@ -127,7 +145,10 @@ struct ContentView: View {
             LazyVStack(spacing: 16) {
                 ForEach(cardSets) { cardSet in
                     NavigationLink(value: navigationValue(cardSet)) {
-                        DeckCard(cardSet: cardSet)
+                        DeckCard(cardSet: cardSet, onStudy: {
+                            self.selectedCardSet = cardSet
+                            self.selectedTab = 1
+                        })
                     }
                 }
             }
@@ -138,6 +159,7 @@ struct ContentView: View {
 
 struct DeckCard: View {
     let cardSet: CardSet
+    let onStudy: () -> Void
 
     var body: some View {
         ZStack {
@@ -162,7 +184,7 @@ struct DeckCard: View {
 
                     Spacer()
 
-                    Button(action: {}) {
+                    Button(action: onStudy) {
                         Text("Study")
                             .font(.headline)
                             .foregroundColor(DesignSystem.Colors.highlight)
