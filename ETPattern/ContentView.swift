@@ -33,6 +33,9 @@ struct ContentView: View {
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
     @State private var errorTitle = ""
+    @State private var showingSessionStats = false
+    @State private var showingImport = false
+    @State private var showingSettings = false
 
     var body: some View {
         NavigationView {
@@ -103,7 +106,7 @@ struct ContentView: View {
                 EmptyView()
             }
         }
-        .sheet(isPresented: $showingStudyView) {
+        .fullScreenCover(isPresented: $showingStudyView) {
             if let cardSet = selectedCardSet {
                 StudyView(cardSet: cardSet)
             }
@@ -111,6 +114,36 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $showingAutoView) {
             if let cardSet = selectedCardSet {
                 AutoPlayView(cardSet: cardSet)
+            }
+        }
+        .sheet(isPresented: $showingSessionStats) {
+            NavigationView {
+                SessionStatsView()
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Done") { showingSessionStats = false }
+                        }
+                    }
+            }
+        }
+        .sheet(isPresented: $showingImport) {
+            NavigationView {
+                ImportView()
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Done") { showingImport = false }
+                        }
+                    }
+            }
+        }
+        .sheet(isPresented: $showingSettings) {
+            NavigationView {
+                SettingsView()
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Done") { showingSettings = false }
+                        }
+                    }
             }
         }
         .sheet(item: $browseCardSet) { deck in
@@ -521,15 +554,35 @@ struct ContentView: View {
 
     private var headerActions: some View {
         HStack(spacing: 10) {
-            NavigationLink(destination: SessionStatsView()) {
+            Button {
+                UIImpactFeedbackGenerator.lightImpact()
+                showingSessionStats = true
+            } label: {
                 headerIcon(systemName: "chart.bar")
             }
-            NavigationLink(destination: ImportView()) {
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("chart.bar")
+            .accessibilityLabel("chart.bar")
+
+            Button {
+                UIImpactFeedbackGenerator.lightImpact()
+                showingImport = true
+            } label: {
                 headerIcon(systemName: "square.and.arrow.down")
             }
-            NavigationLink(destination: SettingsView()) {
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("square.and.arrow.down")
+            .accessibilityLabel("square.and.arrow.down")
+
+            Button {
+                UIImpactFeedbackGenerator.lightImpact()
+                showingSettings = true
+            } label: {
                 headerIcon(systemName: "gear")
             }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("gear")
+            .accessibilityLabel("gear")
         }
     }
 

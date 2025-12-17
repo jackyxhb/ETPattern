@@ -54,6 +54,7 @@ struct Constants {
     }
 
     struct Decks {
+        // Bundled master deck name (represents all 300 patterns)
         static let bundledMasterName = "ETPattern 300"
         static let legacyBundledMasterName = "ETPatterns 300"
     }

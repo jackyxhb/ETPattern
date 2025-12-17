@@ -14,9 +14,6 @@ struct ETPatternApp: App {
     @StateObject private var ttsService = TTSService()
 
     init() {
-        // Initialize bundled card sets on first launch
-        persistenceController.initializeBundledCardSets()
-        
         // Initialize default settings if not already set
         initializeDefaultSettings()
     }

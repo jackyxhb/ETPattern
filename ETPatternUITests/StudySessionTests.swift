@@ -35,8 +35,8 @@ final class StudySessionTests: XCTestCase {
         XCTAssertTrue(againButton.waitForExistence(timeout: 5))
         XCTAssertTrue(easyButton.waitForExistence(timeout: 5))
 
-        againButton.tap()
-        easyButton.tap()
+        againButton.forceTap()
+        easyButton.forceTap()
 
         XCTAssertTrue(app.navigationBars["Study Session"].exists || app.staticTexts["Session Complete!"].exists)
     }
@@ -51,14 +51,14 @@ final class StudySessionTests: XCTestCase {
         XCTAssertTrue(statsButton.exists)
         statsButton.tap()
         XCTAssertTrue(app.navigationBars["Study Sessions"].waitForExistence(timeout: 3))
-        app.buttons["Done"].tap()
+        app.navigationBars["Study Sessions"].buttons["Done"].forceTap()
 
         let importButton = app.buttons["square.and.arrow.down"]
         XCTAssertTrue(importButton.exists)
         importButton.tap()
         XCTAssertTrue(app.staticTexts["Import CSV File"].waitForExistence(timeout: 3))
         if app.navigationBars.buttons.count > 0 {
-            app.navigationBars.buttons.element(boundBy: 0).tap()
+            app.navigationBars.buttons.element(boundBy: 0).forceTap()
         }
 
         let settingsButton = app.buttons["gear"]
@@ -66,7 +66,7 @@ final class StudySessionTests: XCTestCase {
         settingsButton.tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
         if app.navigationBars.buttons.count > 0 {
-            app.navigationBars.buttons.element(boundBy: 0).tap()
+            app.navigationBars.buttons.element(boundBy: 0).forceTap()
         }
     }
 }

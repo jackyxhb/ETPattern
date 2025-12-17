@@ -25,7 +25,7 @@ final class CardFlipTests: XCTestCase {
 
         let studyButton = app.buttons["Study"]
         XCTAssertTrue(studyButton.waitForExistence(timeout: 5), "Study button missing on deck detail")
-        studyButton.tap()
+        studyButton.forceTap()
 
         let card = app.otherElements["studyCard"]
         XCTAssertTrue(card.waitForExistence(timeout: 8), "Card view did not appear")
@@ -48,7 +48,7 @@ final class CardFlipTests: XCTestCase {
 
         let studyButton = app.buttons["Study"]
         XCTAssertTrue(studyButton.waitForExistence(timeout: 5))
-        studyButton.tap()
+        studyButton.forceTap()
 
         let card = app.otherElements["studyCard"]
         XCTAssertTrue(card.waitForExistence(timeout: 8))

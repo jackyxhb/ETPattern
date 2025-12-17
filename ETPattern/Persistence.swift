@@ -6,30 +6,47 @@
 //
 
 import CoreData
+import Foundation
 
 struct PersistenceController {
-    static let shared = PersistenceController()
+    static let shared = PersistenceController(
+        inMemory: ProcessInfo.processInfo.arguments.contains("UI_TESTING") ||
+            ProcessInfo.processInfo.arguments.contains("UNIT_TESTING")
+    )
+
+    private final class ModelBundleToken: NSObject {}
 
     @MainActor
     static let preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
 
+        guard let cardSetEntity = NSEntityDescription.entity(forEntityName: "CardSet", in: viewContext),
+              let cardEntity = NSEntityDescription.entity(forEntityName: "Card", in: viewContext) else {
+            fatalError("Failed to resolve Core Data entities for preview")
+        }
+
         // Create sample CardSet
-        let cardSet = CardSet(context: viewContext)
+        let cardSet = CardSet(entity: cardSetEntity, insertInto: viewContext)
         cardSet.name = "Sample Group"
         cardSet.createdDate = Date()
 
         // Create sample cards
         for i in 1...5 {
-            let card = Card(context: viewContext)
+            let card = Card(entity: cardEntity, insertInto: viewContext)
+            card.id = Int32(i)
             card.front = "Sample pattern \(i)"
+            card.cardName = card.front ?? "Sample pattern \(i)"
             card.back = "Example 1<br>Example 2<br>Example 3<br>Example 4<br>Example 5"
             card.tags = "sample"
+            card.groupId = 0
+            card.groupName = ""
             card.difficulty = 0
             card.nextReviewDate = Date()
             card.interval = 1
             card.easeFactor = 2.5
+            card.timesReviewed = 0
+            card.timesCorrect = 0
             card.cardSet = cardSet
         }
 
@@ -45,31 +62,61 @@ struct PersistenceController {
     let container: NSPersistentContainer
 
     init(inMemory: Bool = false) {
-        container = NSPersistentContainer(name: "ETPattern")
+        let modelName = "ETPattern"
+
+        // When running under test hosts, multiple bundles can contain a compiled .momd.
+        // Explicitly loading the model from the ETPattern app bundle avoids Core Data
+        // ambiguity ("Failed to find a unique match for an NSEntityDescription").
+        let modelBundle = Bundle(for: ModelBundleToken.self)
+        guard let modelURL = modelBundle.url(forResource: modelName, withExtension: "momd"),
+              let model = NSManagedObjectModel(contentsOf: modelURL) else {
+            fatalError("Failed to load Core Data model \(modelName).momd from bundle \(modelBundle.bundleURL)")
+        }
+
+        container = NSPersistentContainer(name: modelName, managedObjectModel: model)
+        let containerRef = container
+        let isUITesting = ProcessInfo.processInfo.arguments.contains("UI_TESTING")
         if inMemory {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
         }
-        container.loadPersistentStores(completionHandler: { (storeDescription, error) in
-            if let error = error as NSError? {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
 
-                /*
-                 Typical reasons for an error here include:
-                 * The parent directory does not exist, cannot be created, or disallows writing.
-                 * The persistent store is not accessible, due to permissions or data protection when the device is locked.
-                 * The device is out of space.
-                 * The store could not be migrated to the current model version.
-                 Check the error message to determine what the actual problem was.
-                 */
+        if isUITesting {
+            // UI tests need deterministic, fully-seeded data before the first screen appears.
+            let semaphore = DispatchSemaphore(value: 0)
+            var loadError: NSError?
+
+            container.loadPersistentStores { _, error in
+                loadError = error as NSError?
+                semaphore.signal()
+            }
+
+            semaphore.wait()
+
+            if let error = loadError {
                 fatalError("Unresolved error \(error), \(error.userInfo)")
             }
-        })
+
+            PersistenceController.seedBundledCardSets(viewContext: containerRef.viewContext)
+        } else {
+            container.loadPersistentStores(completionHandler: { (_, error) in
+                if let error = error as NSError? {
+                    fatalError("Unresolved error \(error), \(error.userInfo)")
+                }
+
+                // Seed bundled decks only after the persistent store is ready.
+                DispatchQueue.main.async {
+                    PersistenceController.seedBundledCardSets(viewContext: containerRef.viewContext)
+                }
+            })
+        }
         container.viewContext.automaticallyMergesChangesFromParent = true
     }
 
     func initializeBundledCardSets() {
-        let viewContext = container.viewContext
+        Self.seedBundledCardSets(viewContext: container.viewContext)
+    }
+
+    private static func seedBundledCardSets(viewContext: NSManagedObjectContext) {
 
         print("DEBUG: Ensuring bundled card sets are initialized...")
         let csvImporter = CSVImporter(viewContext: viewContext)

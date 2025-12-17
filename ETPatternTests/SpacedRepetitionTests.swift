@@ -5,138 +5,156 @@
 //  Created by admin on 29/11/2025.
 //
 
-import XCTest
 import CoreData
+import Testing
 @testable import ETPattern
 
-class SpacedRepetitionTests: XCTestCase {
+@Suite("Spaced Repetition")
+struct SpacedRepetitionTests {
 
-    var persistenceController: PersistenceController!
-    var spacedRepetitionService: SpacedRepetitionService!
-    var testCard: Card!
-
-    override func setUp() {
-        super.setUp()
-        persistenceController = PersistenceController(inMemory: true)
-        spacedRepetitionService = SpacedRepetitionService()
-
-        // Create a test card
-        testCard = Card(context: persistenceController.container.viewContext)
-        testCard.front = "Test Pattern"
-        testCard.back = "Test Example"
-        testCard.difficulty = 0
-        testCard.nextReviewDate = Date()
-        testCard.interval = 1
-        testCard.easeFactor = 2.5
+    @MainActor
+    private func makeTestCard(in context: NSManagedObjectContext) -> Card {
+        guard let entity = NSEntityDescription.entity(forEntityName: "Card", in: context) else {
+            fatalError("Failed to resolve Card entity")
+        }
+        let card = Card(entity: entity, insertInto: context)
+        card.id = 1
+        card.front = "Test Pattern"
+        card.cardName = card.front ?? "Test Pattern"
+        card.back = "Test Example"
+        card.groupId = 0
+        card.groupName = ""
+        card.difficulty = 0
+        card.nextReviewDate = Date()
+        card.interval = 1
+        card.easeFactor = 2.5
+        card.timesReviewed = 0
+        card.timesCorrect = 0
+        return card
     }
 
-    override func tearDown() {
-        persistenceController = nil
-        spacedRepetitionService = nil
-        testCard = nil
-        super.tearDown()
-    }
-
-    func testUpdateCardDifficulty_Again() {
-        // Given
-        let initialInterval = testCard.interval
+    @MainActor
+    @Test
+    func updateCardDifficulty_again() {
+        let persistenceController = PersistenceController(inMemory: true)
+        let service = SpacedRepetitionService()
+        let testCard = makeTestCard(in: persistenceController.container.viewContext)
         let initialEaseFactor = testCard.easeFactor
 
-        // When
-        spacedRepetitionService.updateCardDifficulty(testCard, rating: .again)
+        service.updateCardDifficulty(testCard, rating: .again)
 
-        // Then
-        XCTAssertEqual(testCard.interval, 1, "Interval should reset to 1 for 'again' rating")
-        XCTAssertEqual(testCard.easeFactor, max(1.3, initialEaseFactor - 0.2), "Ease factor should decrease for 'again' rating")
-        XCTAssertNotNil(testCard.nextReviewDate, "Next review date should be set")
+        #expect(testCard.interval == 1)
+        #expect(testCard.easeFactor == max(1.3, initialEaseFactor - 0.2))
+        #expect(testCard.nextReviewDate != nil)
     }
 
-    func testUpdateCardDifficulty_Easy() {
-        // Given
+    @MainActor
+    @Test
+    func updateCardDifficulty_easy() {
+        let persistenceController = PersistenceController(inMemory: true)
+        let service = SpacedRepetitionService()
+        let testCard = makeTestCard(in: persistenceController.container.viewContext)
         testCard.interval = 2
         let initialEaseFactor = testCard.easeFactor
 
-        // When
-        spacedRepetitionService.updateCardDifficulty(testCard, rating: .easy)
+        service.updateCardDifficulty(testCard, rating: .easy)
 
-        // Then
         let expectedInterval = Int32(max(1, Int(Double(2) * initialEaseFactor * 1.5)))
-        XCTAssertEqual(testCard.interval, expectedInterval, "Interval should increase for 'easy' rating")
-        XCTAssertEqual(testCard.easeFactor, min(2.5, initialEaseFactor + 0.1), "Ease factor should increase for 'easy' rating")
-        XCTAssertNotNil(testCard.nextReviewDate, "Next review date should be set")
+        #expect(testCard.interval == expectedInterval)
+        #expect(testCard.easeFactor == min(2.5, initialEaseFactor + 0.1))
+        #expect(testCard.nextReviewDate != nil)
     }
 
-    func testGetCardsDueForReview() {
-        // Given
-        let cardSet = CardSet(context: persistenceController.container.viewContext)
+    @MainActor
+    @Test
+    func getCardsDueForReview_returnsDueCard() {
+        let persistenceController = PersistenceController(inMemory: true)
+        let service = SpacedRepetitionService()
+        let testCard = makeTestCard(in: persistenceController.container.viewContext)
+
+        guard let cardSetEntity = NSEntityDescription.entity(forEntityName: "CardSet", in: persistenceController.container.viewContext) else {
+            fatalError("Failed to resolve CardSet entity")
+        }
+        let cardSet = CardSet(entity: cardSetEntity, insertInto: persistenceController.container.viewContext)
         cardSet.name = "Test Set"
         cardSet.addToCards(testCard)
 
-        // Set card as due (past date)
-        testCard.nextReviewDate = Date().addingTimeInterval(-86400) // Yesterday
+        testCard.nextReviewDate = Date().addingTimeInterval(-86400)
 
-        // When
-        let dueCards = spacedRepetitionService.getCardsDueForReview(from: cardSet)
+        let dueCards = service.getCardsDueForReview(from: cardSet)
 
-        // Then
-        XCTAssertEqual(dueCards.count, 1, "Should return 1 due card")
-        XCTAssertEqual(dueCards.first, testCard, "Should return the test card")
+        #expect(dueCards.count == 1)
+        #expect(dueCards.first === testCard)
     }
 
-    func testGetCardsDueForReview_NoDueCards() {
-        // Given
-        let cardSet = CardSet(context: persistenceController.container.viewContext)
+    @MainActor
+    @Test
+    func getCardsDueForReview_returnsEmptyWhenNotDue() {
+        let persistenceController = PersistenceController(inMemory: true)
+        let service = SpacedRepetitionService()
+        let testCard = makeTestCard(in: persistenceController.container.viewContext)
+
+        guard let cardSetEntity = NSEntityDescription.entity(forEntityName: "CardSet", in: persistenceController.container.viewContext) else {
+            fatalError("Failed to resolve CardSet entity")
+        }
+        let cardSet = CardSet(entity: cardSetEntity, insertInto: persistenceController.container.viewContext)
         cardSet.name = "Test Set"
         cardSet.addToCards(testCard)
 
-        // Set card as not due (future date)
-        testCard.nextReviewDate = Date().addingTimeInterval(86400) // Tomorrow
+        testCard.nextReviewDate = Date().addingTimeInterval(86400)
+        let dueCards = service.getCardsDueForReview(from: cardSet)
 
-        // When
-        let dueCards = spacedRepetitionService.getCardsDueForReview(from: cardSet)
-
-        // Then
-        XCTAssertEqual(dueCards.count, 0, "Should return no due cards")
+        #expect(dueCards.isEmpty)
     }
 
-    func testGetCardsDueForReview_NewCard() {
-        // Given
-        let cardSet = CardSet(context: persistenceController.container.viewContext)
+    @MainActor
+    @Test
+    func getCardsDueForReview_newCardIsDue() {
+        let persistenceController = PersistenceController(inMemory: true)
+        let service = SpacedRepetitionService()
+        let testCard = makeTestCard(in: persistenceController.container.viewContext)
+
+        guard let cardSetEntity = NSEntityDescription.entity(forEntityName: "CardSet", in: persistenceController.container.viewContext) else {
+            fatalError("Failed to resolve CardSet entity")
+        }
+        let cardSet = CardSet(entity: cardSetEntity, insertInto: persistenceController.container.viewContext)
         cardSet.name = "Test Set"
         cardSet.addToCards(testCard)
 
-        // New card (no nextReviewDate)
         testCard.nextReviewDate = nil
+        let dueCards = service.getCardsDueForReview(from: cardSet)
 
-        // When
-        let dueCards = spacedRepetitionService.getCardsDueForReview(from: cardSet)
-
-        // Then
-        XCTAssertEqual(dueCards.count, 1, "New cards should be due for review")
-        XCTAssertEqual(dueCards.first, testCard, "Should return the new card")
+        #expect(dueCards.count == 1)
+        #expect(dueCards.first === testCard)
     }
 
-    func testGetNextReviewDate() {
-        // Given
+    @MainActor
+    @Test
+    func getNextReviewDate_calculatesCorrectly() {
+        let persistenceController = PersistenceController(inMemory: true)
+        let service = SpacedRepetitionService()
+        let testCard = makeTestCard(in: persistenceController.container.viewContext)
         testCard.interval = 3
 
-        // When
-        let nextReviewDate = spacedRepetitionService.getNextReviewDate(for: testCard)
-
-        // Then
+        let nextReviewDate = service.getNextReviewDate(for: testCard)
         let expectedDate = Date().addingTimeInterval(TimeInterval(3 * 86400))
-        XCTAssertEqual(nextReviewDate.timeIntervalSince1970, expectedDate.timeIntervalSince1970, accuracy: 1.0, "Next review date should be calculated correctly")
+
+        #expect(abs(nextReviewDate.timeIntervalSince1970 - expectedDate.timeIntervalSince1970) < 1.0)
     }
 
-    func testEaseFactorBounds() {
-        // Test minimum ease factor
-        testCard.easeFactor = 1.2
-        spacedRepetitionService.updateCardDifficulty(testCard, rating: .again)
-        XCTAssertEqual(testCard.easeFactor, 1.3, "Ease factor should not go below minimum")
+    @MainActor
+    @Test
+    func easeFactorBounds_areEnforced() {
+        let persistenceController = PersistenceController(inMemory: true)
+        let service = SpacedRepetitionService()
+        let testCard = makeTestCard(in: persistenceController.container.viewContext)
 
-        // Test maximum ease factor
+        testCard.easeFactor = 1.2
+        service.updateCardDifficulty(testCard, rating: .again)
+        #expect(testCard.easeFactor == 1.3)
+
         testCard.easeFactor = 2.5
-        spacedRepetitionService.updateCardDifficulty(testCard, rating: .easy)
-        XCTAssertEqual(testCard.easeFactor, 2.5, "Ease factor should not go above maximum")
+        service.updateCardDifficulty(testCard, rating: .easy)
+        #expect(testCard.easeFactor == 2.5)
     }
 }

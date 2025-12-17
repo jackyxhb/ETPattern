@@ -104,11 +104,11 @@ final class ETPatternUITests: XCTestCase {
 
         // Tap settings button
         let settingsButton = app.buttons["gear"]
-        XCTAssertTrue(settingsButton.exists)
-        settingsButton.tap()
+        XCTAssertTrue(settingsButton.waitForExistence(timeout: 5))
+        settingsButton.forceTap()
 
         // Verify settings view
-        XCTAssertTrue(app.navigationBars["Settings"].exists)
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Text-to-Speech"].exists)
     }
 

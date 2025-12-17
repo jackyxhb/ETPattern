@@ -39,26 +39,29 @@ struct StudyView: View {
             DesignSystem.Gradients.background
                 .ignoresSafeArea()
 
-            VStack(spacing: 32) {
+            VStack(spacing: 12) {
                 header
 
-                if showSessionComplete {
-                    completionView
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if cardsDue.isEmpty {
-                    emptyState
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    studySessionContent
+                Group {
+                    if showSessionComplete {
+                        completionView
+                    } else if cardsDue.isEmpty {
+                        emptyState
+                    } else {
+                        studySessionContent
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .zIndex(0)
+
+                if !showSessionComplete && !cardsDue.isEmpty {
+                    actionButtonsBar
+                        .zIndex(10)
+                        .padding(.bottom, 8)
                 }
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 8)
-            .safeAreaInset(edge: .bottom) {
-                if !showSessionComplete && !cardsDue.isEmpty {
-                    actionButtonsBar
-                }
-            }
         }
         .onAppear {
             isRandomOrder = UserDefaults.standard.string(forKey: "cardOrderMode") == "random"
@@ -187,6 +190,7 @@ struct StudyView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(.vertical, 4)
                 .offset(x: swipeOffset)
+                .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("studyCard")
                 .gesture(
                     DragGesture()
@@ -312,6 +316,7 @@ struct StudyView: View {
                         .clipShape(Circle())
                 }
                 .accessibilityLabel("Again")
+                .accessibilityIdentifier("Again")
 
                 // Flip button - just flip current card
                 Button(action: {
@@ -344,6 +349,7 @@ struct StudyView: View {
                         .clipShape(Circle())
                 }
                 .accessibilityLabel("Easy")
+                .accessibilityIdentifier("Easy")
 
                 // Close button - close the view
                 Button(action: {
