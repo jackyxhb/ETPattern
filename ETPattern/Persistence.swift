@@ -100,15 +100,16 @@ struct PersistenceController {
         var importErrors: [String] = []
 
         for fileName in bundledFiles {
-            do {
-                let cardSet = try csvImporter.importBundledCSV(named: fileName, cardSetName: masterDeckName)
-                if let cards = cardSet.cards {
-                    let cardCount = cards.count
-                    totalImported += Int(cardCount)
-                    print("DEBUG: Imported \(cardCount) cards from \(fileName) into '\(masterDeckName)'")
+            if let content = FileManagerService.loadBundledCSV(named: fileName) {
+                let cards = csvImporter.parseCSV(content, cardSetName: masterDeckName)
+                for card in cards {
+                    card.cardSet = masterDeck
+                    masterDeck.addToCards(card)
                 }
-            } catch {
-                let errorMessage = "Failed to import \(fileName): \(error.localizedDescription)"
+                totalImported += cards.count
+                print("DEBUG: Imported \(cards.count) cards from \(fileName) into '\(masterDeckName)'")
+            } else {
+                let errorMessage = "Failed to load bundled CSV \(fileName)"
                 importErrors.append(errorMessage)
                 print("ERROR: \(errorMessage)")
             }
