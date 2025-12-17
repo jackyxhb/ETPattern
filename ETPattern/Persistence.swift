@@ -9,10 +9,7 @@ import CoreData
 import Foundation
 
 struct PersistenceController {
-    static let shared = PersistenceController(
-        inMemory: ProcessInfo.processInfo.arguments.contains("UI_TESTING") ||
-            ProcessInfo.processInfo.arguments.contains("UNIT_TESTING")
-    )
+    static let shared = PersistenceController()
 
     private final class ModelBundleToken: NSObject {}
 
@@ -64,9 +61,8 @@ struct PersistenceController {
     init(inMemory: Bool = false) {
         let modelName = "ETPattern"
 
-        // When running under test hosts, multiple bundles can contain a compiled .momd.
-        // Explicitly loading the model from the ETPattern app bundle avoids Core Data
-        // ambiguity ("Failed to find a unique match for an NSEntityDescription").
+        // Explicitly load the model from the ETPattern module bundle to avoid Core Data
+        // ambiguity when multiple bundles include a compiled .momd.
         let modelBundle = Bundle(for: ModelBundleToken.self)
         guard let modelURL = modelBundle.url(forResource: modelName, withExtension: "momd"),
               let model = NSManagedObjectModel(contentsOf: modelURL) else {
@@ -75,40 +71,20 @@ struct PersistenceController {
 
         container = NSPersistentContainer(name: modelName, managedObjectModel: model)
         let containerRef = container
-        let isUITesting = ProcessInfo.processInfo.arguments.contains("UI_TESTING")
         if inMemory {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
         }
 
-        if isUITesting {
-            // UI tests need deterministic, fully-seeded data before the first screen appears.
-            let semaphore = DispatchSemaphore(value: 0)
-            var loadError: NSError?
-
-            container.loadPersistentStores { _, error in
-                loadError = error as NSError?
-                semaphore.signal()
-            }
-
-            semaphore.wait()
-
-            if let error = loadError {
+        container.loadPersistentStores(completionHandler: { (_, error) in
+            if let error = error as NSError? {
                 fatalError("Unresolved error \(error), \(error.userInfo)")
             }
 
-            PersistenceController.seedBundledCardSets(viewContext: containerRef.viewContext)
-        } else {
-            container.loadPersistentStores(completionHandler: { (_, error) in
-                if let error = error as NSError? {
-                    fatalError("Unresolved error \(error), \(error.userInfo)")
-                }
-
-                // Seed bundled decks only after the persistent store is ready.
-                DispatchQueue.main.async {
-                    PersistenceController.seedBundledCardSets(viewContext: containerRef.viewContext)
-                }
-            })
-        }
+            // Seed bundled decks only after the persistent store is ready.
+            DispatchQueue.main.async {
+                PersistenceController.seedBundledCardSets(viewContext: containerRef.viewContext)
+            }
+        })
         container.viewContext.automaticallyMergesChangesFromParent = true
     }
 

@@ -8,7 +8,6 @@ struct SplashHostView<Content: View>: View {
 
     init(@ViewBuilder content: @escaping () -> Content) {
         self.content = content
-        _showSplash = State(initialValue: !ProcessInfo.processInfo.arguments.contains("UI_TESTING"))
     }
 
     var body: some View {

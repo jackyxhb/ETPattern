@@ -217,11 +217,6 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            if ProcessInfo.processInfo.arguments.contains("UI_TESTING") {
-                UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
-                hasSeenOnboarding = true
-                showingOnboarding = false
-            }
             if !hasSeenOnboarding {
                 showingOnboarding = true
             }

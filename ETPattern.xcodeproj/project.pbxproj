@@ -7,53 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A0F2C1000000000000000001 /* Group1.csv in Resources */ = {isa = PBXBuildFile; fileRef = A0F2C2000000000000000001 /* Group1.csv */; };
-		A0F2C1000000000000000002 /* Group2.csv in Resources */ = {isa = PBXBuildFile; fileRef = A0F2C2000000000000000002 /* Group2.csv */; };
-		A0F2C1000000000000000003 /* Group3.csv in Resources */ = {isa = PBXBuildFile; fileRef = A0F2C2000000000000000003 /* Group3.csv */; };
-		A0F2C1000000000000000004 /* Group4.csv in Resources */ = {isa = PBXBuildFile; fileRef = A0F2C2000000000000000004 /* Group4.csv */; };
-		A0F2C1000000000000000005 /* Group5.csv in Resources */ = {isa = PBXBuildFile; fileRef = A0F2C2000000000000000005 /* Group5.csv */; };
-		A0F2C1000000000000000006 /* Group6.csv in Resources */ = {isa = PBXBuildFile; fileRef = A0F2C2000000000000000006 /* Group6.csv */; };
-		A0F2C1000000000000000007 /* Group7.csv in Resources */ = {isa = PBXBuildFile; fileRef = A0F2C2000000000000000007 /* Group7.csv */; };
-		A0F2C1000000000000000008 /* Group8.csv in Resources */ = {isa = PBXBuildFile; fileRef = A0F2C2000000000000000008 /* Group8.csv */; };
-		A0F2C1000000000000000009 /* Group9.csv in Resources */ = {isa = PBXBuildFile; fileRef = A0F2C2000000000000000009 /* Group9.csv */; };
-		A0F2C100000000000000000A /* Group10.csv in Resources */ = {isa = PBXBuildFile; fileRef = A0F2C200000000000000000A /* Group10.csv */; };
-		A0F2C100000000000000000B /* Group11.csv in Resources */ = {isa = PBXBuildFile; fileRef = A0F2C200000000000000000B /* Group11.csv */; };
-		A0F2C100000000000000000C /* Group12.csv in Resources */ = {isa = PBXBuildFile; fileRef = A0F2C200000000000000000C /* Group12.csv */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		22EC7D612ED5727300C3DDDA /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 22EC7D462ED5726F00C3DDDA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 22EC7D4D2ED5726F00C3DDDA;
-			remoteInfo = ETPattern;
-		};
-		22EC7D6B2ED5727300C3DDDA /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 22EC7D462ED5726F00C3DDDA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 22EC7D4D2ED5726F00C3DDDA;
-			remoteInfo = ETPattern;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		22EC7D4E2ED5726F00C3DDDA /* ETPattern.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ETPattern.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		22EC7D602ED5727300C3DDDA /* ETPatternTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ETPatternTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		22EC7D6A2ED5727300C3DDDA /* ETPatternUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ETPatternUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		A0F2C2000000000000000001 /* Group1.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = Group1.csv; path = ETPattern/Resources/Group1.csv; sourceTree = "<group>"; };
-		A0F2C2000000000000000002 /* Group2.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = Group2.csv; path = ETPattern/Resources/Group2.csv; sourceTree = "<group>"; };
-		A0F2C2000000000000000003 /* Group3.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = Group3.csv; path = ETPattern/Resources/Group3.csv; sourceTree = "<group>"; };
-		A0F2C2000000000000000004 /* Group4.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = Group4.csv; path = ETPattern/Resources/Group4.csv; sourceTree = "<group>"; };
-		A0F2C2000000000000000005 /* Group5.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = Group5.csv; path = ETPattern/Resources/Group5.csv; sourceTree = "<group>"; };
-		A0F2C2000000000000000006 /* Group6.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = Group6.csv; path = ETPattern/Resources/Group6.csv; sourceTree = "<group>"; };
-		A0F2C2000000000000000007 /* Group7.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = Group7.csv; path = ETPattern/Resources/Group7.csv; sourceTree = "<group>"; };
-		A0F2C2000000000000000008 /* Group8.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = Group8.csv; path = ETPattern/Resources/Group8.csv; sourceTree = "<group>"; };
-		A0F2C2000000000000000009 /* Group9.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = Group9.csv; path = ETPattern/Resources/Group9.csv; sourceTree = "<group>"; };
-		A0F2C200000000000000000A /* Group10.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = Group10.csv; path = ETPattern/Resources/Group10.csv; sourceTree = "<group>"; };
-		A0F2C200000000000000000B /* Group11.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = Group11.csv; path = ETPattern/Resources/Group11.csv; sourceTree = "<group>"; };
-		A0F2C200000000000000000C /* Group12.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = Group12.csv; path = ETPattern/Resources/Group12.csv; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -62,34 +22,10 @@
 			path = ETPattern;
 			sourceTree = "<group>";
 		};
-		22EC7D632ED5727300C3DDDA /* ETPatternTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = ETPatternTests;
-			sourceTree = "<group>";
-		};
-		22EC7D6D2ED5727300C3DDDA /* ETPatternUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = ETPatternUITests;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		22EC7D4B2ED5726F00C3DDDA /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		22EC7D5D2ED5727300C3DDDA /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		22EC7D672ED5727300C3DDDA /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -103,8 +39,6 @@
 			isa = PBXGroup;
 			children = (
 				22EC7D502ED5726F00C3DDDA /* ETPattern */,
-				22EC7D632ED5727300C3DDDA /* ETPatternTests */,
-				22EC7D6D2ED5727300C3DDDA /* ETPatternUITests */,
 				22EC7D4F2ED5726F00C3DDDA /* Products */,
 			);
 			sourceTree = "<group>";
@@ -113,8 +47,6 @@
 			isa = PBXGroup;
 			children = (
 				22EC7D4E2ED5726F00C3DDDA /* ETPattern.app */,
-				22EC7D602ED5727300C3DDDA /* ETPatternTests.xctest */,
-				22EC7D6A2ED5727300C3DDDA /* ETPatternUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -144,52 +76,6 @@
 			productReference = 22EC7D4E2ED5726F00C3DDDA /* ETPattern.app */;
 			productType = "com.apple.product-type.application";
 		};
-		22EC7D5F2ED5727300C3DDDA /* ETPatternTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 22EC7D772ED5727300C3DDDA /* Build configuration list for PBXNativeTarget "ETPatternTests" */;
-			buildPhases = (
-				22EC7D5C2ED5727300C3DDDA /* Sources */,
-				22EC7D5D2ED5727300C3DDDA /* Frameworks */,
-				22EC7D5E2ED5727300C3DDDA /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				22EC7D622ED5727300C3DDDA /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				22EC7D632ED5727300C3DDDA /* ETPatternTests */,
-			);
-			name = ETPatternTests;
-			packageProductDependencies = (
-			);
-			productName = ETPatternTests;
-			productReference = 22EC7D602ED5727300C3DDDA /* ETPatternTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		22EC7D692ED5727300C3DDDA /* ETPatternUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 22EC7D7A2ED5727300C3DDDA /* Build configuration list for PBXNativeTarget "ETPatternUITests" */;
-			buildPhases = (
-				22EC7D662ED5727300C3DDDA /* Sources */,
-				22EC7D672ED5727300C3DDDA /* Frameworks */,
-				22EC7D682ED5727300C3DDDA /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				22EC7D6C2ED5727300C3DDDA /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				22EC7D6D2ED5727300C3DDDA /* ETPatternUITests */,
-			);
-			name = ETPatternUITests;
-			packageProductDependencies = (
-			);
-			productName = ETPatternUITests;
-			productReference = 22EC7D6A2ED5727300C3DDDA /* ETPatternUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -202,14 +88,6 @@
 				TargetAttributes = {
 					22EC7D4D2ED5726F00C3DDDA = {
 						CreatedOnToolsVersion = 26.1.1;
-					};
-					22EC7D5F2ED5727300C3DDDA = {
-						CreatedOnToolsVersion = 26.1.1;
-						TestTargetID = 22EC7D4D2ED5726F00C3DDDA;
-					};
-					22EC7D692ED5727300C3DDDA = {
-						CreatedOnToolsVersion = 26.1.1;
-						TestTargetID = 22EC7D4D2ED5726F00C3DDDA;
 					};
 				};
 			};
@@ -228,40 +106,12 @@
 			projectRoot = "";
 			targets = (
 				22EC7D4D2ED5726F00C3DDDA /* ETPattern */,
-				22EC7D5F2ED5727300C3DDDA /* ETPatternTests */,
-				22EC7D692ED5727300C3DDDA /* ETPatternUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		22EC7D4C2ED5726F00C3DDDA /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				A0F2C1000000000000000001 /* Group1.csv in Resources */,
-				A0F2C1000000000000000002 /* Group2.csv in Resources */,
-				A0F2C1000000000000000003 /* Group3.csv in Resources */,
-				A0F2C1000000000000000004 /* Group4.csv in Resources */,
-				A0F2C1000000000000000005 /* Group5.csv in Resources */,
-				A0F2C1000000000000000006 /* Group6.csv in Resources */,
-				A0F2C1000000000000000007 /* Group7.csv in Resources */,
-				A0F2C1000000000000000008 /* Group8.csv in Resources */,
-				A0F2C1000000000000000009 /* Group9.csv in Resources */,
-				A0F2C100000000000000000A /* Group10.csv in Resources */,
-				A0F2C100000000000000000B /* Group11.csv in Resources */,
-				A0F2C100000000000000000C /* Group12.csv in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		22EC7D5E2ED5727300C3DDDA /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		22EC7D682ED5727300C3DDDA /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -278,33 +128,9 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		22EC7D5C2ED5727300C3DDDA /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		22EC7D662ED5727300C3DDDA /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		22EC7D622ED5727300C3DDDA /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 22EC7D4D2ED5726F00C3DDDA /* ETPattern */;
-			targetProxy = 22EC7D612ED5727300C3DDDA /* PBXContainerItemProxy */;
-		};
-		22EC7D6C2ED5727300C3DDDA /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 22EC7D4D2ED5726F00C3DDDA /* ETPattern */;
-			targetProxy = 22EC7D6B2ED5727300C3DDDA /* PBXContainerItemProxy */;
-		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -448,7 +274,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = aaaa.ETPattern;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jack.ETPattern;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -482,7 +308,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = aaaa.ETPattern;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jack.ETPattern;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -492,88 +318,6 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		22EC7D782ED5727300C3DDDA /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = aaaa.ETPatternTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ETPattern.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ETPattern";
-			};
-			name = Debug;
-		};
-		22EC7D792ED5727300C3DDDA /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = aaaa.ETPatternTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ETPattern.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ETPattern";
-			};
-			name = Release;
-		};
-		22EC7D7B2ED5727300C3DDDA /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = aaaa.ETPatternUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = ETPattern;
-			};
-			name = Debug;
-		};
-		22EC7D7C2ED5727300C3DDDA /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = aaaa.ETPatternUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = ETPattern;
 			};
 			name = Release;
 		};
@@ -594,24 +338,6 @@
 			buildConfigurations = (
 				22EC7D752ED5727300C3DDDA /* Debug */,
 				22EC7D762ED5727300C3DDDA /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		22EC7D772ED5727300C3DDDA /* Build configuration list for PBXNativeTarget "ETPatternTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				22EC7D782ED5727300C3DDDA /* Debug */,
-				22EC7D792ED5727300C3DDDA /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		22EC7D7A2ED5727300C3DDDA /* Build configuration list for PBXNativeTarget "ETPatternUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				22EC7D7B2ED5727300C3DDDA /* Debug */,
-				22EC7D7C2ED5727300C3DDDA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
