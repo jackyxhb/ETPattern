@@ -8,6 +8,7 @@
 import SwiftUI
 import CoreData
 import UIKit
+import UniformTypeIdentifiers
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -23,6 +24,8 @@ struct ContentView: View {
     @State private var showingRenameAlert = false
     @State private var showingDeleteAlert = false
     @State private var showingExportAlert = false
+    @State private var showingReimportAlert = false
+    @State private var showingReimportFilePicker = false
     @State private var newName = ""
     @State private var browseCardSet: CardSet?
     @State private var hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
@@ -53,6 +56,11 @@ struct ContentView: View {
                                                 promptRename(for: cardSet)
                                             } label: {
                                                 Label("Rename", systemImage: "pencil")
+                                            }
+                                            Button {
+                                                promptReimport(for: cardSet)
+                                            } label: {
+                                                Label("Re-import", systemImage: "arrow.clockwise")
                                             }
                                             Button {
                                                 selectedCardSet = cardSet
@@ -147,6 +155,22 @@ struct ContentView: View {
         } message: {
             Text("Export this deck as a CSV file?")
         }
+        .alert("Re-import Deck", isPresented: $showingReimportAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Re-import", role: .destructive) {
+                guard let cardSet = selectedCardSet else { return }
+                performReimport(for: cardSet)
+            }
+        } message: {
+            Text("This will replace all cards in the deck with the source CSV.")
+        }
+        .fileImporter(
+            isPresented: $showingReimportFilePicker,
+            allowedContentTypes: [UTType.commaSeparatedText],
+            allowsMultipleSelection: false
+        ) { result in
+            handleReimportFileSelection(result)
+        }
         .alert(errorTitle, isPresented: $showErrorAlert) {
             Button("OK", role: .cancel) { }
         } message: {
@@ -160,6 +184,11 @@ struct ContentView: View {
             }
         }
         .onAppear {
+            if ProcessInfo.processInfo.arguments.contains("UI_TESTING") {
+                UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                hasSeenOnboarding = true
+                showingOnboarding = false
+            }
             if !hasSeenOnboarding {
                 showingOnboarding = true
             }
@@ -220,6 +249,154 @@ struct ContentView: View {
     private func promptDelete(for cardSet: CardSet) {
         selectedCardSet = cardSet
         showingDeleteAlert = true
+    }
+
+    private func promptReimport(for cardSet: CardSet) {
+        selectedCardSet = cardSet
+        showingReimportAlert = true
+    }
+
+    private enum BundledDeckKind {
+        case master
+        case group(fileName: String)
+    }
+
+    private func bundledDeckKind(for cardSet: CardSet) -> BundledDeckKind? {
+        let name = (cardSet.name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if name == Constants.Decks.bundledMasterName || name == Constants.Decks.legacyBundledMasterName {
+            return .master
+        }
+        if name.hasPrefix("Group "),
+           let number = Int(name.replacingOccurrences(of: "Group ", with: "")),
+           (1...12).contains(number) {
+            return .group(fileName: "Group\(number)")
+        }
+        return nil
+    }
+
+    private func performReimport(for cardSet: CardSet) {
+        // Bundled decks can be re-imported without a file picker.
+        if let kind = bundledDeckKind(for: cardSet) {
+            reimportBundledDeck(cardSet, kind: kind)
+            return
+        }
+
+        // Custom decks require selecting a CSV file.
+        showingReimportFilePicker = true
+    }
+
+    private func handleReimportFileSelection(_ result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            guard let url = urls.first, let cardSet = selectedCardSet else { return }
+            reimportCustomDeck(cardSet, from: url)
+        case .failure(let error):
+            errorTitle = "Re-import Failed"
+            errorMessage = error.localizedDescription
+            showErrorAlert = true
+        }
+    }
+
+    private func deleteAllCards(in cardSet: CardSet) {
+        if let cards = cardSet.cards as? Set<Card> {
+            for card in cards {
+                viewContext.delete(card)
+            }
+        }
+    }
+
+    private func reimportBundledDeck(_ cardSet: CardSet, kind: BundledDeckKind) {
+        let csvImporter = CSVImporter(viewContext: viewContext)
+        let bundledFiles = FileManagerService.getBundledCSVFiles()
+
+        deleteAllCards(in: cardSet)
+
+        var importedCount = 0
+        var failures: [String] = []
+
+        switch kind {
+        case .master:
+            // Always keep master name standardized.
+            cardSet.name = Constants.Decks.bundledMasterName
+            for fileName in bundledFiles {
+                guard let content = FileManagerService.loadBundledCSV(named: fileName) else {
+                    failures.append(fileName)
+                    continue
+                }
+                let cards = csvImporter.parseCSV(content, cardSetName: Constants.Decks.bundledMasterName)
+                for card in cards {
+                    card.cardSet = cardSet
+                    cardSet.addToCards(card)
+                }
+                importedCount += cards.count
+            }
+        case .group(let fileName):
+            guard let content = FileManagerService.loadBundledCSV(named: fileName) else {
+                errorTitle = "Re-import Failed"
+                errorMessage = "Failed to load bundled CSV \(fileName)."
+                showErrorAlert = true
+                viewContext.rollback()
+                return
+            }
+            let cards = csvImporter.parseCSV(content, cardSetName: cardSet.name ?? "")
+            for card in cards {
+                card.cardSet = cardSet
+                cardSet.addToCards(card)
+            }
+            importedCount = cards.count
+        }
+
+        do {
+            try viewContext.save()
+        } catch {
+            errorTitle = "Re-import Failed"
+            errorMessage = error.localizedDescription
+            showErrorAlert = true
+            viewContext.rollback()
+            return
+        }
+
+        if !failures.isEmpty {
+            errorTitle = "Re-import Partially Failed"
+            errorMessage = "Imported \(importedCount) cards, but failed to load: \(failures.joined(separator: ", "))."
+            showErrorAlert = true
+        }
+    }
+
+    private func reimportCustomDeck(_ cardSet: CardSet, from url: URL) {
+        guard url.startAccessingSecurityScopedResource() else {
+            errorTitle = "Re-import Failed"
+            errorMessage = "Cannot access the selected file."
+            showErrorAlert = true
+            return
+        }
+        defer { url.stopAccessingSecurityScopedResource() }
+
+        do {
+            let content = try String(contentsOf: url, encoding: .utf8)
+            let csvImporter = CSVImporter(viewContext: viewContext)
+            let cards = csvImporter.parseCSV(content, cardSetName: cardSet.name ?? "")
+
+            guard !cards.isEmpty else {
+                errorTitle = "Re-import Failed"
+                errorMessage = "No valid cards found in the CSV file. Please check the format."
+                showErrorAlert = true
+                return
+            }
+
+            deleteAllCards(in: cardSet)
+            for card in cards {
+                card.cardSet = cardSet
+                cardSet.addToCards(card)
+            }
+
+            try viewContext.save()
+        } catch {
+            errorTitle = "Re-import Failed"
+            errorMessage = error.localizedDescription
+            showErrorAlert = true
+            viewContext.rollback()
+        }
     }
 
     private func exportDeck(_ cardSet: CardSet) {
@@ -405,6 +582,7 @@ struct ContentView: View {
             .shadow(color: DesignSystem.Metrics.shadow.opacity(0.3), radius: 14, x: 0, y: 10)
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("deckCard")
     }
 }
 

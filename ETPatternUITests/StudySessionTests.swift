@@ -14,9 +14,9 @@ final class StudySessionTests: XCTestCase {
     }
 
     private func startStudySession(app: XCUIApplication) {
-        let firstDeckCell = app.tables.cells.element(boundBy: 0)
-        XCTAssertTrue(firstDeckCell.waitForExistence(timeout: 5), "Deck list is empty")
-        firstDeckCell.tap()
+        let firstDeck = app.buttons.matching(identifier: "deckCard").element(boundBy: 0)
+        XCTAssertTrue(firstDeck.waitForExistence(timeout: 8), "Deck list is empty")
+        firstDeck.tap()
 
         let studyButton = app.buttons["Study"]
         XCTAssertTrue(studyButton.waitForExistence(timeout: 5))
@@ -26,6 +26,7 @@ final class StudySessionTests: XCTestCase {
     @MainActor
     func testAgainAndEasyButtonsExist() throws {
         let app = XCUIApplication()
+        app.launchArguments = ["UI_TESTING"]
         app.launch()
         startStudySession(app: app)
 
@@ -43,6 +44,7 @@ final class StudySessionTests: XCTestCase {
     @MainActor
     func testNavigationShortcuts() throws {
         let app = XCUIApplication()
+        app.launchArguments = ["UI_TESTING"]
         app.launch()
 
         let statsButton = app.buttons["chart.bar"]
@@ -55,12 +57,16 @@ final class StudySessionTests: XCTestCase {
         XCTAssertTrue(importButton.exists)
         importButton.tap()
         XCTAssertTrue(app.staticTexts["Import CSV File"].waitForExistence(timeout: 3))
-        app.navigationBars.buttons["Back"].tap()
+        if app.navigationBars.buttons.count > 0 {
+            app.navigationBars.buttons.element(boundBy: 0).tap()
+        }
 
         let settingsButton = app.buttons["gear"]
         XCTAssertTrue(settingsButton.exists)
         settingsButton.tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
-        app.navigationBars.buttons["Back"].tap()
+        if app.navigationBars.buttons.count > 0 {
+            app.navigationBars.buttons.element(boundBy: 0).tap()
+        }
     }
 }

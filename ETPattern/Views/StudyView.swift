@@ -187,6 +187,7 @@ struct StudyView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(.vertical, 4)
                 .offset(x: swipeOffset)
+                .accessibilityIdentifier("studyCard")
                 .gesture(
                     DragGesture()
                         .onEnded { value in

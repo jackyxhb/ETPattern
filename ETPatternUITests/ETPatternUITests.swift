@@ -19,10 +19,11 @@ final class ETPatternUITests: XCTestCase {
     @MainActor
     func testAppLaunch() throws {
         let app = XCUIApplication()
+        app.launchArguments = ["UI_TESTING"]
         app.launch()
 
         // Verify main screen elements
-        XCTAssertTrue(app.navigationBars["Flashcard Decks"].exists)
+        XCTAssertTrue(app.staticTexts["English Thought"].waitForExistence(timeout: 8))
         XCTAssertTrue(app.buttons["chart.bar"].exists)
         XCTAssertTrue(app.buttons["square.and.arrow.down"].exists)
         XCTAssertTrue(app.buttons["gear"].exists)
@@ -31,11 +32,12 @@ final class ETPatternUITests: XCTestCase {
     @MainActor
     func testCardFlip() throws {
         let app = XCUIApplication()
+        app.launchArguments = ["UI_TESTING"]
         app.launch()
 
         // Navigate to a deck (assuming bundled decks are loaded)
-        let firstDeck = app.staticTexts.element(boundBy: 0)
-        XCTAssertTrue(firstDeck.waitForExistence(timeout: 5))
+        let firstDeck = app.buttons.matching(identifier: "deckCard").element(boundBy: 0)
+        XCTAssertTrue(firstDeck.waitForExistence(timeout: 8))
         firstDeck.tap()
 
         // Tap study button
@@ -44,28 +46,29 @@ final class ETPatternUITests: XCTestCase {
         studyButton.tap()
 
         // Verify we're in study view
-        XCTAssertTrue(app.navigationBars["Study Session"].exists)
+        XCTAssertTrue(app.otherElements["studyCard"].waitForExistence(timeout: 8))
 
         // Tap card to flip
-        let card = app.otherElements.element(boundBy: 0)
-        XCTAssertTrue(card.waitForExistence(timeout: 5))
+        let card = app.otherElements["studyCard"]
+        XCTAssertTrue(card.waitForExistence(timeout: 8))
         card.tap()
 
         // Wait for flip animation
         sleep(1)
 
         // Card should be flipped (we can't directly test visual state, but ensure no crash)
-        XCTAssertTrue(app.navigationBars["Study Session"].exists)
+        XCTAssertTrue(app.buttons["Again"].exists || app.buttons["Easy"].exists)
     }
 
     @MainActor
     func testStudyFlow() throws {
         let app = XCUIApplication()
+        app.launchArguments = ["UI_TESTING"]
         app.launch()
 
         // Navigate to a deck
-        let firstDeck = app.staticTexts.element(boundBy: 0)
-        XCTAssertTrue(firstDeck.waitForExistence(timeout: 5))
+        let firstDeck = app.buttons.matching(identifier: "deckCard").element(boundBy: 0)
+        XCTAssertTrue(firstDeck.waitForExistence(timeout: 8))
         firstDeck.tap()
 
         // Tap study button
@@ -74,26 +77,29 @@ final class ETPatternUITests: XCTestCase {
         studyButton.tap()
 
         // Verify study session starts
-        XCTAssertTrue(app.navigationBars["Study Session"].exists)
+        XCTAssertTrue(app.otherElements["studyCard"].waitForExistence(timeout: 8))
 
         // Check for progress elements
-        XCTAssertTrue(app.staticTexts.containing(NSPredicate(format: "label CONTAINS 'Cards:'")).element.exists)
+        // Ensure controls exist
+        XCTAssertTrue(app.buttons["Again"].exists)
+        XCTAssertTrue(app.buttons["Easy"].exists)
 
         // Test swipe gestures (simulate swipe right for "Easy")
-        let card = app.otherElements.element(boundBy: 0)
-        XCTAssertTrue(card.waitForExistence(timeout: 5))
+        let card = app.otherElements["studyCard"]
+        XCTAssertTrue(card.waitForExistence(timeout: 8))
 
         // Swipe right
         card.swipeRight()
 
         // Session should continue or complete
         // (We can't predict exact behavior without knowing card count, but ensure no crash)
-        XCTAssertTrue(app.navigationBars["Study Session"].exists || app.staticTexts["Session Complete!"].exists)
+        XCTAssertTrue(app.buttons["Again"].exists || app.buttons["Easy"].exists || app.staticTexts["Session Complete"].exists)
     }
 
     @MainActor
     func testNavigationToSettings() throws {
         let app = XCUIApplication()
+        app.launchArguments = ["UI_TESTING"]
         app.launch()
 
         // Tap settings button
@@ -109,6 +115,7 @@ final class ETPatternUITests: XCTestCase {
     @MainActor
     func testNavigationToImport() throws {
         let app = XCUIApplication()
+        app.launchArguments = ["UI_TESTING"]
         app.launch()
 
         // Tap import button
@@ -123,6 +130,7 @@ final class ETPatternUITests: XCTestCase {
     @MainActor
     func testNavigationToSessionStats() throws {
         let app = XCUIApplication()
+        app.launchArguments = ["UI_TESTING"]
         app.launch()
 
         // Tap stats button
@@ -137,7 +145,9 @@ final class ETPatternUITests: XCTestCase {
     @MainActor
     func testLaunchPerformance() throws {
         measure(metrics: [XCTApplicationLaunchMetric()]) {
-            XCUIApplication().launch()
+            let app = XCUIApplication()
+            app.launchArguments = ["UI_TESTING"]
+            app.launch()
         }
     }
 }

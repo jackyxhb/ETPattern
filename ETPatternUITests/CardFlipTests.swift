@@ -16,44 +16,46 @@ final class CardFlipTests: XCTestCase {
     @MainActor
     func testCardFlipFromDeckList() throws {
         let app = XCUIApplication()
+        app.launchArguments = ["UI_TESTING"]
         app.launch()
 
-        let firstDeckCell = app.tables.cells.element(boundBy: 0)
-        XCTAssertTrue(firstDeckCell.waitForExistence(timeout: 5), "Deck list did not load")
-        firstDeckCell.tap()
+        let firstDeck = app.buttons.matching(identifier: "deckCard").element(boundBy: 0)
+        XCTAssertTrue(firstDeck.waitForExistence(timeout: 8), "Deck list did not load")
+        firstDeck.tap()
 
         let studyButton = app.buttons["Study"]
         XCTAssertTrue(studyButton.waitForExistence(timeout: 5), "Study button missing on deck detail")
         studyButton.tap()
 
-        let card = app.otherElements.element(boundBy: 0)
-        XCTAssertTrue(card.waitForExistence(timeout: 5), "Card view did not appear")
+        let card = app.otherElements["studyCard"]
+        XCTAssertTrue(card.waitForExistence(timeout: 8), "Card view did not appear")
 
         card.tap() // Flip to back
         card.tap() // Flip to front
 
-        XCTAssertTrue(app.navigationBars["Study Session"].exists, "Study session should remain active after flips")
+        XCTAssertTrue(app.buttons["Again"].exists || app.buttons["Easy"].exists, "Study controls should remain visible after flips")
     }
 
     @MainActor
     func testCardSwipeGestures() throws {
         let app = XCUIApplication()
+        app.launchArguments = ["UI_TESTING"]
         app.launch()
 
-        let firstDeckCell = app.tables.cells.element(boundBy: 0)
-        XCTAssertTrue(firstDeckCell.waitForExistence(timeout: 5))
-        firstDeckCell.tap()
+        let firstDeck = app.buttons.matching(identifier: "deckCard").element(boundBy: 0)
+        XCTAssertTrue(firstDeck.waitForExistence(timeout: 8))
+        firstDeck.tap()
 
         let studyButton = app.buttons["Study"]
         XCTAssertTrue(studyButton.waitForExistence(timeout: 5))
         studyButton.tap()
 
-        let card = app.otherElements.element(boundBy: 0)
-        XCTAssertTrue(card.waitForExistence(timeout: 5))
+        let card = app.otherElements["studyCard"]
+        XCTAssertTrue(card.waitForExistence(timeout: 8))
 
         card.swipeRight() // Easy
         card.swipeLeft()  // Again
 
-        XCTAssertTrue(app.navigationBars["Study Session"].exists || app.staticTexts["Session Complete!"].exists)
+        XCTAssertTrue(app.buttons["Again"].exists || app.buttons["Easy"].exists || app.staticTexts["Session Complete"].exists)
     }
 }

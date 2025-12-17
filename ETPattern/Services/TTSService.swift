@@ -12,7 +12,10 @@ import Combine
 class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unchecked Sendable {
     let objectWillChange = PassthroughSubject<Void, Never>()
     private let synthesizer = AVSpeechSynthesizer()
-    private var currentVoice: String
+    // Stores the user selection (either language like "en-US" or a concrete voice identifier).
+    private var voicePreference: String
+    // Stores the resolved voice identifier actually used for speaking.
+    private var resolvedVoiceIdentifier: String?
     private var currentPercentage: Float  // Store as percentage (50-120)
     private var currentPitch: Float
     private var currentVolume: Float
@@ -25,19 +28,9 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
     @Published var errorMessage: String?
 
     override init() {
-        let availableVoices = AVSpeechSynthesisVoice.speechVoices().filter { $0.language.starts(with: "en-") }
-        let storedVoice = UserDefaults.standard.string(forKey: "selectedVoice") ?? "en-US"
-        
-        // Check if stored voice is available, otherwise pick the first available English voice
-        if let voice = availableVoices.first(where: { $0.identifier == storedVoice }) {
-            self.currentVoice = storedVoice
-        } else if let defaultVoice = availableVoices.first {
-            self.currentVoice = defaultVoice.identifier
-            UserDefaults.standard.set(defaultVoice.identifier, forKey: "selectedVoice")
-        } else {
-            // Fallback to a known working voice for simulator
-            self.currentVoice = "com.apple.ttsbundle.Samantha-compact"
-        }
+        let storedPreference = UserDefaults.standard.string(forKey: "selectedVoice") ?? Constants.TTS.defaultVoice
+        self.voicePreference = storedPreference
+        self.resolvedVoiceIdentifier = nil
         
         // Load stored percentage, default to 100% if not set
         let storedPercentage = UserDefaults.standard.float(forKey: "ttsPercentage")
@@ -50,6 +43,9 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
         self.currentPause = storedPause >= 0 ? storedPause : Constants.TTS.defaultPause
         super.init()
         synthesizer.delegate = self
+
+        // Resolve initial voice preference to a concrete installed voice identifier.
+        resolveVoicePreferenceAndPersistIfNeeded()
     }
 
     func speak(_ text: String, completion: (() -> Void)? = nil) {
@@ -68,9 +64,13 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
             return
         }
 
-        // Check if the current voice is available
-        guard let voice = AVSpeechSynthesisVoice(identifier: currentVoice) else {
-            let error = AppError.ttsVoiceNotAvailable(voice: currentVoice)
+        // Ensure we have a valid installed voice identifier before speaking.
+        if resolvedVoiceIdentifier == nil {
+            resolveVoicePreferenceAndPersistIfNeeded()
+        }
+        guard let resolvedVoiceIdentifier,
+              let voice = AVSpeechSynthesisVoice(identifier: resolvedVoiceIdentifier) else {
+            let error = AppError.ttsVoiceNotAvailable(voice: voicePreference)
             lastError = error
             errorMessage = error.localizedDescription
             print("TTS Error: \(error.localizedDescription)")
@@ -88,7 +88,6 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
 
         synthesizer.speak(utterance)
         isSpeaking = true
-        isSpeaking = true
     }
 
     func stop() {
@@ -98,23 +97,71 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
         isSpeaking = false
     }
 
-    func setVoice(_ voiceIdentifier: String) {
-        // Validate that the voice exists
-        if AVSpeechSynthesisVoice(identifier: voiceIdentifier) != nil {
-            currentVoice = voiceIdentifier
-            UserDefaults.standard.set(voiceIdentifier, forKey: "selectedVoice")
-            errorMessage = nil
-            lastError = nil
-        } else {
-            let error = AppError.ttsVoiceNotAvailable(voice: voiceIdentifier)
-            lastError = error
-            errorMessage = error.localizedDescription
-            print("TTS Error: \(error.localizedDescription)")
-        }
+    /// Accepts either a concrete voice identifier (e.g. "com.apple.ttsbundle.Samantha-compact")
+    /// or a language code (e.g. "en-US", "en-GB").
+    func setVoice(_ voiceIdentifierOrLanguage: String) {
+        voicePreference = voiceIdentifierOrLanguage
+        resolveVoicePreferenceAndPersistIfNeeded()
     }
 
     func getCurrentVoice() -> String {
-        return currentVoice
+        // Return the persisted preference (language or identifier) so Settings stays stable.
+        return voicePreference
+    }
+
+    private func resolveVoicePreferenceAndPersistIfNeeded() {
+        errorMessage = nil
+        lastError = nil
+
+        // 1) If preference matches an installed identifier, use it directly.
+        if let direct = AVSpeechSynthesisVoice(identifier: voicePreference) {
+            resolvedVoiceIdentifier = direct.identifier
+            UserDefaults.standard.set(voicePreference, forKey: "selectedVoice")
+            return
+        }
+
+        // 2) If preference looks like a language code (en-XX), pick the best installed voice for that language.
+        if voicePreference.hasPrefix("en-") {
+            if let best = bestVoiceIdentifier(forLanguage: voicePreference) {
+                resolvedVoiceIdentifier = best
+                UserDefaults.standard.set(voicePreference, forKey: "selectedVoice")
+                return
+            }
+        }
+
+        // 3) Fall back to any English voice on the device.
+        if let fallback = bestVoiceIdentifier(forLanguagePrefix: "en-") {
+            resolvedVoiceIdentifier = fallback
+            // Persist a stable preference if the previous one was invalid.
+            voicePreference = Constants.TTS.defaultVoice
+            UserDefaults.standard.set(voicePreference, forKey: "selectedVoice")
+            return
+        }
+
+        // 4) Last resort (should be rare). Keep nil identifier and surface an error.
+        resolvedVoiceIdentifier = nil
+        let error = AppError.ttsVoiceNotAvailable(voice: voicePreference)
+        lastError = error
+        errorMessage = error.localizedDescription
+        print("TTS Error: \(error.localizedDescription)")
+    }
+
+    private func bestVoiceIdentifier(forLanguage language: String) -> String? {
+        let candidates = AVSpeechSynthesisVoice.speechVoices().filter { $0.language == language }
+        return pickBestIdentifier(from: candidates)
+    }
+
+    private func bestVoiceIdentifier(forLanguagePrefix prefix: String) -> String? {
+        let candidates = AVSpeechSynthesisVoice.speechVoices().filter { $0.language.hasPrefix(prefix) }
+        return pickBestIdentifier(from: candidates)
+    }
+
+    private func pickBestIdentifier(from voices: [AVSpeechSynthesisVoice]) -> String? {
+        guard !voices.isEmpty else { return nil }
+        // Prefer enhanced quality voices when available.
+        let enhanced = voices.filter { $0.quality == .enhanced }
+        if let first = enhanced.first { return first.identifier }
+        return voices.first?.identifier
     }
 
     func setRate(_ rate: Float) {

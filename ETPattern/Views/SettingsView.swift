@@ -10,7 +10,7 @@ import AVFoundation
 
 struct SettingsView: View {
     @EnvironmentObject private var ttsService: TTSService
-    @State private var selectedVoice: String = UserDefaults.standard.string(forKey: "selectedVoice") ?? Constants.TTS.defaultVoice
+    @State private var selectedVoice: String = Constants.TTS.defaultVoice
     @State private var cardOrderMode: String = UserDefaults.standard.string(forKey: "cardOrderMode") ?? "random"
     @State private var autoPlayOrderMode: String = UserDefaults.standard.string(forKey: "autoPlayOrderMode") ?? "sequential"
     @State private var ttsPercentage: Float = 0 // Will be set in onAppear
@@ -182,12 +182,26 @@ struct SettingsView: View {
         }
         .navigationTitle("Settings")
         .onAppear {
-            selectedVoice = ttsService.getCurrentVoice()
+            let stored = UserDefaults.standard.string(forKey: "selectedVoice") ?? Constants.TTS.defaultVoice
+            selectedVoice = canonicalVoiceLanguage(from: stored)
             ttsPercentage = ttsService.getCurrentRate()
             ttsPitch = ttsService.getCurrentPitch()
             ttsVolume = ttsService.getCurrentVolume()
             ttsPause = ttsService.getCurrentPause()
         }
+    }
+
+    private func canonicalVoiceLanguage(from value: String) -> String {
+        if voiceOptions.keys.contains(value) {
+            return value
+        }
+
+        // If an older build stored a concrete voice identifier, map it back to a language.
+        if let voice = AVSpeechSynthesisVoice(identifier: value), voiceOptions.keys.contains(voice.language) {
+            return voice.language
+        }
+
+        return Constants.TTS.defaultVoice
     }
 }
 

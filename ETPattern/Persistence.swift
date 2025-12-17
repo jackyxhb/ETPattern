@@ -76,24 +76,67 @@ struct PersistenceController {
         let bundledFiles = FileManagerService.getBundledCSVFiles()
         let masterDeckName = Constants.Decks.bundledMasterName
 
-        // Fetch or create the single master deck that will hold all bundled cards
-        let fetchRequest: NSFetchRequest<CardSet> = CardSet.fetchRequest()
-        fetchRequest.fetchLimit = 1
-        fetchRequest.predicate = NSPredicate(format: "name == %@", masterDeckName)
-
-        let masterDeck: CardSet
-        if let existingDeck = (try? viewContext.fetch(fetchRequest))?.first {
-            // Check if the deck already has cards - if so, skip re-import for performance
-            if let existingCards = existingDeck.cards as? Set<Card>, !existingCards.isEmpty {
-                print("DEBUG: Master deck '\(masterDeckName)' already has \(existingCards.count) cards, skipping re-import")
-                return
+        // Migrate/rename legacy master deck name if it exists.
+        let legacyName = Constants.Decks.legacyBundledMasterName
+        if legacyName != masterDeckName {
+            let legacyFetch: NSFetchRequest<CardSet> = CardSet.fetchRequest()
+            legacyFetch.fetchLimit = 1
+            legacyFetch.predicate = NSPredicate(format: "name == %@", legacyName)
+            if let legacyDeck = (try? viewContext.fetch(legacyFetch))?.first {
+                print("DEBUG: Renaming legacy master deck '\(legacyName)' -> '\(masterDeckName)'")
+                legacyDeck.name = masterDeckName
+                try? viewContext.save()
             }
-            // Deck exists but has no cards, so we'll re-import
-            masterDeck = existingDeck
-        } else {
-            masterDeck = CardSet(context: viewContext)
-            masterDeck.name = masterDeckName
-            masterDeck.createdDate = Date()
+        }
+
+        func fetchOrCreateCardSet(named name: String) -> CardSet {
+            let fetch: NSFetchRequest<CardSet> = CardSet.fetchRequest()
+            fetch.fetchLimit = 1
+            fetch.predicate = NSPredicate(format: "name == %@", name)
+            if let existing = (try? viewContext.fetch(fetch))?.first {
+                return existing
+            }
+            let created = CardSet(context: viewContext)
+            created.name = name
+            created.createdDate = Date()
+            return created
+        }
+
+        func cardCount(in set: CardSet) -> Int {
+            (set.cards as? Set<Card>)?.count ?? 0
+        }
+
+        // 1) Ensure Group 1–12 decks exist (and are populated if empty).
+        for bundledFile in bundledFiles {
+            let deckDisplayName = FileManagerService.getCardSetName(from: bundledFile)
+            let groupDeck = fetchOrCreateCardSet(named: deckDisplayName)
+
+            if cardCount(in: groupDeck) > 0 {
+                continue
+            }
+
+            guard let content = FileManagerService.loadBundledCSV(named: bundledFile) else {
+                print("ERROR: Failed to load bundled CSV \(bundledFile)")
+                continue
+            }
+
+            let cards = csvImporter.parseCSV(content, cardSetName: deckDisplayName)
+            for card in cards {
+                card.cardSet = groupDeck
+                groupDeck.addToCards(card)
+            }
+            print("DEBUG: Imported \(cards.count) cards into '\(deckDisplayName)'")
+        }
+
+        // 2) Ensure the single master deck exists and is populated if empty.
+        let masterDeck = fetchOrCreateCardSet(named: masterDeckName)
+        if cardCount(in: masterDeck) > 0 {
+            // Master deck already exists; still save any newly created group decks.
+            if viewContext.hasChanges {
+                try? viewContext.save()
+            }
+            print("DEBUG: Master deck '\(masterDeckName)' already has \(cardCount(in: masterDeck)) cards, skipping re-import")
+            return
         }
 
         var totalImported = 0
