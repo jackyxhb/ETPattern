@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1" systemVersion="11A491" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="false" userDefinedModelVersionIdentifier="">
-    <entity name="CardSet" representedClassName="CardSet" syncable="YES" codeGenerationType="category">
+    <entity name="CardSet" representedClassName="CardSet" syncable="YES" codeGenerationType="class">
         <attribute name="name" optional="NO" attributeType="String" usesScalarValueType="NO"/>
         <attribute name="createdDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="cards" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Card" inverseName="cardSet" inverseEntity="Card"/>
         <relationship name="studySessions" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="StudySession" inverseName="cardSet" inverseEntity="StudySession"/>
     </entity>
-    <entity name="Card" representedClassName="Card" syncable="YES" codeGenerationType="category">
+    <entity name="Card" representedClassName="Card" syncable="YES" codeGenerationType="class">
         <attribute name="id" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="front" optional="NO" attributeType="String" usesScalarValueType="NO"/>
         <attribute name="back" optional="NO" attributeType="String" usesScalarValueType="NO"/>
@@ -25,7 +25,7 @@
         <relationship name="reviewedSessions" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="StudySession" inverseName="reviewedCards" inverseEntity="StudySession"/>
         <relationship name="remainingSessions" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="StudySession" inverseName="remainingCards" inverseEntity="StudySession"/>
     </entity>
-    <entity name="StudySession" representedClassName="StudySession" syncable="YES" codeGenerationType="category">
+    <entity name="StudySession" representedClassName="StudySession" syncable="YES" codeGenerationType="class">
         <attribute name="date" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="cardsReviewed" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="correctCount" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>

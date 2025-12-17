@@ -1,24 +1,41 @@
 Command line invocation:
-    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -scheme ETPattern -sdk iphonesimulator -configuration Debug build
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project ETPattern.xcodeproj -scheme ETPattern -sdk iphonesimulator -configuration Debug build
 
 Build settings from command line:
-    SDKROOT = iphonesimulator26.1
+    SDKROOT = iphonesimulator26.2
 
-2025-12-05 20:36:27.581 xcodebuild[77026:23023481] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
 --- xcodebuild: WARNING: Using the first of multiple matching destinations:
 { platform:iOS Simulator, id:dvtdevice-DVTiOSDeviceSimulatorPlaceholder-iphonesimulator:placeholder, name:Any iOS Simulator Device }
+{ platform:iOS Simulator, arch:x86_64, id:54373853-3545-497D-9473-A34AFD2AB63E, OS:18.6, name:iPad (A16) }
 { platform:iOS Simulator, arch:x86_64, id:5C721BD4-124E-4AE8-A890-062AFC6A62CF, OS:26.1, name:iPad (A16) }
+{ platform:iOS Simulator, arch:x86_64, id:899E79CF-66A7-48DE-A266-1E4E079CDDC8, OS:26.2, name:iPad (A16) }
+{ platform:iOS Simulator, arch:x86_64, id:F4C08B26-1562-4A21-9174-C69F7EC5D40F, OS:18.6, name:iPad Air 11-inch (M3) }
 { platform:iOS Simulator, arch:x86_64, id:8AD9E394-CEE9-472C-9D7C-5421566947BE, OS:26.1, name:iPad Air 11-inch (M3) }
+{ platform:iOS Simulator, arch:x86_64, id:F584A798-6D6B-4A50-AD7D-CDBF19A17DB5, OS:26.2, name:iPad Air 11-inch (M3) }
+{ platform:iOS Simulator, arch:x86_64, id:CEF3CF3E-68A6-4CEE-AE39-09A6DD97C476, OS:18.6, name:iPad Air 13-inch (M3) }
 { platform:iOS Simulator, arch:x86_64, id:31CC49F9-7115-4376-8DD7-C7A55C12A5D1, OS:26.1, name:iPad Air 13-inch (M3) }
+{ platform:iOS Simulator, arch:x86_64, id:9682FB80-A15A-4E35-BAFD-8E2BC81D790B, OS:26.2, name:iPad Air 13-inch (M3) }
+{ platform:iOS Simulator, arch:x86_64, id:99027244-AFA9-40D4-BDB0-A55BF475589B, OS:18.6, name:iPad Pro 11-inch (M4) }
 { platform:iOS Simulator, arch:x86_64, id:1AB5FAED-2691-42EB-A71D-4D4105FB7AA1, OS:26.1, name:iPad Pro 11-inch (M5) }
+{ platform:iOS Simulator, arch:x86_64, id:3AE36FE3-0D0C-407E-B116-BE3B40BA5F2A, OS:26.2, name:iPad Pro 11-inch (M5) }
+{ platform:iOS Simulator, arch:x86_64, id:C4139EC2-83F5-48BA-9FBE-CAEE9E5E3F5A, OS:18.6, name:iPad Pro 13-inch (M4) }
 { platform:iOS Simulator, arch:x86_64, id:E9872758-F2CE-4DDC-8F8C-58687046531B, OS:26.1, name:iPad Pro 13-inch (M5) }
+{ platform:iOS Simulator, arch:x86_64, id:7E66DFAC-556E-451B-A2A9-B753CEC14380, OS:26.2, name:iPad Pro 13-inch (M5) }
+{ platform:iOS Simulator, arch:x86_64, id:AA3220F3-9E23-4558-B0B9-10541F4F383F, OS:18.6, name:iPad mini (A17 Pro) }
 { platform:iOS Simulator, arch:x86_64, id:6198FF9F-E348-431C-A1AD-BCCDADEFA4FE, OS:26.1, name:iPad mini (A17 Pro) }
-{ platform:iOS Simulator, arch:x86_64, id:38814CBA-53A0-4D8C-9B83-8465D05CFBEB, OS:26.1, name:iPhone 16 (26.1) }
-{ platform:iOS Simulator, arch:x86_64, id:A3CC45D8-C4C8-4C96-BD74-2AAB7031C33E, OS:26.1, name:iPhone 16e }
-{ platform:iOS Simulator, arch:x86_64, id:D3611024-E52D-4359-BE5E-51C9F4278E40, OS:26.1, name:iPhone 17 }
+{ platform:iOS Simulator, arch:x86_64, id:7BE3A4F5-0517-4900-8509-5EF3A0D2FCBA, OS:26.2, name:iPad mini (A17 Pro) }
+{ platform:iOS Simulator, arch:x86_64, id:0B067B2D-FE51-486D-8EBB-D71DB5D757BD, OS:18.6, name:iPhone 16 }
+{ platform:iOS Simulator, arch:x86_64, id:75A31908-C120-4308-8A0E-3DCF74E69132, OS:18.6, name:iPhone 16 Plus }
+{ platform:iOS Simulator, arch:x86_64, id:07F42128-C264-4BD8-B77F-ED13C1CB94C6, OS:18.6, name:iPhone 16 Pro Max }
+{ platform:iOS Simulator, arch:x86_64, id:8B12CB40-2CB0-4841-A924-66D44DC439D7, OS:18.6, name:iPhone 16e }
+{ platform:iOS Simulator, arch:x86_64, id:0D692BDE-CEEB-4778-B9F7-F6301997608F, OS:26.2, name:iPhone 16e }
+{ platform:iOS Simulator, arch:x86_64, id:AE183F6E-7A6D-41C8-9087-A6AAA4C8AA4C, OS:26.2, name:iPhone 17 }
 { platform:iOS Simulator, arch:x86_64, id:355F0A35-94F9-48A9-9F3D-68D8CC06C51B, OS:26.1, name:iPhone 17 Pro }
+{ platform:iOS Simulator, arch:x86_64, id:0AA9E103-E3BD-4C40-B188-A833D056E0E8, OS:26.2, name:iPhone 17 Pro }
 { platform:iOS Simulator, arch:x86_64, id:F593FBFB-DD66-4428-A27A-CF716DAFA0CC, OS:26.1, name:iPhone 17 Pro Max }
+{ platform:iOS Simulator, arch:x86_64, id:9C7F9402-FD10-467B-A9C9-FE4CEC188F22, OS:26.2, name:iPhone 17 Pro Max }
 { platform:iOS Simulator, arch:x86_64, id:21EB7DD4-5B57-42EB-80E1-19406C734C60, OS:26.1, name:iPhone Air }
+{ platform:iOS Simulator, arch:x86_64, id:6D9B55D0-88C2-4439-9450-DF55D4A1F4F1, OS:26.2, name:iPhone Air }
 { platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device }
 { platform:iOS, arch:arm64, id:00008140-000654E61107001C, name:Jack-iPhone16Plus }
 ComputePackagePrebuildTargetDependencyGraph
@@ -40,9 +57,9 @@ GatherProvisioningInputs
 
 CreateBuildDescription
 
-ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk -x c -c /dev/null
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -x c -c /dev/null
 
-ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/momc --dry-run --action generate --swift-version 5.0 --sdkroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk --iphonesimulator-deployment-target 26.1 --module ETPattern /Users/macbook1/work/ETPattern/ETPattern/ETPattern.xcdatamodeld /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/momc --dry-run --action generate --swift-version 5.0 --sdkroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk --iphonesimulator-deployment-target 16.0 --module ETPattern /Users/macbook1/work/ETPattern/ETPattern/ETPattern.xcdatamodeld /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern
 
 ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/macbook1/work/ETPattern/ETPattern/Assets.xcassets
 
@@ -52,92 +69,333 @@ ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeD
 
 ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
 
-Build description signature: 00c922f7980888293c9a15bc8fd02f35
-Build description path: /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/XCBuildData/00c922f7980888293c9a15bc8fd02f35.xcbuilddata
-ProcessProductPackaging "" /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern.app-Simulated.xcent (in target 'ETPattern' from project 'ETPattern')
-    cd /Users/macbook1/work/ETPattern
-    
-    Entitlements:
-    
-    {
-    "application-identifier" = "F674YT87QV.aaaa.ETPattern";
-}
-    
-    builtin-productPackagingUtility -entitlements -format xml -o /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern.app-Simulated.xcent
-
-ProcessProductPackagingDER /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern.app-Simulated.xcent /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern.app-Simulated.xcent.der (in target 'ETPattern' from project 'ETPattern')
-    cd /Users/macbook1/work/ETPattern
-    /usr/bin/derq query -f xml -i /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern.app-Simulated.xcent -o /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern.app-Simulated.xcent.der --raw
-
-ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk /Users/macbook1/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.1-23B77-90cf18a4295e390e64c810bc6bd7acbc.sdkstatcache
+Build description signature: 172c762f963aa6a082d1e87ff4ff6eea
+Build description path: /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/XCBuildData/172c762f963aa6a082d1e87ff4ff6eea.xcbuilddata
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk /Users/macbook1/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.2-23C53-7d00a8b37fbd7999ea79df8ebc024bf0.sdkstatcache
     cd /Users/macbook1/work/ETPattern/ETPattern.xcodeproj
-    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk -o /Users/macbook1/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.1-23B77-90cf18a4295e390e64c810bc6bd7acbc.sdkstatcache
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -o /Users/macbook1/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.2-23C53-7d00a8b37fbd7999ea79df8ebc024bf0.sdkstatcache
 
-Ld /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/Binary/ETPattern.debug.dylib normal x86_64 (in target 'ETPattern' from project 'ETPattern')
+CompileAssetCatalogVariant thinned /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app /Users/macbook1/work/ETPattern/ETPattern/Assets.xcassets (in target 'ETPattern' from project 'ETPattern')
     cd /Users/macbook1/work/ETPattern
-    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target x86_64-apple-ios26.1-simulator -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk -O0 -L/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -L/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator -F/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -F/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator -filelist /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/ETPattern.LinkFileList -install_name @rpath/ETPattern.debug.dylib -Xlinker -rpath -Xlinker @executable_path/Frameworks -dead_strip -Xlinker -object_path_lto -Xlinker /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/ETPattern_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -debug_variant -Xlinker -dependency_info -Xlinker /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/ETPattern_dependency_info.dat -fobjc-link-runtime -fprofile-instr-generate -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/ETPattern.swiftmodule @/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/ETPattern-linker-args.resp -Xlinker -alias -Xlinker _main -Xlinker ___debug_main_executable_dylib_entry_point -Xlinker -no_adhoc_codesign -o /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/Binary/ETPattern.debug.dylib
+    /Applications/Xcode.app/Contents/Developer/usr/bin/actool /Users/macbook1/work/ETPattern/ETPattern/Assets.xcassets --compile /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/assetcatalog_output/thinned --output-format human-readable-text --notices --warnings --export-dependency-info /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/assetcatalog_dependencies_thinned --output-partial-info-plist /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/assetcatalog_generated_info.plist_thinned --app-icon AppIcon --accent-color AccentColor --compress-pngs --enable-on-demand-resources YES --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 16.0 --platform iphonesimulator
 
-Ld /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Binary/ETPattern.debug.dylib normal arm64 (in target 'ETPattern' from project 'ETPattern')
+SwiftDriver ETPattern normal x86_64 com.apple.xcode.tools.swift.compiler (in target 'ETPattern' from project 'ETPattern')
     cd /Users/macbook1/work/ETPattern
-    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios26.1-simulator -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk -O0 -L/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -L/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator -F/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -F/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator -filelist /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/ETPattern.LinkFileList -install_name @rpath/ETPattern.debug.dylib -Xlinker -rpath -Xlinker @executable_path/Frameworks -dead_strip -Xlinker -object_path_lto -Xlinker /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/ETPattern_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -debug_variant -Xlinker -dependency_info -Xlinker /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/ETPattern_dependency_info.dat -fobjc-link-runtime -fprofile-instr-generate -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/ETPattern.swiftmodule @/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/ETPattern-linker-args.resp -Xlinker -alias -Xlinker _main -Xlinker ___debug_main_executable_dylib_entry_point -Xlinker -no_adhoc_codesign -o /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Binary/ETPattern.debug.dylib
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name ETPattern -Onone -enforce-exclusivity\=checked @/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/ETPattern.SwiftFileList -DDEBUG -default-isolation\=MainActor -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -target x86_64-apple-ios16.0-simulator -g -module-cache-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator -F /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64 -c -j12 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/macbook1/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.2-23C53-7d00a8b37fbd7999ea79df8ebc024bf0.sdkstatcache -output-file-map /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/ETPattern-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/ETPattern.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/macbook1/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/ETPattern_const_extract_protocols.json -Xcc -iquote -Xcc /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-generated-files.hmap -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-own-target-headers.hmap -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-all-target-headers.hmap -Xcc -iquote -Xcc /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-project-headers.hmap -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources-normal/x86_64 -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/x86_64 -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/ETPattern-Swift.h -working-directory /Users/macbook1/work/ETPattern -experimental-emit-module-separately -disable-cmo
 
-ProcessInfoPlistFile /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app/Info.plist /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/empty-ETPattern.plist (in target 'ETPattern' from project 'ETPattern')
+SwiftDriver ETPattern normal arm64 com.apple.xcode.tools.swift.compiler (in target 'ETPattern' from project 'ETPattern')
     cd /Users/macbook1/work/ETPattern
-    builtin-infoPlistUtility /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/empty-ETPattern.plist -producttype com.apple.product-type.application -genpkginfo /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app/PkgInfo -expandbuildsettings -format binary -platform iphonesimulator -additionalcontentfile /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/assetcatalog_generated_info.plist -o /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app/Info.plist
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name ETPattern -Onone -enforce-exclusivity\=checked @/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/ETPattern.SwiftFileList -DDEBUG -default-isolation\=MainActor -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -target arm64-apple-ios16.0-simulator -g -module-cache-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator -F /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64 -c -j12 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/macbook1/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.2-23C53-7d00a8b37fbd7999ea79df8ebc024bf0.sdkstatcache -output-file-map /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/ETPattern-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/ETPattern.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/macbook1/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/ETPattern_const_extract_protocols.json -Xcc -iquote -Xcc /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-generated-files.hmap -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-own-target-headers.hmap -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-all-target-headers.hmap -Xcc -iquote -Xcc /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-project-headers.hmap -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources-normal/arm64 -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/arm64 -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/ETPattern-Swift.h -working-directory /Users/macbook1/work/ETPattern -experimental-emit-module-separately -disable-cmo
 
-CreateUniversalBinary /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app/ETPattern.debug.dylib normal arm64\ x86_64 (in target 'ETPattern' from project 'ETPattern')
-    cd /Users/macbook1/work/ETPattern
-    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo -create /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Binary/ETPattern.debug.dylib /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/Binary/ETPattern.debug.dylib -output /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app/ETPattern.debug.dylib
-
-ConstructStubExecutorLinkFileList /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-ExecutorLinkFileList-normal-x86_64.txt (in target 'ETPattern' from project 'ETPattern')
-    cd /Users/macbook1/work/ETPattern
-    construct-stub-executor-link-file-list /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/Binary/ETPattern.debug.dylib /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libPreviewsJITStubExecutor_no_swift_entry_point.a /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libPreviewsJITStubExecutor.a --output /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-ExecutorLinkFileList-normal-x86_64.txt
-note: Using stub executor library with Swift entry point. (in target 'ETPattern' from project 'ETPattern')
-
-ConstructStubExecutorLinkFileList /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-ExecutorLinkFileList-normal-arm64.txt (in target 'ETPattern' from project 'ETPattern')
-    cd /Users/macbook1/work/ETPattern
-    construct-stub-executor-link-file-list /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Binary/ETPattern.debug.dylib /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libPreviewsJITStubExecutor_no_swift_entry_point.a /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libPreviewsJITStubExecutor.a --output /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-ExecutorLinkFileList-normal-arm64.txt
-note: Using stub executor library with Swift entry point. (in target 'ETPattern' from project 'ETPattern')
-
-Ld /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Binary/ETPattern normal arm64 (in target 'ETPattern' from project 'ETPattern')
-    cd /Users/macbook1/work/ETPattern
-    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios26.1-simulator -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk -O0 -L/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator -F/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator -Xlinker -rpath -Xlinker @executable_path -Xlinker -rpath -Xlinker @executable_path/Frameworks -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -debug_variant -e ___debug_blank_executor_main -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_dylib -Xlinker /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-DebugDylibPath-normal-arm64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_instlnm -Xlinker /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-DebugDylibInstallName-normal-arm64.txt -Xlinker -filelist -Xlinker /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-ExecutorLinkFileList-normal-arm64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __entitlements -Xlinker /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern.app-Simulated.xcent -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __ents_der -Xlinker /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern.app-Simulated.xcent.der /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Binary/ETPattern.debug.dylib -Xlinker -no_adhoc_codesign -o /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Binary/ETPattern
-
-Ld /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/Binary/ETPattern normal x86_64 (in target 'ETPattern' from project 'ETPattern')
-    cd /Users/macbook1/work/ETPattern
-    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target x86_64-apple-ios26.1-simulator -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk -O0 -L/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator -F/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator -Xlinker -rpath -Xlinker @executable_path -Xlinker -rpath -Xlinker @executable_path/Frameworks -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -debug_variant -e ___debug_blank_executor_main -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_dylib -Xlinker /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-DebugDylibPath-normal-x86_64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_instlnm -Xlinker /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-DebugDylibInstallName-normal-x86_64.txt -Xlinker -filelist -Xlinker /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-ExecutorLinkFileList-normal-x86_64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __entitlements -Xlinker /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern.app-Simulated.xcent -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __ents_der -Xlinker /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern.app-Simulated.xcent.der /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/Binary/ETPattern.debug.dylib -Xlinker -no_adhoc_codesign -o /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/Binary/ETPattern
-
-CreateUniversalBinary /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app/ETPattern normal arm64\ x86_64 (in target 'ETPattern' from project 'ETPattern')
-    cd /Users/macbook1/work/ETPattern
-    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo -create /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Binary/ETPattern /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/Binary/ETPattern -output /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app/ETPattern
-
-CopySwiftLibs /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app (in target 'ETPattern' from project 'ETPattern')
-    cd /Users/macbook1/work/ETPattern
-    builtin-swiftStdLibTool --copy --verbose --sign - --scan-executable /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app/ETPattern.debug.dylib --scan-folder /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app/Frameworks --scan-folder /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app/PlugIns --scan-folder /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app/SystemExtensions --scan-folder /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app/Extensions --platform iphonesimulator --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os
-
-ExtractAppIntentsMetadata (in target 'ETPattern' from project 'ETPattern')
-    cd /Users/macbook1/work/ETPattern
-    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name ETPattern --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk --xcode-version 17B100 --platform-family iOS --deployment-target 26.1 --bundle-identifier aaaa.ETPattern --output /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app --target-triple arm64-apple-ios26.1-simulator --target-triple x86_64-apple-ios26.1-simulator --binary-file /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app/ETPattern --dependency-file /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/ETPattern_dependency_info.dat --dependency-file /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/ETPattern_dependency_info.dat --stringsdata-file /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --stringsdata-file /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/ETPattern.SwiftFileList --source-file-list /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/ETPattern.SwiftFileList --metadata-file-list /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern.DependencyMetadataFileList --static-metadata-file-list /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern.DependencyStaticMetadataFileList --swift-const-vals-list /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/ETPattern.SwiftConstValuesFileList --swift-const-vals-list /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/x86_64/ETPattern.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
-2025-12-05 20:36:29.776 appintentsmetadataprocessor[77057:23023788] Starting appintentsmetadataprocessor export
-2025-12-05 20:36:29.780 appintentsmetadataprocessor[77057:23023788] warning: Metadata extraction skipped. No AppIntents.framework dependency found.
-
-CodeSign /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app/ETPattern.debug.dylib (in target 'ETPattern' from project 'ETPattern')
+SwiftCompile normal arm64 Compiling\ CSVImporter.swift,\ FileManagerService.swift,\ SpacedRepetitionService.swift /Users/macbook1/work/ETPattern/ETPattern/Services/CSVImporter.swift /Users/macbook1/work/ETPattern/ETPattern/Services/FileManagerService.swift /Users/macbook1/work/ETPattern/ETPattern/Services/SpacedRepetitionService.swift (in target 'ETPattern' from project 'ETPattern')
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Services/CSVImporter.swift (in target 'ETPattern' from project 'ETPattern')
     cd /Users/macbook1/work/ETPattern
     
-    Signing Identity:     "Sign to Run Locally"
-    
-    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app/ETPattern.debug.dylib
 
-CodeSign /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app (in target 'ETPattern' from project 'ETPattern')
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Services/FileManagerService.swift (in target 'ETPattern' from project 'ETPattern')
     cd /Users/macbook1/work/ETPattern
     
-    Signing Identity:     "Sign to Run Locally"
-    
-    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app
 
-Validate /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app (in target 'ETPattern' from project 'ETPattern')
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Services/SpacedRepetitionService.swift (in target 'ETPattern' from project 'ETPattern')
     cd /Users/macbook1/work/ETPattern
-    builtin-validationUtility /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/ETPattern.app -shallow-bundle -infoplist-subpath Info.plist
+    
 
-** BUILD SUCCEEDED **
+SwiftCompile normal arm64 Compiling\ Card.swift,\ CardSet.swift,\ StudySession.swift /Users/macbook1/work/ETPattern/ETPattern/Models/Card.swift /Users/macbook1/work/ETPattern/ETPattern/Models/CardSet.swift /Users/macbook1/work/ETPattern/ETPattern/Models/StudySession.swift (in target 'ETPattern' from project 'ETPattern')
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Models/Card.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+/Users/macbook1/work/ETPattern/ETPattern/Models/Card.swift:28:36: error: 'CardSet' is ambiguous for type lookup in this context
+    @NSManaged public var cardSet: CardSet?
+                                   ^~~~~~~
+/Users/macbook1/work/ETPattern/ETPattern/Models/CardSet.swift:12:14: note: found this candidate
+public class CardSet: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/CardSet+CoreDataClass.swift:16:14: note: found this candidate
+public class CardSet: NSManagedObject {
+             ^
+/Users/macbook1/work/ETPattern/ETPattern/Models/Card.swift:12:14: error: invalid redeclaration of 'Card'
+public class Card: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataClass.swift:16:14: note: 'Card' previously declared here
+public class Card: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataClass.swift:16:14: note: 'Card' previously declared here
+public class Card: NSManagedObject {
+             ^
+/Users/macbook1/work/ETPattern/ETPattern/Models/Card.swift:34:11: error: 'Card' is ambiguous for type lookup in this context
+extension Card {
+          ^~~~
+/Users/macbook1/work/ETPattern/ETPattern/Models/Card.swift:12:14: note: found this candidate
+public class Card: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataClass.swift:16:14: note: found this candidate
+public class Card: NSManagedObject {
+             ^
 
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Models/CardSet.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+/Users/macbook1/work/ETPattern/ETPattern/Models/CardSet.swift:12:14: error: invalid redeclaration of 'CardSet'
+public class CardSet: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/CardSet+CoreDataClass.swift:16:14: note: 'CardSet' previously declared here
+public class CardSet: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/CardSet+CoreDataClass.swift:16:14: note: 'CardSet' previously declared here
+public class CardSet: NSManagedObject {
+             ^
+
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Models/StudySession.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+/Users/macbook1/work/ETPattern/ETPattern/Models/StudySession.swift:20:36: error: 'CardSet' is ambiguous for type lookup in this context
+    @NSManaged public var cardSet: CardSet?
+                                   ^~~~~~~
+/Users/macbook1/work/ETPattern/ETPattern/Models/CardSet.swift:12:14: note: found this candidate
+public class CardSet: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/CardSet+CoreDataClass.swift:16:14: note: found this candidate
+public class CardSet: NSManagedObject {
+             ^
+/Users/macbook1/work/ETPattern/ETPattern/Models/StudySession.swift:12:14: error: invalid redeclaration of 'StudySession'
+public class StudySession: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/StudySession+CoreDataClass.swift:16:14: note: 'StudySession' previously declared here
+public class StudySession: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/StudySession+CoreDataClass.swift:16:14: note: 'StudySession' previously declared here
+public class StudySession: NSManagedObject {
+             ^
+
+SwiftCompile normal arm64 Compiling\ SessionStatsView.swift,\ SettingsView.swift,\ SplashView.swift /Users/macbook1/work/ETPattern/ETPattern/Views/SessionStatsView.swift /Users/macbook1/work/ETPattern/ETPattern/Views/SettingsView.swift /Users/macbook1/work/ETPattern/ETPattern/Views/SplashView.swift (in target 'ETPattern' from project 'ETPattern')
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Views/SessionStatsView.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Views/SettingsView.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Views/SplashView.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 Compiling\ DesignSystem.swift,\ Extensions.swift,\ AutoPlayView.swift /Users/macbook1/work/ETPattern/ETPattern/Utilities/DesignSystem.swift /Users/macbook1/work/ETPattern/ETPattern/Utilities/Extensions.swift /Users/macbook1/work/ETPattern/ETPattern/Views/AutoPlayView.swift (in target 'ETPattern' from project 'ETPattern')
+
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Utilities/DesignSystem.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Utilities/Extensions.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Views/AutoPlayView.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 Compiling\ OnboardingView.swift,\ ProgressCircle.swift,\ SessionManagementView.swift /Users/macbook1/work/ETPattern/ETPattern/Views/OnboardingView.swift /Users/macbook1/work/ETPattern/ETPattern/Views/ProgressCircle.swift /Users/macbook1/work/ETPattern/ETPattern/Views/SessionManagementView.swift (in target 'ETPattern' from project 'ETPattern')
+
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Views/OnboardingView.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Views/ProgressCircle.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Views/SessionManagementView.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 Compiling\ CardView.swift,\ DeckDetailView.swift,\ ImportView.swift /Users/macbook1/work/ETPattern/ETPattern/Views/CardView.swift /Users/macbook1/work/ETPattern/ETPattern/Views/DeckDetailView.swift /Users/macbook1/work/ETPattern/ETPattern/Views/ImportView.swift (in target 'ETPattern' from project 'ETPattern')
+
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Views/CardView.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Views/DeckDetailView.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Views/ImportView.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 Compiling\ TTSService.swift,\ AppError.swift,\ Constants.swift /Users/macbook1/work/ETPattern/ETPattern/Services/TTSService.swift /Users/macbook1/work/ETPattern/ETPattern/Utilities/AppError.swift /Users/macbook1/work/ETPattern/ETPattern/Utilities/Constants.swift (in target 'ETPattern' from project 'ETPattern')
+
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Services/TTSService.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Utilities/AppError.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Utilities/Constants.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 Compiling\ StudyView.swift,\ ContentView.swift,\ ETPatternApp.swift /Users/macbook1/work/ETPattern/ETPattern/Views/StudyView.swift /Users/macbook1/work/ETPattern/ETPattern/ContentView.swift /Users/macbook1/work/ETPattern/ETPattern/ETPatternApp.swift (in target 'ETPattern' from project 'ETPattern')
+
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Views/StudyView.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/ContentView.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/ETPatternApp.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 Compiling\ Persistence.swift,\ CardSet+CoreDataClass.swift,\ CardSet+CoreDataProperties.swift /Users/macbook1/work/ETPattern/ETPattern/Persistence.swift /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/CardSet+CoreDataClass.swift /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/CardSet+CoreDataProperties.swift (in target 'ETPattern' from project 'ETPattern')
+
+SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Persistence.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/CardSet+CoreDataClass.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/CardSet+CoreDataProperties.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftCompile normal arm64 Compiling\ Card+CoreDataClass.swift,\ Card+CoreDataProperties.swift /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataClass.swift /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataProperties.swift (in target 'ETPattern' from project 'ETPattern')
+Failed frontend command:
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift-frontend -frontend -c /Users/macbook1/work/ETPattern/ETPattern/Models/Card.swift /Users/macbook1/work/ETPattern/ETPattern/Models/CardSet.swift /Users/macbook1/work/ETPattern/ETPattern/Models/StudySession.swift /Users/macbook1/work/ETPattern/ETPattern/Services/CSVImporter.swift /Users/macbook1/work/ETPattern/ETPattern/Services/FileManagerService.swift /Users/macbook1/work/ETPattern/ETPattern/Services/SpacedRepetitionService.swift /Users/macbook1/work/ETPattern/ETPattern/Services/TTSService.swift /Users/macbook1/work/ETPattern/ETPattern/Utilities/AppError.swift /Users/macbook1/work/ETPattern/ETPattern/Utilities/Constants.swift /Users/macbook1/work/ETPattern/ETPattern/Utilities/DesignSystem.swift /Users/macbook1/work/ETPattern/ETPattern/Utilities/Extensions.swift /Users/macbook1/work/ETPattern/ETPattern/Views/AutoPlayView.swift /Users/macbook1/work/ETPattern/ETPattern/Views/CardView.swift /Users/macbook1/work/ETPattern/ETPattern/Views/DeckDetailView.swift /Users/macbook1/work/ETPattern/ETPattern/Views/ImportView.swift /Users/macbook1/work/ETPattern/ETPattern/Views/OnboardingView.swift /Users/macbook1/work/ETPattern/ETPattern/Views/ProgressCircle.swift /Users/macbook1/work/ETPattern/ETPattern/Views/SessionManagementView.swift /Users/macbook1/work/ETPattern/ETPattern/Views/SessionStatsView.swift /Users/macbook1/work/ETPattern/ETPattern/Views/SettingsView.swift /Users/macbook1/work/ETPattern/ETPattern/Views/SplashView.swift /Users/macbook1/work/ETPattern/ETPattern/Views/StudyView.swift /Users/macbook1/work/ETPattern/ETPattern/ContentView.swift /Users/macbook1/work/ETPattern/ETPattern/ETPatternApp.swift /Users/macbook1/work/ETPattern/ETPattern/Persistence.swift /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/CardSet+CoreDataClass.swift /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/CardSet+CoreDataProperties.swift -primary-file /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataClass.swift -primary-file /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataProperties.swift /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/StudySession+CoreDataClass.swift /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/StudySession+CoreDataProperties.swift /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/ETPattern+CoreDataModel.swift /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/GeneratedAssetSymbols.swift -emit-dependencies-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Card+CoreDataClass.d -emit-const-values-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Card+CoreDataClass.swiftconstvalues -emit-reference-dependencies-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Card+CoreDataClass.swiftdeps -serialize-diagnostics-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Card+CoreDataClass.dia -emit-dependencies-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Card+CoreDataProperties.d -emit-const-values-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Card+CoreDataProperties.swiftconstvalues -emit-reference-dependencies-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Card+CoreDataProperties.swiftdeps -serialize-diagnostics-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Card+CoreDataProperties.dia -emit-localized-strings -emit-localized-strings-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64 -target arm64-apple-ios16.0-simulator -module-can-import-version DeveloperToolsSupport 23.0.4 23.0.4 -module-can-import-version SwiftUI 7.2.5.1 7.2.5 -module-can-import-version UIKit 9126.2.4.1 9126.2.4 -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libFoundationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#FoundationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libObservationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#ObservationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libPreviewsMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#PreviewsMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libSwiftMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#SwiftMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libSwiftUIMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#SwiftUIMacros -disable-implicit-swift-modules -Xcc -fno-implicit-modules -Xcc -fno-implicit-module-maps -explicit-swift-module-map-file /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/ETPattern-dependencies-1.json -Xllvm -aarch64-use-tbi -enable-objc-interop -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -I /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator -F /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator -no-color-diagnostics -Xcc -fno-color-diagnostics -enable-testing -g -debug-info-format\=dwarf -dwarf-version\=4 -module-cache-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -swift-version 5 -enforce-exclusivity\=checked -Onone -D DEBUG -serialize-debugging-options -const-gather-protocols-file /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/ETPattern_const_extract_protocols.json -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -default-isolation\=MainActor -empty-abi-descriptor -validate-clang-modules-once -clang-build-session-file /Users/macbook1/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -working-directory -Xcc /Users/macbook1/work/ETPattern -enable-anonymous-context-mangled-names -file-compilation-dir /Users/macbook1/work/ETPattern -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -Xcc -ivfsstatcache -Xcc /Users/macbook1/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.2-23C53-7d00a8b37fbd7999ea79df8ebc024bf0.sdkstatcache -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/swift-overrides.hmap -Xcc -iquote -Xcc /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-generated-files.hmap -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-own-target-headers.hmap -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-all-target-headers.hmap -Xcc -iquote -Xcc /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/ETPattern-project-headers.hmap -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources-normal/arm64 -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/arm64 -Xcc -I/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources -Xcc -DDEBUG\=1 -no-auto-bridging-header-chaining -module-name ETPattern -frontend-parseable-output -disable-clang-spi -target-sdk-version 26.2 -target-sdk-name iphonesimulator26.2 -clang-target arm64-apple-ios26.2-simulator -in-process-plugin-server-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/libSwiftInProcPluginServer.dylib -o /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Card+CoreDataClass.o -o /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Card+CoreDataProperties.o -index-unit-output-path /ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Card+CoreDataClass.o -index-unit-output-path /ETPattern.build/Debug-iphonesimulator/ETPattern.build/Objects-normal/arm64/Card+CoreDataProperties.o -index-store-path /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Index.noindex/DataStore -index-system-modules
+
+SwiftCompile normal arm64 /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataClass.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataClass.swift:16:14: error: invalid redeclaration of 'Card'
+public class Card: NSManagedObject {
+             ^
+/Users/macbook1/work/ETPattern/ETPattern/Models/Card.swift:12:14: note: 'Card' previously declared here
+public class Card: NSManagedObject {
+             ^
+/Users/macbook1/work/ETPattern/ETPattern/Models/Card.swift:12:14: note: 'Card' previously declared here
+public class Card: NSManagedObject {
+             ^
+
+SwiftCompile normal arm64 /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataProperties.swift (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataProperties.swift:16:11: error: 'Card' is ambiguous for type lookup in this context
+extension Card {
+          ^~~~
+/Users/macbook1/work/ETPattern/ETPattern/Models/Card.swift:12:14: note: found this candidate
+public class Card: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataClass.swift:16:14: note: found this candidate
+public class Card: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataProperties.swift:43:11: error: 'Card' is ambiguous for type lookup in this context
+extension Card {
+          ^~~~
+/Users/macbook1/work/ETPattern/ETPattern/Models/Card.swift:12:14: note: found this candidate
+public class Card: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataClass.swift:16:14: note: found this candidate
+public class Card: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataProperties.swift:60:11: error: 'Card' is ambiguous for type lookup in this context
+extension Card {
+          ^~~~
+/Users/macbook1/work/ETPattern/ETPattern/Models/Card.swift:12:14: note: found this candidate
+public class Card: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataClass.swift:16:14: note: found this candidate
+public class Card: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataProperties.swift:76:11: error: 'Card' is ambiguous for type lookup in this context
+extension Card : Identifiable {
+          ^~~~
+/Users/macbook1/work/ETPattern/ETPattern/Models/Card.swift:12:14: note: found this candidate
+public class Card: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataClass.swift:16:14: note: found this candidate
+public class Card: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataProperties.swift:11:8: warning: public import of 'CoreData' was not used in public declarations or inlinable code
+public import CoreData
+~~~~~~ ^
+internal
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataProperties.swift:18:65: error: 'Card' is ambiguous for type lookup in this context
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<Card> {
+                                                                ^~~~
+/Users/macbook1/work/ETPattern/ETPattern/Models/Card.swift:12:14: note: found this candidate
+public class Card: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataClass.swift:16:14: note: found this candidate
+public class Card: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataProperties.swift:36:36: error: 'CardSet' is ambiguous for type lookup in this context
+    @NSManaged public var cardSet: CardSet?
+                                   ^~~~~~~
+/Users/macbook1/work/ETPattern/ETPattern/Models/CardSet.swift:12:14: note: found this candidate
+public class CardSet: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/CardSet+CoreDataClass.swift:16:14: note: found this candidate
+public class CardSet: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataProperties.swift:46:59: error: 'StudySession' is ambiguous for type lookup in this context
+    @NSManaged public func addToReviewedSessions(_ value: StudySession)
+                                                          ^~~~~~~~~~~~
+/Users/macbook1/work/ETPattern/ETPattern/Models/StudySession.swift:12:14: note: found this candidate
+public class StudySession: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/StudySession+CoreDataClass.swift:16:14: note: found this candidate
+public class StudySession: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataProperties.swift:49:64: error: 'StudySession' is ambiguous for type lookup in this context
+    @NSManaged public func removeFromReviewedSessions(_ value: StudySession)
+                                                               ^~~~~~~~~~~~
+/Users/macbook1/work/ETPattern/ETPattern/Models/StudySession.swift:12:14: note: found this candidate
+public class StudySession: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/StudySession+CoreDataClass.swift:16:14: note: found this candidate
+public class StudySession: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataProperties.swift:63:60: error: 'StudySession' is ambiguous for type lookup in this context
+    @NSManaged public func addToRemainingSessions(_ value: StudySession)
+                                                           ^~~~~~~~~~~~
+/Users/macbook1/work/ETPattern/ETPattern/Models/StudySession.swift:12:14: note: found this candidate
+public class StudySession: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/StudySession+CoreDataClass.swift:16:14: note: found this candidate
+public class StudySession: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataProperties.swift:66:65: error: 'StudySession' is ambiguous for type lookup in this context
+    @NSManaged public func removeFromRemainingSessions(_ value: StudySession)
+                                                                ^~~~~~~~~~~~
+/Users/macbook1/work/ETPattern/ETPattern/Models/StudySession.swift:12:14: note: found this candidate
+public class StudySession: NSManagedObject {
+             ^
+/Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/StudySession+CoreDataClass.swift:16:14: note: found this candidate
+public class StudySession: NSManagedObject {
+             ^
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ ETPattern (in target 'ETPattern' from project 'ETPattern')
+
+EmitSwiftModule normal arm64 (in target 'ETPattern' from project 'ETPattern')
+    cd /Users/macbook1/work/ETPattern
+    
+
+SwiftEmitModule normal x86_64 Emitting\ module\ for\ ETPattern (in target 'ETPattern' from project 'ETPattern')
+
+** BUILD FAILED **
+
+
+The following build commands failed:
+	SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Models/Card.swift (in target 'ETPattern' from project 'ETPattern')
+	SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Models/CardSet.swift (in target 'ETPattern' from project 'ETPattern')
+	SwiftCompile normal arm64 /Users/macbook1/work/ETPattern/ETPattern/Models/StudySession.swift (in target 'ETPattern' from project 'ETPattern')
+	SwiftCompile normal arm64 Compiling\ Card+CoreDataClass.swift,\ Card+CoreDataProperties.swift /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataClass.swift /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataProperties.swift (in target 'ETPattern' from project 'ETPattern')
+	SwiftCompile normal arm64 /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataClass.swift (in target 'ETPattern' from project 'ETPattern')
+	SwiftCompile normal arm64 /Users/macbook1/Library/Developer/Xcode/DerivedData/ETPattern-ceepkkizhrfttrghnalmrcwlbsmz/Build/Intermediates.noindex/ETPattern.build/Debug-iphonesimulator/ETPattern.build/DerivedSources/CoreDataGenerated/ETPattern/Card+CoreDataProperties.swift (in target 'ETPattern' from project 'ETPattern')
+	Building project ETPattern with scheme ETPattern and configuration Debug
+(7 failures)
