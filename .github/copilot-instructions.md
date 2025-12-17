@@ -9,7 +9,7 @@ SwiftUI iOS app (iOS 16+) for studying English pattern flashcards with Core Data
 
 ## Decks + bundled data
 - Bundled CSVs are `Resources/Group1.csv` … `Group12.csv` (loaded via [ETPattern/Services/FileManagerService.swift](ETPattern/Services/FileManagerService.swift)).
-- The aggregated bundled master deck name is `Constants.Decks.bundledMasterName` = “ETPattern 300” (legacy name “ETPatterns 300” is migrated on launch in `PersistenceController.seedBundledCardSets`).
+- Only one bundled cardset is created named `Constants.Decks.bundledMasterName` = "ETPattern 300" (legacy name "ETPatterns 300" is migrated on launch in `PersistenceController.seedBundledCardSets`), containing all cards from the 12 group CSVs. Cards are tagged with `groupId` and `groupName` for internal grouping within the deck.
 
 ## CSV conventions (import/export must match)
 - Format is `Front;;Back;;Tags` with `<br>` in `Back` meaning line breaks.

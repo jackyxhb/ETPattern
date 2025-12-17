@@ -129,32 +129,10 @@ struct PersistenceController {
             (set.cards as? Set<Card>)?.count ?? 0
         }
 
-        // 1) Ensure Group 1–12 decks exist (and are populated if empty).
-        for bundledFile in bundledFiles {
-            let deckDisplayName = FileManagerService.getCardSetName(from: bundledFile)
-            let groupDeck = fetchOrCreateCardSet(named: deckDisplayName)
-
-            if cardCount(in: groupDeck) > 0 {
-                continue
-            }
-
-            guard let content = FileManagerService.loadBundledCSV(named: bundledFile) else {
-                print("ERROR: Failed to load bundled CSV \(bundledFile)")
-                continue
-            }
-
-            let cards = csvImporter.parseCSV(content, cardSetName: deckDisplayName)
-            for card in cards {
-                card.cardSet = groupDeck
-                groupDeck.addToCards(card)
-            }
-            print("DEBUG: Imported \(cards.count) cards into '\(deckDisplayName)'")
-        }
-
-        // 2) Ensure the single master deck exists and is populated if empty.
+        // Ensure the single master deck exists and is populated if empty.
         let masterDeck = fetchOrCreateCardSet(named: masterDeckName)
         if cardCount(in: masterDeck) > 0 {
-            // Master deck already exists; still save any newly created group decks.
+            // Master deck already exists.
             if viewContext.hasChanges {
                 try? viewContext.save()
             }
