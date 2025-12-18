@@ -3,40 +3,38 @@
 SwiftUI iOS app (iOS 16+) for studying English pattern flashcards with Core Data persistence, CSV import/export, and automatic TTS.
 
 ## Big picture (where to look)
-- App entry + DI: [ETPattern/ETPatternApp.swift](ETPattern/ETPatternApp.swift) injects Core Data `viewContext` + a single shared `TTSService` (`.environmentObject`). Splash wrapper is in [ETPattern/Views/SplashView.swift](ETPattern/Views/SplashView.swift).
-- Persistence + seeding: [ETPattern/Persistence.swift](ETPattern/Persistence.swift) loads the Core Data model explicitly from the module bundle and seeds bundled decks after the store loads.
-- Core Data model (codegen): entities live in [ETPattern/ETPattern.xcdatamodeld/ETPattern.xcdatamodel/contents](ETPattern/ETPattern.xcdatamodeld/ETPattern.xcdatamodel/contents). `Card.swift`/`CardSet.swift`/`StudySession.swift` are intentionally empty because Xcode generates classes ("Class Definition"). Add computed behavior via extensions like [ETPattern/Models/CardExtensions.swift](ETPattern/Models/CardExtensions.swift).
+- App entry + DI: [ETPattern/ETPatternApp.swift](ETPattern/ETPatternApp.swift) injects Core Data `viewContext` + shared `TTSService` (`.environmentObject`). Initializes default UserDefaults in `init()`. Splash in [ETPattern/Views/SplashView.swift](ETPattern/Views/SplashView.swift), then [ETPattern/ContentView.swift](ETPattern/ContentView.swift) shows onboarding for new users.
+- Persistence + seeding: [ETPattern/Persistence.swift](ETPattern/Persistence.swift) loads Core Data model from bundle, seeds bundled decks post-store load.
+- Core Data model (codegen): Entities in [ETPattern/ETPattern.xcdatamodeld/ETPattern.xcdatamodel/contents](ETPattern/ETPattern.xcdatamodeld/ETPattern.xcdatamodel/contents). `Card.swift`/`CardSet.swift`/`StudySession.swift` are empty; add behavior via extensions like [ETPattern/Models/CardExtensions.swift](ETPattern/Models/CardExtensions.swift).
 
 ## Decks + bundled data
-- Bundled CSVs are `Resources/Group1.csv` … `Group12.csv` (loaded via [ETPattern/Services/FileManagerService.swift](ETPattern/Services/FileManagerService.swift)).
-- Only one bundled cardset is created named `Constants.Decks.bundledMasterName` = "ETPattern 300" (legacy name "ETPatterns 300" is migrated on launch in `PersistenceController.seedBundledCardSets`), containing all cards from the 12 group CSVs. Cards are tagged with `groupId` and `groupName` for internal grouping within the deck.
+- Bundled CSVs: `Resources/Group1.csv` … `Group12.csv` (via [ETPattern/Services/FileManagerService.swift](ETPattern/Services/FileManagerService.swift)).
+- Single bundled cardset: `Constants.Decks.bundledMasterName` = "ETPattern 300", aggregates all cards. Cards tagged with `groupId`/`groupName`.
 
 ## CSV conventions (import/export must match)
-- Format is `Front;;Back;;Tags` with `<br>` in `Back` meaning line breaks.
-- Parsing is in [ETPattern/Services/CSVImporter.swift](ETPattern/Services/CSVImporter.swift):
-  - Splits by `;;`, skips header, replaces `<br>` → `\n`, assigns `card.id` by (1-based) line number.
-  - Tags optionally encode grouping as `^\d+-...` → `groupId` + `groupName`.
-- Export uses the same separator and converts `\n` back to `<br>` in [ETPattern/ContentView.swift](ETPattern/ContentView.swift).
+- Format: `Front;;Back;;Tags` with `<br>` for line breaks.
+- Parsing: [ETPattern/Services/CSVImporter.swift](ETPattern/Services/CSVImporter.swift) splits by `;;`, skips header, replaces `<br>` → `\n`, assigns `card.id` by line number.
+- Tags: Optional grouping as `^\d+-...` → `groupId` + `groupName`.
+- Export: Same separator, `\n` → `<br>` in [ETPattern/ContentView.swift](ETPattern/ContentView.swift).
 
 ## TTS (single speaker, no overlap)
-- `TTSService` in [ETPattern/Services/TTSService.swift](ETPattern/Services/TTSService.swift) wraps one `AVSpeechSynthesizer`, always stops previous speech before speaking.
-- Voice preference is stored in `UserDefaults` key `selectedVoice` (may be language like `en-US`/`en-GB` or a concrete voice identifier); rate is stored as `ttsPercentage` and converted via `Constants.TTS.percentageToRate`.
-- Auto-play relies on the `speak(_:completion:)` callback; keep it reliable when changing speech behavior.
+- `TTSService` in [ETPattern/Services/TTSService.swift](ETPattern/Services/TTSService.swift) wraps one `AVSpeechSynthesizer`, stops previous before speaking.
+- Preferences: `UserDefaults` `selectedVoice` (e.g., `en-US`/`en-GB`), `ttsPercentage` → rate via `Constants.TTS.percentageToRate`.
+- Auto-play: Relies on `speak(_:completion:)` callback.
 
 ## Study vs Auto-Play flows
-- Study session UI: [ETPattern/Views/StudyView.swift](ETPattern/Views/StudyView.swift)
-  - Tap flips and speaks the visible side; swipe right = "Easy", swipe left = "Again".
-  - Ordering uses `UserDefaults` key `cardOrderMode` (`random`/`sequential`).
-  - Scheduling uses [ETPattern/Services/SpacedRepetitionService.swift](ETPattern/Services/SpacedRepetitionService.swift) and per-card counters via `Card.recordReview`.
-- Auto-play UI: [ETPattern/Views/AutoPlayView.swift](ETPattern/Views/AutoPlayView.swift)
-  - Event-driven: TTS completion advances phases (`front` → flip → `back` → next card).
-  - Cancellation uses a UUID `speechToken`; progress is persisted per-deck in `UserDefaults` as `autoPlayProgress-<CardSet.objectID.uriRepresentation()>`.
-  - Ordering uses `UserDefaults` key `autoPlayOrderMode`.
+- Study: [ETPattern/Views/StudyView.swift](ETPattern/Views/StudyView.swift) — tap flips/speaks, swipe right="Easy", left="Again". Ordering: `UserDefaults` `cardOrderMode` (`random`/`sequential`). Scheduling: [ETPattern/Services/SpacedRepetitionService.swift](ETPattern/Services/SpacedRepetitionService.swift), `Card.recordReview`.
+- Auto-play: [ETPattern/Views/AutoPlayView.swift](ETPattern/Views/AutoPlayView.swift) — event-driven, TTS completion advances phases. Cancellation: UUID `speechToken`. Progress: `UserDefaults` `autoPlayProgress-<CardSet.objectID.uriRepresentation()>`. Ordering: `autoPlayOrderMode`.
 
 ## Deck management patterns
-- Main deck list is [ETPattern/ContentView.swift](ETPattern/ContentView.swift): context menu for Rename/Delete/Re-import/Export.
-- Re-import for user-picked files uses security-scoped URLs (`startAccessingSecurityScopedResource`). Bundled re-import bypasses picker and reloads from `Resources/Group*.csv`.
+- Main list: [ETPattern/ContentView.swift](ETPattern/ContentView.swift) — context menu for Rename/Delete/Re-import/Export.
+- Re-import: User files use security-scoped URLs; bundled reloads from `Resources/Group*.csv`.
+
+## User experience flows
+- Onboarding: First launch shows [ETPattern/Views/OnboardingView.swift](ETPattern/Views/OnboardingView.swift) with intro pages; completion stored in UserDefaults.
+- Settings: [ETPattern/Views/SettingsView.swift](ETPattern/Views/SettingsView.swift) for voice selection, card/auto-play order modes, TTS rate/pitch/volume/pause.
 
 ## Developer workflow
-- Open `ETPattern.xcodeproj` in Xcode 15+. CLI build examples are in [README.md](README.md).
-- `install.sh` device selection policy: list devices via `devicectl` → first USB-connected physical iPhone (checks `transportType == "usb"`) → else first booted iPhone simulator → else boot an available “iPhone 16” simulator and target it. The app path is resolved via `xcodebuild -showBuildSettings` (no hard-coded DerivedData paths).
+- Open `ETPattern.xcodeproj` in Xcode 15+.
+- Build: `xcodebuild -project ETPattern.xcodeproj -scheme ETPattern -sdk iphonesimulator -configuration Debug build`
+- Install/run: `install.sh` selects device (USB iPhone > booted sim > boot iPhone 16 sim), resolves app path via `xcodebuild -showBuildSettings`.

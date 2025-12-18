@@ -26,6 +26,8 @@ English Thought (abbreviated **ET**) is a native SwiftUI iOS app that helps lear
 **Experience**
 - Gradient-rich interface, modern buttons, and progress components tuned for iPhone 16 displays.
 - Linear progress bars, session stats, and Auto Play HUD keep learners focused without clutter.
+- Onboarding guide for first-time users to get started quickly.
+- Customizable settings for voice preferences, card ordering, and TTS options.
 
 ## Requirements
 
@@ -42,7 +44,7 @@ ETPattern/
 ├── Persistence.swift         // Core Data stack
 ├── Models/                   // Card, CardSet, StudySession entities
 ├── Services/                 // CSV, TTS, File, Spaced Repetition
-├── Views/                    // ContentView, StudyView, AutoPlayView, etc.
+├── Views/                    // ContentView, StudyView, AutoPlayView, SettingsView, OnboardingView, etc.
 ├── Utilities/                // Constants + Extensions
 ├── Resources/                // Group1–12 CSV bundles feeding the ETPattern 300 deck
 ├── Assets.xcassets           // Colors + icons
@@ -113,7 +115,12 @@ xcodebuild test -project ETPattern.xcodeproj -scheme ETPattern
 
 ## Release Notes
 
-### v1.3.0 (Latest)
+### v1.4.0 (Latest)
+- Added onboarding experience for new users with guided introduction to app features.
+- Introduced settings view for customizing voice preferences, card order modes, and TTS settings.
+- Enhanced user experience with improved navigation and accessibility.
+
+### v1.3.0
 - Enhanced swipe animations: Added visual feedback with checkmark (✓) for "Easy" swipes and X (✗) for "Again" swipes
 - Improved UI layout: Moved swipe instruction text from card area to bottom navbar for cleaner card display
 - Smooth slide animations: Feedback overlays now slide in smoothly during swipe gestures
