@@ -11,6 +11,7 @@ import CoreData
 struct DeckDetailView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.theme) var theme
 
     let cardSet: CardSet
 
@@ -18,13 +19,13 @@ struct DeckDetailView: View {
 
     var body: some View {
         ZStack {
-            DesignSystem.Gradients.background
+            theme.gradients.background
                 .ignoresSafeArea()
 
             if sortedGroupNames.isEmpty {
                 Text("No cards in this deck")
                     .font(.headline)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(theme.colors.textSecondary)
             } else {
                 ScrollView {
                     LazyVStack(spacing: 16) {
@@ -52,20 +53,20 @@ struct DeckDetailView: View {
                                 HStack {
                                     Text(groupName)
                                         .font(.headline)
-                                        .foregroundColor(.white)
+                                        .foregroundColor(theme.colors.textPrimary)
                                     Spacer()
                                     Text("\(groupedCards[groupName]?.count ?? 0) cards")
                                         .font(.subheadline)
-                                        .foregroundColor(.white.opacity(0.7))
+                                        .foregroundColor(theme.colors.textSecondary)
                                 }
                                 .padding()
                                 .background(
-                                    RoundedRectangle(cornerRadius: DesignSystem.Metrics.cornerRadius)
-                                        .fill(DesignSystem.Gradients.card.opacity(0.9))
+                                    RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
+                                        .fill(theme.gradients.card.opacity(0.9))
                                 )
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: DesignSystem.Metrics.cornerRadius)
-                                        .stroke(DesignSystem.Colors.stroke, lineWidth: 1)
+                                    RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
+                                        .stroke(theme.colors.surfaceLight, lineWidth: 1)
                                 )
                             }
                             .tint(.white)
@@ -104,27 +105,29 @@ struct DeckDetailView: View {
 private struct CardRow: View {
     let card: Card
 
+    @Environment(\.theme) var theme
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(card.front ?? "No front")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(theme.colors.textPrimary)
             Text(formattedBack)
                 .font(.subheadline)
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundColor(theme.colors.textSecondary)
                 .lineLimit(2)
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: DesignSystem.Metrics.cornerRadius)
-                .fill(DesignSystem.Gradients.card.opacity(0.9))
+            RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
+                .fill(theme.gradients.card.opacity(0.9))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: DesignSystem.Metrics.cornerRadius)
-                .stroke(DesignSystem.Colors.stroke, lineWidth: 1)
+            RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
+                .stroke(theme.colors.surfaceLight, lineWidth: 1)
         )
-        .shadow(color: DesignSystem.Metrics.shadow.opacity(0.4), radius: 12, x: 0, y: 8)
+        .shadow(color: theme.colors.shadow.opacity(0.4), radius: 12, x: 0, y: 8)
     }
 
     private var formattedBack: String {
@@ -139,10 +142,11 @@ private struct CardPreviewContainer: View {
     let onClose: () -> Void
 
     @EnvironmentObject private var ttsService: TTSService
+    @Environment(\.theme) var theme
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            DesignSystem.Gradients.background
+            theme.gradients.background
                 .ignoresSafeArea()
 
             CardView(card: card, currentIndex: index, totalCards: total)
@@ -151,9 +155,9 @@ private struct CardPreviewContainer: View {
             Button(action: onClose) {
                 Image(systemName: "xmark")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(theme.colors.textPrimary)
                     .padding(10)
-                    .background(Color.white.opacity(0.2), in: Circle())
+                    .background(theme.colors.textPrimary.opacity(0.2), in: Circle())
                     .padding()
             }
             .accessibilityLabel("Close preview")

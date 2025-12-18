@@ -14,6 +14,7 @@ struct CardView: View {
     let currentIndex: Int
     let totalCards: Int
     @State private var isFlipped = false
+    @Environment(\.theme) var theme
     @EnvironmentObject private var ttsService: TTSService
 
     var body: some View {
@@ -65,15 +66,17 @@ struct CardFace: View {
     let currentIndex: Int
     let totalCards: Int
 
+    @Environment(\.theme) var theme
+
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: DesignSystem.Metrics.cornerRadius)
-                .fill(DesignSystem.Gradients.card)
+            RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
+                .fill(theme.gradients.card)
                 .overlay(
-                    RoundedRectangle(cornerRadius: DesignSystem.Metrics.cornerRadius)
-                        .stroke(DesignSystem.Colors.stroke, lineWidth: 1.5)
+                    RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
+                        .stroke(theme.colors.surfaceLight, lineWidth: 1.5)
                 )
-                .shadow(color: DesignSystem.Metrics.shadow, radius: 30, x: 0, y: 30)
+                .shadow(color: theme.colors.shadow, radius: 30, x: 0, y: 30)
 
             VStack(alignment: .leading, spacing: 28) {
                 header
@@ -111,7 +114,7 @@ struct CardFace: View {
             if !pattern.isEmpty, !isFront {
                 Text(pattern)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundColor(DesignSystem.Colors.highlight)
+                    .foregroundColor(theme.colors.highlight)
                     .lineLimit(1)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)

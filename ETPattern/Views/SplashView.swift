@@ -32,16 +32,11 @@ struct SplashHostView<Content: View>: View {
 }
 
 struct SplashView: View {
-    private var backgroundGradient: LinearGradient {
-        LinearGradient(colors: [
-            Color(red: 18/255, green: 22/255, blue: 41/255),
-            Color(red: 42/255, green: 49/255, blue: 89/255)
-        ], startPoint: .topLeading, endPoint: .bottomTrailing)
-    }
-    
+    @Environment(\.theme) var theme
+
     var body: some View {
         ZStack {
-            backgroundGradient
+            theme.gradients.background
                 .ignoresSafeArea()
 
             VStack(spacing: 18) {
@@ -49,7 +44,7 @@ struct SplashView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 180, height: 180)
-                    .shadow(color: Color.black.opacity(0.25), radius: 30, y: 16)
+                    .shadow(color: theme.colors.shadow, radius: 30, y: 16)
 
                 Text("English Thought")
                     .font(.title2.bold())

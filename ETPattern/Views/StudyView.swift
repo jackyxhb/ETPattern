@@ -12,6 +12,7 @@ import UIKit
 struct StudyView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.theme) var theme
     @EnvironmentObject private var ttsService: TTSService
 
     let cardSet: CardSet
@@ -36,7 +37,7 @@ struct StudyView: View {
 
     var body: some View {
         ZStack {
-            DesignSystem.Gradients.background
+            theme.gradients.background
                 .ignoresSafeArea()
 
             VStack(spacing: 12) {
@@ -116,7 +117,7 @@ struct StudyView: View {
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(DesignSystem.Gradients.accent)
+                    .background(theme.gradients.accent)
                     .foregroundColor(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             }
@@ -270,7 +271,7 @@ struct StudyView: View {
                     .foregroundColor(.white.opacity(0.8))
 
                 ProgressView(value: progress)
-                    .tint(DesignSystem.Colors.highlight)
+                    .tint(theme.colors.highlight)
                     .frame(height: 4)
 
                 if let accuracy = currentAccuracy, accuracy > 0 {
@@ -298,7 +299,7 @@ struct StudyView: View {
                         .font(.title3)
                         .foregroundColor(.white)
                         .frame(width: 44, height: 44)
-                        .background(Color.white.opacity(0.15))
+                        .background(theme.colors.surfaceLight)
                         .clipShape(Circle())
                 }
                 .accessibilityLabel(isRandomOrder ? "Random Order" : "Sequential Order")
@@ -312,7 +313,7 @@ struct StudyView: View {
                         .font(.title3)
                         .foregroundColor(.white.opacity(0.8))
                         .frame(width: 44, height: 44)
-                        .background(DesignSystem.Gradients.danger)
+                        .background(theme.gradients.danger)
                         .clipShape(Circle())
                 }
                 .accessibilityLabel("Again")
@@ -330,9 +331,9 @@ struct StudyView: View {
                         .font(.title)
                         .foregroundColor(.white)
                         .frame(width: 60, height: 60)
-                        .background(Color.white.opacity(0.15))
+                        .background(theme.colors.surfaceLight)
                         .clipShape(Circle())
-                        .shadow(color: DesignSystem.Colors.highlight.opacity(0.3), radius: 8, x: 0, y: 4)
+                        .shadow(color: theme.colors.highlight.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
                 .accessibilityLabel("Flip Card")
 
@@ -345,7 +346,7 @@ struct StudyView: View {
                         .font(.title3)
                         .foregroundColor(.white)
                         .frame(width: 44, height: 44)
-                        .background(DesignSystem.Gradients.success)
+                        .background(theme.gradients.success)
                         .clipShape(Circle())
                 }
                 .accessibilityLabel("Easy")

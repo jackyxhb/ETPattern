@@ -12,6 +12,7 @@ import CoreData
 struct ImportView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.theme) var theme
 
     @State private var isShowingFilePicker = false
     @State private var isImporting = false
@@ -25,51 +26,60 @@ struct ImportView: View {
     }
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Import CSV File")
-                .font(.title)
-                .fontWeight(.bold)
+        ZStack {
+            theme.gradients.background
+                .ignoresSafeArea()
+            VStack(spacing: 20) {
+                Text("Import CSV File")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(theme.colors.textPrimary)
 
-            Text("Select a CSV file to import flashcards. The file should have the format:")
-                .multilineTextAlignment(.center)
-                .foregroundColor(.secondary)
+                Text("Select a CSV file to import flashcards. The file should have the format:")
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(theme.colors.highlight.opacity(0.8))
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text("• First row: Front;;Back;;Tags")
-                Text("• Subsequent rows: Pattern;;Examples<br>More examples;;tag1,tag2")
-                Text("• Separator: ;; (double semicolon)")
-                Text("• Line breaks in examples: <br>")
-            }
-            .font(.caption)
-            .foregroundColor(.secondary)
-            .padding(.horizontal)
-
-            Spacer()
-
-            Button(action: {
-                isShowingFilePicker = true
-            }) {
-                HStack {
-                    Image(systemName: "doc.badge.plus")
-                    Text("Select CSV File")
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("• First row: Front;;Back;;Tags")
+                        .foregroundColor(theme.colors.highlight.opacity(0.8))
+                    Text("• Subsequent rows: Pattern;;Examples<br>More examples;;tag1,tag2")
+                        .foregroundColor(theme.colors.highlight.opacity(0.8))
+                    Text("• Separator: ;; (double semicolon)")
+                        .foregroundColor(theme.colors.highlight.opacity(0.8))
+                    Text("• Line breaks in examples: <br>")
+                        .foregroundColor(theme.colors.highlight.opacity(0.8))
                 }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-            }
-            .padding(.horizontal)
-            .disabled(isImporting)
+                .font(.caption)
+                .padding(.horizontal)
 
-            if isImporting {
-                ProgressView("Importing...")
+                Spacer()
+
+                Button(action: {
+                    isShowingFilePicker = true
+                }) {
+                    HStack {
+                        Image(systemName: "doc.badge.plus")
+                        Text("Select CSV File")
+                    }
+                    .frame(maxWidth: .infinity)
                     .padding()
-            }
+                    .background(theme.gradients.accent)
+                    .foregroundColor(theme.colors.textPrimary)
+                    .cornerRadius(10)
+                }
+                .padding(.horizontal)
+                .disabled(isImporting)
 
-            Spacer()
+                if isImporting {
+                    ProgressView("Importing...")
+                        .padding()
+                        .foregroundColor(theme.colors.textPrimary)
+                }
+
+                Spacer()
+            }
+            .padding()
         }
-        .padding()
         .fileImporter(
             isPresented: $isShowingFilePicker,
             allowedContentTypes: [UTType.commaSeparatedText],

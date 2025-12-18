@@ -9,6 +9,7 @@ import SwiftUI
 import AVFoundation
 
 struct SettingsView: View {
+    @Environment(\.theme) var theme
     @EnvironmentObject private var ttsService: TTSService
     @State private var selectedVoice: String = Constants.TTS.defaultVoice
     @State private var cardOrderMode: String = UserDefaults.standard.string(forKey: "cardOrderMode") ?? "random"
@@ -29,11 +30,15 @@ struct SettingsView: View {
     ]
 
     var body: some View {
-        Form {
-            Section(header: Text("Study Mode")) {
+        ZStack {
+            theme.gradients.background
+                .ignoresSafeArea()
+            Form {
+            Section(header: Text("Study Mode").foregroundColor(theme.colors.textPrimary)) {
                 Picker("Card Order", selection: $cardOrderMode) {
                     ForEach(orderOptions.keys.sorted(), id: \.self) { orderKey in
                         Text(orderOptions[orderKey] ?? orderKey)
+                            .foregroundColor(theme.colors.textPrimary)
                             .tag(orderKey)
                     }
                 }
@@ -42,11 +47,13 @@ struct SettingsView: View {
                     UserDefaults.standard.set(newValue, forKey: "cardOrderMode")
                 }
             }
+            .listRowBackground(Color.clear)
 
-            Section(header: Text("Auto Play Mode")) {
+            Section(header: Text("Auto Play Mode").foregroundColor(theme.colors.textPrimary)) {
                 Picker("Card Order", selection: $autoPlayOrderMode) {
                     ForEach(orderOptions.keys.sorted(), id: \.self) { orderKey in
                         Text(orderOptions[orderKey] ?? orderKey)
+                            .foregroundColor(theme.colors.textPrimary)
                             .tag(orderKey)
                     }
                 }
@@ -55,11 +62,13 @@ struct SettingsView: View {
                     UserDefaults.standard.set(newValue, forKey: "autoPlayOrderMode")
                 }
             }
+            .listRowBackground(Color.clear)
 
-            Section(header: Text("Text-to-Speech")) {
+            Section(header: Text("Text-to-Speech").foregroundColor(theme.colors.textPrimary)) {
                 Picker("Voice", selection: $selectedVoice) {
                     ForEach(voiceOptions.keys.sorted(), id: \.self) { voiceId in
                         Text(voiceOptions[voiceId] ?? voiceId)
+                            .foregroundColor(theme.colors.textPrimary)
                             .tag(voiceId)
                     }
                 }
@@ -68,21 +77,24 @@ struct SettingsView: View {
                     ttsService.setVoice(newValue)
                 }
 
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
                     Text("Speech Speed: \(Int(ttsPercentage))%")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .font(theme.typography.subheadline)
+                        .foregroundColor(theme.colors.textPrimary)
                     
                     GeometryReader { geometry in
                         Slider(value: $ttsPercentage, in: Constants.TTS.minPercentage...Constants.TTS.maxPercentage, step: 10) {
                             Text("Speech Speed")
                         } minimumValueLabel: {
                             Text("50%")
-                                .font(.caption)
+                                .font(theme.typography.caption)
+                                .foregroundColor(theme.colors.textSecondary)
                         } maximumValueLabel: {
                             Text("120%")
-                                .font(.caption)
+                                .font(theme.typography.caption)
+                                .foregroundColor(theme.colors.textSecondary)
                         }
+                        .tint(theme.colors.highlight)
                         .gesture(
                             DragGesture(minimumDistance: 0)
                                 .onChanged { value in
@@ -99,86 +111,109 @@ struct SettingsView: View {
                             ttsService.setRate(newValue)
                         }
                     }
-                    .frame(height: 44) // Standard slider height
+                    .frame(height: theme.metrics.sliderHeight) // Standard slider height
                 }
-                .padding(.vertical, 4)
+                .padding(.vertical, theme.metrics.smallSpacing)
+                .listRowBackground(Color.clear)
 
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
                     Text("Pitch: \(Int(ttsPitch * 100))%")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .font(theme.typography.subheadline)
+                        .foregroundColor(theme.colors.textPrimary)
                     
                     Slider(value: $ttsPitch, in: Constants.TTS.minPitch...Constants.TTS.maxPitch, step: 0.1) {
                         Text("Pitch")
                     } minimumValueLabel: {
                         Text("50%")
-                            .font(.caption)
+                            .font(theme.typography.caption)
+                            .foregroundColor(theme.colors.textSecondary)
                     } maximumValueLabel: {
                         Text("200%")
-                            .font(.caption)
+                            .font(theme.typography.caption)
+                            .foregroundColor(theme.colors.textSecondary)
                     }
+                    .tint(theme.colors.highlight)
                     .onChange(of: ttsPitch) { newValue in
                         ttsService.setPitch(newValue)
                     }
                 }
-                .padding(.vertical, 4)
+                .padding(.vertical, theme.metrics.smallSpacing)
+                .listRowBackground(Color.clear)
 
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
                     Text("Volume: \(Int(ttsVolume * 100))%")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .font(theme.typography.subheadline)
+                        .foregroundColor(theme.colors.textPrimary)
                     
                     Slider(value: $ttsVolume, in: Constants.TTS.minVolume...Constants.TTS.maxVolume, step: 0.1) {
                         Text("Volume")
                     } minimumValueLabel: {
                         Text("0%")
-                            .font(.caption)
+                            .font(theme.typography.caption)
+                            .foregroundColor(theme.colors.textSecondary)
                     } maximumValueLabel: {
                         Text("100%")
-                            .font(.caption)
+                            .font(theme.typography.caption)
+                            .foregroundColor(theme.colors.textSecondary)
                     }
+                    .tint(theme.colors.highlight)
                     .onChange(of: ttsVolume) { newValue in
                         ttsService.setVolume(newValue)
                     }
                 }
-                .padding(.vertical, 4)
+                .padding(.vertical, theme.metrics.smallSpacing)
+                .listRowBackground(Color.clear)
 
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
                     Text("Pause: \(String(format: "%.1f", ttsPause))s")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .font(theme.typography.subheadline)
+                        .foregroundColor(theme.colors.textPrimary)
                     
                     Slider(value: $ttsPause, in: Constants.TTS.minPause...Constants.TTS.maxPause, step: 0.1) {
                         Text("Pause")
                     } minimumValueLabel: {
                         Text("0s")
-                            .font(.caption)
+                            .font(theme.typography.caption)
+                            .foregroundColor(theme.colors.textSecondary)
                     } maximumValueLabel: {
                         Text("2s")
-                            .font(.caption)
+                            .font(theme.typography.caption)
+                            .foregroundColor(theme.colors.textSecondary)
                     }
+                    .tint(theme.colors.highlight)
                     .onChange(of: ttsPause) { newValue in
                         ttsService.setPause(newValue)
                     }
                 }
-                .padding(.vertical, 4)
+                .padding(.vertical, theme.metrics.smallSpacing)
+                .listRowBackground(Color.clear)
 
                 Button("Test Voice") {
                     UIImpactFeedbackGenerator.lightImpact()
                     ttsService.speak("Hello! This is a test of the selected voice and speed.")
                 }
-                .buttonStyle(.bordered)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(theme.gradients.accent)
+                .foregroundColor(theme.colors.textPrimary)
+                .cornerRadius(theme.metrics.cornerRadius)
+                .listRowBackground(Color.clear)
             }
+            .listRowBackground(Color.clear)
 
-            Section(header: Text("About")) {
+            Section(header: Text("About").foregroundColor(theme.colors.textPrimary)) {
                 Text("English Pattern Flashcards")
-                    .font(.headline)
+                    .font(theme.typography.headline)
+                    .foregroundColor(theme.colors.textPrimary)
                 Text("Version 1.0")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(theme.colors.textSecondary)
                 Text("Learn English patterns with spaced repetition")
-                    .foregroundColor(.secondary)
-                    .font(.caption)
+                    .foregroundColor(theme.colors.textSecondary)
+                    .font(theme.typography.caption)
             }
+            .listRowBackground(Color.clear)
+            }
+            .scrollContentBackground(.hidden)
         }
         .navigationTitle("Settings")
         .onAppear {

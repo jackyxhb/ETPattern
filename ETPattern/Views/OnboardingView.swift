@@ -8,44 +8,45 @@
 import SwiftUI
 
 struct OnboardingView: View {
+    @Environment(\.theme) var theme
     @State private var currentPage = 0
     @State private var showMainApp = false
     let onComplete: () -> Void
 
-    private let pages = [
-        OnboardingPage(
-            title: "Welcome to English Thought",
-            subtitle: "Master 300 English expression patterns",
-            description: "Learn natural English expressions with our comprehensive flashcard system featuring automatic text-to-speech.",
-            systemImage: "sparkles",
-            gradient: DesignSystem.Gradients.accent
-        ),
-        OnboardingPage(
-            title: "Smart Learning",
-            subtitle: "Spaced repetition made simple",
-            description: "Our algorithm helps you review cards at optimal intervals, ensuring you remember patterns long-term.",
-            systemImage: "brain.head.profile",
-            gradient: DesignSystem.Gradients.success
-        ),
-        OnboardingPage(
-            title: "Auto-Play Mode",
-            subtitle: "Hands-free learning experience",
-            description: "Let the app automatically play through your cards with natural speech. Perfect for passive learning.",
-            systemImage: "waveform",
-            gradient: DesignSystem.Gradients.card
-        ),
-        OnboardingPage(
-            title: "Ready to Begin",
-            subtitle: "Your English journey starts now",
-            description: "Import your CSV files or start with our built-in 300 pattern deck. Happy learning!",
-            systemImage: "checkmark.circle.fill",
-            gradient: DesignSystem.Gradients.accent
-        )
-    ]
-
     var body: some View {
+        let pages = [
+            OnboardingPage(
+                title: "Welcome to English Thought",
+                subtitle: "Master 300 English expression patterns",
+                description: "Learn natural English expressions with our comprehensive flashcard system featuring automatic text-to-speech.",
+                systemImage: "sparkles",
+                gradient: theme.gradients.accent
+            ),
+            OnboardingPage(
+                title: "Smart Learning",
+                subtitle: "Spaced repetition made simple",
+                description: "Our algorithm helps you review cards at optimal intervals, ensuring you remember patterns long-term.",
+                systemImage: "brain.head.profile",
+                gradient: theme.gradients.success
+            ),
+            OnboardingPage(
+                title: "Auto-Play Mode",
+                subtitle: "Hands-free learning experience",
+                description: "Let the app automatically play through your cards with natural speech. Perfect for passive learning.",
+                systemImage: "waveform",
+                gradient: theme.gradients.card
+            ),
+            OnboardingPage(
+                title: "Ready to Begin",
+                subtitle: "Your English journey starts now",
+                description: "Import your CSV files or start with our built-in 300 pattern deck. Happy learning!",
+                systemImage: "checkmark.circle.fill",
+                gradient: theme.gradients.accent
+            )
+        ]
+
         ZStack {
-            DesignSystem.Gradients.background
+            theme.gradients.background
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -61,7 +62,7 @@ struct OnboardingView: View {
                 HStack(spacing: 8) {
                     ForEach(pages.indices, id: \.self) { index in
                         Circle()
-                            .fill(currentPage == index ? DesignSystem.Colors.highlight : Color.white.opacity(0.3))
+                            .fill(currentPage == index ? theme.colors.highlight : Color.white.opacity(0.3))
                             .frame(width: 8, height: 8)
                             .animation(.smooth, value: currentPage)
                     }
@@ -95,9 +96,9 @@ struct OnboardingView: View {
                         }) {
                             Text("Next")
                                 .font(.headline.bold())
-                                .foregroundColor(.white)
+                                .foregroundColor(theme.colors.textPrimary)
                                 .frame(width: 80, height: 50)
-                                .background(DesignSystem.Gradients.accent)
+                                .background(theme.gradients.accent)
                                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
                     } else {
@@ -109,9 +110,9 @@ struct OnboardingView: View {
                         }) {
                             Text("Get Started")
                                 .font(.headline.bold())
-                                .foregroundColor(.white)
+                                .foregroundColor(theme.colors.textPrimary)
                                 .frame(width: 140, height: 50)
-                                .background(DesignSystem.Gradients.success)
+                                .background(theme.gradients.success)
                                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
                     }
@@ -133,6 +134,7 @@ struct OnboardingPage: Identifiable {
 }
 
 struct OnboardingPageView: View {
+    @Environment(\.theme) var theme
     let page: OnboardingPage
 
     var body: some View {
@@ -146,24 +148,24 @@ struct OnboardingPageView: View {
 
                 Image(systemName: page.systemImage)
                     .font(.system(size: 80))
-                    .foregroundColor(.white)
+                    .foregroundColor(theme.colors.textPrimary)
             }
             .padding(.bottom, 20)
 
             VStack(spacing: 16) {
                 Text(page.title)
                     .font(.title.bold())
-                    .foregroundColor(.white)
+                    .foregroundColor(theme.colors.textPrimary)
                     .multilineTextAlignment(.center)
 
                 Text(page.subtitle)
                     .font(.title3)
-                    .foregroundColor(DesignSystem.Colors.highlight)
+                    .foregroundColor(theme.colors.highlight)
                     .multilineTextAlignment(.center)
 
                 Text(page.description)
                     .font(.body)
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(theme.colors.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
                     .padding(.horizontal, 32)

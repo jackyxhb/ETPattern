@@ -11,6 +11,7 @@ import CoreData
 struct SessionStatsView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.theme) var theme
 
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \StudySession.date, ascending: false)],
@@ -19,64 +20,71 @@ struct SessionStatsView: View {
 
     var body: some View {
         NavigationView {
-            List {
-                if studySessions.isEmpty {
-                    Text("No study sessions yet")
-                        .foregroundColor(.secondary)
-                        .padding()
-                } else {
-                    ForEach(studySessions) { session in
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Text(session.date ?? Date(), style: .date)
-                                    .font(.headline)
-                                Spacer()
-                                Text(session.date ?? Date(), style: .time)
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
+            ZStack {
+                theme.gradients.background
+                    .ignoresSafeArea()
+                List {
+                    if studySessions.isEmpty {
+                        Text("No study sessions yet")
+                            .foregroundColor(theme.colors.highlight.opacity(0.7))
+                            .padding()
+                    } else {
+                        ForEach(studySessions) { session in
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Text(session.date ?? Date(), style: .date)
+                                        .font(.headline)
+                                        .foregroundColor(theme.colors.textPrimary)
+                                    Spacer()
+                                    Text(session.date ?? Date(), style: .time)
+                                        .font(.subheadline)
+                                        .foregroundColor(theme.colors.textSecondary)
+                                }
+
+                                HStack(spacing: 16) {
+                                    VStack(alignment: .leading) {
+                                        Text("Cards Reviewed")
+                                            .font(.caption)
+                                            .foregroundColor(theme.colors.textSecondary)
+                                        Text("\(session.cardsReviewed)")
+                                            .font(.title3)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(theme.colors.textPrimary)
+                                    }
+
+                                    VStack(alignment: .leading) {
+                                        Text("Correct")
+                                            .font(.caption)
+                                            .foregroundColor(theme.colors.textSecondary)
+                                        Text("\(session.correctCount)")
+                                            .font(.title3)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(theme.colors.success)
+                                    }
+
+                                    VStack(alignment: .leading) {
+                                        Text("Accuracy")
+                                            .font(.caption)
+                                            .foregroundColor(theme.colors.highlight.opacity(0.7))
+                                        Text(accuracyText(for: session))
+                                            .font(.title3)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(accuracyColor(for: session))
+                                    }
+                                }
                             }
-
-                            HStack(spacing: 16) {
-                                VStack(alignment: .leading) {
-                                    Text("Cards Reviewed")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                    Text("\(session.cardsReviewed)")
-                                        .font(.title3)
-                                        .fontWeight(.semibold)
-                                }
-
-                                VStack(alignment: .leading) {
-                                    Text("Correct")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                    Text("\(session.correctCount)")
-                                        .font(.title3)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(.green)
-                                }
-
-                                VStack(alignment: .leading) {
-                                    Text("Accuracy")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                    Text(accuracyText(for: session))
-                                        .font(.title3)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(accuracyColor(for: session))
-                                }
-                            }
+                            .padding(.vertical, 8)
                         }
-                        .padding(.vertical, 8)
+                        .onDelete(perform: deleteSessions)
                     }
-                    .onDelete(perform: deleteSessions)
                 }
-            }
-            .navigationTitle("Study Sessions")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    EditButton()
+                .navigationTitle("Study Sessions")
+                .navigationBarTitleDisplayMode(.inline)
+                .scrollContentBackground(.hidden)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        EditButton()
+                    }
                 }
             }
         }
@@ -91,15 +99,15 @@ struct SessionStatsView: View {
 
     private func accuracyColor(for session: StudySession) -> Color {
         let reviewed = session.cardsReviewed
-        guard reviewed > 0 else { return .secondary }
+        guard reviewed > 0 else { return theme.colors.textSecondary }
         let accuracy = Double(session.correctCount) / Double(reviewed)
 
         if accuracy >= 0.8 {
-            return .green
+            return theme.colors.success
         } else if accuracy >= 0.6 {
-            return .orange
+            return theme.colors.warning
         } else {
-            return .red
+            return theme.colors.danger
         }
     }
 

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ProgressCircle: View {
+    @Environment(\.theme) var theme
     let progress: Double
     let lineWidth: CGFloat = 8
     let size: CGFloat = 60
@@ -15,7 +16,7 @@ struct ProgressCircle: View {
     var body: some View {
         ZStack {
             Circle()
-                .stroke(DesignSystem.Colors.stroke, lineWidth: lineWidth)
+                .stroke(theme.colors.surfaceLight, lineWidth: lineWidth)
 
             Circle()
                 .trim(from: 0, to: progress)
@@ -28,7 +29,7 @@ struct ProgressCircle: View {
 
             Text("\(Int(progress * 100))%")
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .foregroundColor(.white)
+                .foregroundColor(theme.colors.textPrimary)
         }
         .frame(width: size, height: size)
     }
@@ -36,11 +37,11 @@ struct ProgressCircle: View {
     private var progressGradient: LinearGradient {
         switch progress {
         case 0..<0.3:
-            return DesignSystem.Gradients.danger
+            return theme.gradients.danger
         case 0.3..<0.7:
-            return LinearGradient(colors: [Color.orange, Color.yellow], startPoint: .leading, endPoint: .trailing)
+            return theme.gradients.warning
         default:
-            return DesignSystem.Gradients.success
+            return theme.gradients.success
         }
     }
 }

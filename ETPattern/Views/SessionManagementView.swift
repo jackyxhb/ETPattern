@@ -11,6 +11,7 @@ import CoreData
 struct SessionManagementView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.theme) var theme
 
     let cardSetName: String
     let cardsReviewed: Int
@@ -24,28 +25,28 @@ struct SessionManagementView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Session Management")
                         .font(.title2.bold())
-                        .foregroundColor(.white)
+                        .foregroundColor(theme.colors.textPrimary)
 
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
                             Text("Deck:")
-                                .foregroundColor(.white.opacity(0.7))
+                                .foregroundColor(theme.colors.textSecondary)
                             Text(cardSetName)
-                                .foregroundColor(.white)
+                                .foregroundColor(theme.colors.textPrimary)
                         }
 
                         HStack {
                             Text("Cards Reviewed:")
-                                .foregroundColor(.white.opacity(0.7))
+                                .foregroundColor(theme.colors.textSecondary)
                             Text("\(cardsReviewed)")
-                                .foregroundColor(.white)
+                                .foregroundColor(theme.colors.textPrimary)
                         }
 
                         HStack {
                             Text("Correct Answers:")
-                                .foregroundColor(.white.opacity(0.7))
+                                .foregroundColor(theme.colors.textSecondary)
                             Text("\(correctCount)")
-                                .foregroundColor(.white)
+                                .foregroundColor(theme.colors.textPrimary)
                         }
 
                         if cardsReviewed > 0 {
@@ -76,10 +77,10 @@ struct SessionManagementView: View {
                             Text("Reset Session")
                         }
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(theme.colors.textPrimary)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.red.opacity(0.2))
+                        .background(theme.colors.danger.opacity(0.2))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
 
@@ -92,10 +93,10 @@ struct SessionManagementView: View {
                             Text("Continue Studying")
                         }
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(theme.colors.textPrimary)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(DesignSystem.Gradients.success)
+                        .background(theme.gradients.success)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                 }
@@ -104,7 +105,7 @@ struct SessionManagementView: View {
                 Spacer()
             }
             .padding(.top, 40)
-            .background(DesignSystem.Gradients.background.ignoresSafeArea())
+            .background(theme.gradients.background.ignoresSafeArea())
             .navigationBarItems(trailing: Button("Done") {
                 dismiss()
             })

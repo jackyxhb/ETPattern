@@ -13,6 +13,7 @@ struct AutoPlayView: View {
     let cardSet: CardSet
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.theme) var theme
     @EnvironmentObject private var ttsService: TTSService
 
     @State private var cards: [Card] = []
@@ -37,7 +38,7 @@ struct AutoPlayView: View {
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            DesignSystem.Gradients.background
+            theme.gradients.background
                 .ignoresSafeArea()
 
             VStack(spacing: 32) {
@@ -115,7 +116,7 @@ struct AutoPlayView: View {
 
             ZStack {
                 Circle()
-                    .fill(DesignSystem.Gradients.card.opacity(0.3))
+                    .fill(theme.gradients.card.opacity(0.3))
                     .frame(width: 160, height: 160)
 
                 Image(systemName: "waveform")
@@ -131,7 +132,7 @@ struct AutoPlayView: View {
 
                 Text("This deck doesn't have any cards yet")
                     .font(.title3)
-                    .foregroundColor(DesignSystem.Colors.highlight)
+                    .foregroundColor(theme.colors.highlight)
                     .multilineTextAlignment(.center)
 
                 Text("Add some cards to this deck or import a CSV file to start auto-playing through your patterns.")
@@ -157,7 +158,7 @@ struct AutoPlayView: View {
                     .foregroundColor(.white.opacity(0.8))
                 
                 ProgressView(value: Double(currentCardInCycle), total: Double(cards.count))
-                    .tint(DesignSystem.Colors.highlight)
+                    .tint(theme.colors.highlight)
                     .frame(height: 4)
                 
                 Text(cards.count > 0 ? "\(Int((Double(currentCardInCycle) / Double(cards.count)) * 100))%" : "0%")
@@ -183,7 +184,7 @@ struct AutoPlayView: View {
                         .font(.title3)
                         .foregroundColor(.white)
                         .frame(width: 44, height: 44)
-                        .background(Color.white.opacity(0.15))
+                        .background(theme.colors.surfaceLight)
                         .clipShape(Circle())
                 }
                 .accessibilityLabel(isRandomOrder ? "Random Order" : "Sequential Order")
@@ -215,9 +216,9 @@ struct AutoPlayView: View {
                         .font(.title)
                         .foregroundColor(.white)
                         .frame(width: 60, height: 60)
-                        .background(DesignSystem.Gradients.accent)
+                        .background(theme.gradients.accent)
                         .clipShape(Circle())
-                        .shadow(color: DesignSystem.Colors.highlight.opacity(0.3), radius: 8, x: 0, y: 4)
+                        .shadow(color: theme.colors.highlight.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
                 .accessibilityLabel(isPlaying ? "Pause" : "Play")
                 
@@ -230,7 +231,7 @@ struct AutoPlayView: View {
                         .font(.title3)
                         .foregroundColor(.white)
                         .frame(width: 44, height: 44)
-                        .background(DesignSystem.Gradients.success)
+                        .background(theme.gradients.success)
                         .clipShape(Circle())
                 }
                 .accessibilityLabel("Skip")
@@ -246,7 +247,7 @@ struct AutoPlayView: View {
                         .font(.title3)
                         .foregroundColor(.white)
                         .frame(width: 44, height: 44)
-                        .background(Color.white.opacity(0.15))
+                        .background(theme.colors.surfaceLight)
                         .clipShape(Circle())
                 }
                 .accessibilityLabel("Close")

@@ -25,6 +25,7 @@ struct ETPatternApp: App {
             }
             .environment(\.managedObjectContext, persistenceController.container.viewContext)
             .environmentObject(ttsService)
+            .environment(\.theme, Theme.default)
         }
     }
     

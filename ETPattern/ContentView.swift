@@ -12,6 +12,7 @@ import UniformTypeIdentifiers
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.theme) var theme
 
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \CardSet.createdDate, ascending: false)],
@@ -40,7 +41,7 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                DesignSystem.Gradients.background
+                theme.gradients.background
                     .ignoresSafeArea()
 
                 VStack(alignment: .leading, spacing: 16) {
@@ -482,22 +483,22 @@ struct ContentView: View {
         VStack(spacing: 24) {
             ZStack {
                 Circle()
-                    .fill(DesignSystem.Gradients.accent.opacity(0.2))
+                    .fill(theme.gradients.accent.opacity(0.2))
                     .frame(width: 120, height: 120)
 
                 Image(systemName: "plus.circle.fill")
                     .font(.system(size: 60))
-                    .foregroundColor(.white)
+                    .foregroundColor(theme.colors.textPrimary)
             }
 
             VStack(spacing: 12) {
                 Text("No Decks Yet")
                     .font(.title2.bold())
-                    .foregroundColor(.white)
+                    .foregroundColor(theme.colors.textPrimary)
 
                 Text("Create your first flashcard deck or import CSV files to get started with learning English patterns.")
                     .font(.body)
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(theme.colors.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
                     .padding(.horizontal, 32)
@@ -512,8 +513,8 @@ struct ContentView: View {
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(DesignSystem.Gradients.accent)
-                        .foregroundColor(.white)
+                        .background(theme.gradients.accent)
+                        .foregroundColor(theme.colors.textPrimary)
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
 
@@ -526,7 +527,7 @@ struct ContentView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .background(.ultraThinMaterial)
-                        .foregroundColor(.white)
+                        .foregroundColor(theme.colors.textPrimary)
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
             }
@@ -541,7 +542,7 @@ struct ContentView: View {
         HStack(alignment: .center, spacing: 12) {
             Text("English Thought")
                 .font(.largeTitle.bold())
-                .foregroundColor(.white)
+                .foregroundColor(theme.colors.textPrimary)
             Spacer()
             headerActions
         }
@@ -584,9 +585,9 @@ struct ContentView: View {
     private func headerIcon(systemName: String) -> some View {
         Image(systemName: systemName)
             .imageScale(.medium)
-            .foregroundColor(.white)
+            .foregroundColor(theme.colors.textPrimary)
             .padding(10)
-            .background(Color.white.opacity(0.15))
+            .background(theme.colors.surfaceLight)
             .clipShape(Circle())
     }
 
@@ -603,15 +604,15 @@ struct ContentView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("(\(cardCount))\(cardSet.name ?? "Unnamed Deck")")
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundColor(theme.colors.textPrimary)
                         Text("Created \(createdText)")
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(theme.colors.textSecondary)
                     }
                     Spacer()
                     if isSelected(cardSet) {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(DesignSystem.Colors.highlight)
+                            .foregroundColor(theme.colors.highlight)
                             .imageScale(.large)
                     }
                 }
@@ -619,15 +620,15 @@ struct ContentView: View {
             .padding(.vertical, 16)
             .padding(.horizontal, 18)
             .background(
-                DesignSystem.Gradients.card
+                theme.gradients.card
                     .opacity(isSelected(cardSet) ? 1 : 0.85)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: DesignSystem.Metrics.cornerRadius)
-                    .stroke(isSelected(cardSet) ? DesignSystem.Colors.highlight.opacity(0.8) : Color.white.opacity(0.15), lineWidth: 1.5)
+                RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
+                    .stroke(isSelected(cardSet) ? theme.colors.highlight.opacity(0.8) : theme.colors.surfaceLight, lineWidth: 1.5)
             )
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .shadow(color: DesignSystem.Metrics.shadow.opacity(0.3), radius: 14, x: 0, y: 10)
+            .shadow(color: theme.colors.shadow.opacity(0.3), radius: 14, x: 0, y: 10)
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("deckCard")
@@ -642,6 +643,7 @@ private let dateFormatter: DateFormatter = {
 }()
 
 private struct CardSetActionBar: View {
+    @Environment(\.theme) var theme
     let onStudy: () -> Void
     let onAuto: () -> Void
     let onBrowse: () -> Void
@@ -649,14 +651,14 @@ private struct CardSetActionBar: View {
     var body: some View {
         VStack(spacing: 10) {
             Capsule()
-                .fill(Color.white.opacity(0.3))
+                .fill(theme.colors.textPrimary.opacity(0.3))
                 .frame(width: 34, height: 3)
                 .padding(.top, 6)
 
             HStack(spacing: 12) {
-                ActionButton(title: "Study", systemImage: "bolt.fill", gradient: DesignSystem.Gradients.accent, action: onStudy)
-                ActionButton(title: "Auto", systemImage: "waveform", gradient: DesignSystem.Gradients.success, action: onAuto)
-                ActionButton(title: "Browse", systemImage: "list.bullet", gradient: DesignSystem.Gradients.card, action: onBrowse)
+                ActionButton(title: "Study", systemImage: "bolt.fill", gradient: theme.gradients.accent, action: onStudy)
+                ActionButton(title: "Auto", systemImage: "waveform", gradient: theme.gradients.success, action: onAuto)
+                ActionButton(title: "Browse", systemImage: "list.bullet", gradient: theme.gradients.card, action: onBrowse)
             }
             .padding(.horizontal, 12)
             .padding(.bottom, 12)
