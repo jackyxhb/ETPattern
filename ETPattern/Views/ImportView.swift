@@ -29,9 +29,9 @@ struct ImportView: View {
         ZStack {
             theme.gradients.background
                 .ignoresSafeArea()
-            VStack(spacing: 20) {
+            VStack(spacing: theme.metrics.largeSpacing) {
                 Text("Import CSV File")
-                    .font(.title)
+                    .font(theme.typography.title)
                     .fontWeight(.bold)
                     .foregroundColor(theme.colors.textPrimary)
 
@@ -39,7 +39,7 @@ struct ImportView: View {
                     .multilineTextAlignment(.center)
                     .foregroundColor(theme.colors.highlight.opacity(0.8))
 
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
                     Text("• First row: Front;;Back;;Tags")
                         .foregroundColor(theme.colors.highlight.opacity(0.8))
                     Text("• Subsequent rows: Pattern;;Examples<br>More examples;;tag1,tag2")
@@ -49,8 +49,8 @@ struct ImportView: View {
                     Text("• Line breaks in examples: <br>")
                         .foregroundColor(theme.colors.highlight.opacity(0.8))
                 }
-                .font(.caption)
-                .padding(.horizontal)
+                .font(theme.typography.caption)
+                .padding(.horizontal, theme.metrics.mediumSpacing)
 
                 Spacer()
 
@@ -62,23 +62,23 @@ struct ImportView: View {
                         Text("Select CSV File")
                     }
                     .frame(maxWidth: .infinity)
-                    .padding()
+                    .padding(theme.metrics.buttonPadding)
                     .background(theme.gradients.accent)
                     .foregroundColor(theme.colors.textPrimary)
-                    .cornerRadius(10)
+                    .cornerRadius(theme.metrics.cornerRadius)
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, theme.metrics.mediumSpacing)
                 .disabled(isImporting)
 
                 if isImporting {
                     ProgressView("Importing...")
-                        .padding()
+                        .padding(theme.metrics.mediumSpacing)
                         .foregroundColor(theme.colors.textPrimary)
                 }
 
                 Spacer()
             }
-            .padding()
+            .padding(theme.metrics.largeSpacing)
         }
         .fileImporter(
             isPresented: $isShowingFilePicker,

@@ -129,8 +129,4 @@ extension View {
     func theme(_ theme: Theme) -> some View {
         environment(\.theme, theme)
     }
-    
-    var theme: Theme {
-        Environment(\.theme).wrappedValue
-    }
 }

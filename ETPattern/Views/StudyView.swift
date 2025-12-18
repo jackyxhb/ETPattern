@@ -381,6 +381,7 @@ struct StudyView: View {
     }
 
     private struct CloseSessionButton: View {
+        @Environment(\.theme) var theme
         let action: () -> Void
 
         var body: some View {
@@ -397,6 +398,7 @@ struct StudyView: View {
     }
 
     private struct CompletionRow: View {
+        @Environment(\.theme) var theme
         let title: String
         let value: String
 
