@@ -62,7 +62,7 @@ struct OnboardingView: View {
                 HStack(spacing: 8) {
                     ForEach(pages.indices, id: \.self) { index in
                         Circle()
-                            .fill(currentPage == index ? theme.colors.highlight : Color.white.opacity(0.3))
+                            .fill(currentPage == index ? theme.colors.highlight : theme.colors.surfaceMedium)
                             .frame(width: 8, height: 8)
                             .animation(.smooth, value: currentPage)
                     }

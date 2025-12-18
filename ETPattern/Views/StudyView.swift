@@ -118,7 +118,7 @@ struct StudyView: View {
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(theme.gradients.accent)
-                    .foregroundColor(.white)
+                    .foregroundColor(theme.colors.textPrimary)
                     .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             }
             .buttonStyle(.plain)
@@ -174,14 +174,14 @@ struct StudyView: View {
                     // Swipe feedback overlay
                     if showSwipeFeedback, let direction = swipeDirection {
                         ZStack {
-                            Color.white.opacity(0.9)
+                            theme.colors.surfaceLight
                             VStack {
                                 Image(systemName: direction == .right ? "checkmark.circle.fill" : "arrow.counterclockwise.circle.fill")
                                     .font(.system(size: 60))
-                                    .foregroundColor(direction == .right ? .green : .red)
+                                    .foregroundColor(direction == .right ? theme.colors.success : theme.colors.danger)
                                 Text(direction == .right ? "Easy" : "Again")
                                     .font(.title.bold())
-                                    .foregroundColor(.black)
+                                    .foregroundColor(theme.colors.textPrimary)
                             }
                         }
                         .clipShape(RoundedRectangle(cornerRadius: 24))
@@ -268,7 +268,7 @@ struct StudyView: View {
                 let currentPosition = sessionCardList.count > 0 ? ((cardsStudiedInSession % sessionCardList.count) + 1) : 0
                 Text("\(currentPosition)/\(sessionCardList.count)")
                     .font(.caption.bold())
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(theme.colors.textPrimary.opacity(0.8))
 
                 ProgressView(value: progress)
                     .tint(theme.colors.highlight)
@@ -387,7 +387,7 @@ struct StudyView: View {
             Button(action: action) {
                 Image(systemName: "xmark")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(theme.colors.textPrimary)
                     .padding(10)
             }
             .background(theme.colors.surfaceMedium, in: Circle())

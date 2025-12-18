@@ -35,42 +35,51 @@ struct SettingsView: View {
                 .ignoresSafeArea()
             Form {
             Section(header: Text("Study Mode").foregroundColor(theme.colors.textPrimary)) {
-                Picker("Card Order", selection: $cardOrderMode) {
+                Picker(selection: $cardOrderMode) {
                     ForEach(orderOptions.keys.sorted(), id: \.self) { orderKey in
                         Text(orderOptions[orderKey] ?? orderKey)
                             .foregroundColor(theme.colors.textPrimary)
                             .tag(orderKey)
                     }
+                } label: {
+                    Text("Card Order")
+                        .foregroundColor(theme.colors.textPrimary)
                 }
                 .pickerStyle(.menu)
                 .onChange(of: cardOrderMode) { newValue in
                     UserDefaults.standard.set(newValue, forKey: "cardOrderMode")
                 }
             }
-            .listRowBackground(Color.clear)
+            .listRowBackground(theme.colors.surfaceLight)
 
             Section(header: Text("Auto Play Mode").foregroundColor(theme.colors.textPrimary)) {
-                Picker("Card Order", selection: $autoPlayOrderMode) {
+                Picker(selection: $autoPlayOrderMode) {
                     ForEach(orderOptions.keys.sorted(), id: \.self) { orderKey in
                         Text(orderOptions[orderKey] ?? orderKey)
                             .foregroundColor(theme.colors.textPrimary)
                             .tag(orderKey)
                     }
+                } label: {
+                    Text("Card Order")
+                        .foregroundColor(theme.colors.textPrimary)
                 }
                 .pickerStyle(.menu)
                 .onChange(of: autoPlayOrderMode) { newValue in
                     UserDefaults.standard.set(newValue, forKey: "autoPlayOrderMode")
                 }
             }
-            .listRowBackground(Color.clear)
+            .listRowBackground(theme.colors.surfaceLight)
 
             Section(header: Text("Text-to-Speech").foregroundColor(theme.colors.textPrimary)) {
-                Picker("Voice", selection: $selectedVoice) {
+                Picker(selection: $selectedVoice) {
                     ForEach(voiceOptions.keys.sorted(), id: \.self) { voiceId in
                         Text(voiceOptions[voiceId] ?? voiceId)
                             .foregroundColor(theme.colors.textPrimary)
                             .tag(voiceId)
                     }
+                } label: {
+                    Text("Voice")
+                        .foregroundColor(theme.colors.textPrimary)
                 }
                 .pickerStyle(.menu)
                 .onChange(of: selectedVoice) { newValue in
@@ -85,6 +94,7 @@ struct SettingsView: View {
                     GeometryReader { geometry in
                         Slider(value: $ttsPercentage, in: Constants.TTS.minPercentage...Constants.TTS.maxPercentage, step: 10) {
                             Text("Speech Speed")
+                                .foregroundColor(theme.colors.textPrimary)
                         } minimumValueLabel: {
                             Text("50%")
                                 .font(theme.typography.caption)
@@ -114,7 +124,7 @@ struct SettingsView: View {
                     .frame(height: theme.metrics.sliderHeight) // Standard slider height
                 }
                 .padding(.vertical, theme.metrics.smallSpacing)
-                .listRowBackground(Color.clear)
+                .listRowBackground(theme.colors.surfaceLight)
 
                 VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
                     Text("Pitch: \(Int(ttsPitch * 100))%")
@@ -123,6 +133,7 @@ struct SettingsView: View {
                     
                     Slider(value: $ttsPitch, in: Constants.TTS.minPitch...Constants.TTS.maxPitch, step: 0.1) {
                         Text("Pitch")
+                            .foregroundColor(theme.colors.textPrimary)
                     } minimumValueLabel: {
                         Text("50%")
                             .font(theme.typography.caption)
@@ -138,7 +149,7 @@ struct SettingsView: View {
                     }
                 }
                 .padding(.vertical, theme.metrics.smallSpacing)
-                .listRowBackground(Color.clear)
+                .listRowBackground(theme.colors.surfaceLight)
 
                 VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
                     Text("Volume: \(Int(ttsVolume * 100))%")
@@ -147,6 +158,7 @@ struct SettingsView: View {
                     
                     Slider(value: $ttsVolume, in: Constants.TTS.minVolume...Constants.TTS.maxVolume, step: 0.1) {
                         Text("Volume")
+                            .foregroundColor(theme.colors.textPrimary)
                     } minimumValueLabel: {
                         Text("0%")
                             .font(theme.typography.caption)
@@ -162,7 +174,7 @@ struct SettingsView: View {
                     }
                 }
                 .padding(.vertical, theme.metrics.smallSpacing)
-                .listRowBackground(Color.clear)
+                .listRowBackground(theme.colors.surfaceLight)
 
                 VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
                     Text("Pause: \(String(format: "%.1f", ttsPause))s")
@@ -171,6 +183,7 @@ struct SettingsView: View {
                     
                     Slider(value: $ttsPause, in: Constants.TTS.minPause...Constants.TTS.maxPause, step: 0.1) {
                         Text("Pause")
+                            .foregroundColor(theme.colors.textPrimary)
                     } minimumValueLabel: {
                         Text("0s")
                             .font(theme.typography.caption)
@@ -186,7 +199,7 @@ struct SettingsView: View {
                     }
                 }
                 .padding(.vertical, theme.metrics.smallSpacing)
-                .listRowBackground(Color.clear)
+                .listRowBackground(theme.colors.surfaceLight)
 
                 Button("Test Voice") {
                     UIImpactFeedbackGenerator.lightImpact()
@@ -197,9 +210,9 @@ struct SettingsView: View {
                 .background(theme.gradients.accent)
                 .foregroundColor(theme.colors.textPrimary)
                 .cornerRadius(theme.metrics.cornerRadius)
-                .listRowBackground(Color.clear)
+                .listRowBackground(theme.colors.surfaceLight)
             }
-            .listRowBackground(Color.clear)
+            .listRowBackground(theme.colors.surfaceLight)
 
             Section(header: Text("About").foregroundColor(theme.colors.textPrimary)) {
                 Text("English Pattern Flashcards")
@@ -211,7 +224,7 @@ struct SettingsView: View {
                     .foregroundColor(theme.colors.textSecondary)
                     .font(theme.typography.caption)
             }
-            .listRowBackground(Color.clear)
+            .listRowBackground(theme.colors.surfaceLight)
             }
             .scrollContentBackground(.hidden)
         }

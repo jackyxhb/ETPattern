@@ -120,41 +120,61 @@ struct ContentView: View {
         .sheet(isPresented: $showingSessionStats) {
             NavigationView {
                 SessionStatsView()
+                    .navigationTitle("Session Stats")
+                    .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
                             Button("Done") { showingSessionStats = false }
                         }
                     }
+                    .toolbarBackground(theme.colors.surfaceLight.opacity(0.8), for: .navigationBar)
+                    .toolbarBackground(.visible, for: .navigationBar)
+                    .toolbarColorScheme(.dark, for: .navigationBar)
             }
         }
         .sheet(isPresented: $showingImport) {
             NavigationView {
                 ImportView()
+                    .navigationTitle("Import")
+                    .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
                             Button("Done") { showingImport = false }
                         }
                     }
+                    .toolbarBackground(theme.colors.surfaceLight.opacity(0.8), for: .navigationBar)
+                    .toolbarBackground(.visible, for: .navigationBar)
+                    .toolbarColorScheme(.dark, for: .navigationBar)
             }
         }
         .sheet(isPresented: $showingSettings) {
             NavigationView {
                 SettingsView()
+                    .navigationTitle("Settings")
+                    .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
                             Button("Done") { showingSettings = false }
                         }
                     }
+                    .toolbarBackground(theme.colors.surfaceLight.opacity(0.8), for: .navigationBar)
+                    .toolbarBackground(.visible, for: .navigationBar)
+                    .toolbarColorScheme(.dark, for: .navigationBar)
             }
         }
         .sheet(item: $browseCardSet) { deck in
             NavigationView {
                 DeckDetailView(cardSet: deck)
+                    .navigationTitle(deck.name ?? "Deck Details")
+                    .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
                             Button("Close") { browseCardSet = nil }
                         }
                     }
+                    .toolbarBackground(theme.colors.surfaceLight.opacity(0.8), for: .navigationBar)
+                    .toolbarBackground(.visible, for: .navigationBar)
+                    .toolbarColorScheme(.dark, for: .navigationBar)
             }
         }
         .alert("Rename Deck", isPresented: $showingRenameAlert) {

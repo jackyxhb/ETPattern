@@ -106,7 +106,7 @@ struct CardFace: View {
                 .foregroundColor(.white.opacity(0.9))
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
-                .background(Color.white.opacity(0.08))
+                .background(theme.colors.surfaceLight)
                 .clipShape(Capsule())
 
             Spacer()
@@ -118,7 +118,7 @@ struct CardFace: View {
                     .lineLimit(1)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
-                    .background(Color.white.opacity(0.12))
+                    .background(theme.colors.surfaceMedium)
                     .clipShape(Capsule())
             }
         }
@@ -135,7 +135,7 @@ struct CardFace: View {
                         .font(.caption.bold())
                         .foregroundColor(.white.opacity(0.7))
                         .padding(8)
-                        .background(Color.white.opacity(0.08))
+                        .background(theme.colors.surfaceLight)
                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
                     Text(example)

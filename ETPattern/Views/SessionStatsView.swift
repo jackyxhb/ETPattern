@@ -19,73 +19,73 @@ struct SessionStatsView: View {
     private var studySessions: FetchedResults<StudySession>
 
     var body: some View {
-        NavigationView {
-            ZStack {
-                theme.gradients.background
-                    .ignoresSafeArea()
-                List {
+        ZStack {
+            theme.gradients.background
+                .ignoresSafeArea()
+            Form {
+                // Historical Sessions Section
+                Section(header: Text("Study History")
+                    .foregroundColor(theme.colors.textPrimary)) {
                     if studySessions.isEmpty {
                         Text("No study sessions yet")
                             .foregroundColor(theme.colors.highlight.opacity(0.7))
-                            .padding()
+                            .padding(theme.metrics.buttonPadding)
                     } else {
                         ForEach(studySessions) { session in
-                            VStack(alignment: .leading, spacing: 8) {
+                            VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
                                 HStack {
                                     Text(session.date ?? Date(), style: .date)
-                                        .font(.headline)
+                                        .font(theme.typography.headline)
                                         .foregroundColor(theme.colors.textPrimary)
                                     Spacer()
                                     Text(session.date ?? Date(), style: .time)
-                                        .font(.subheadline)
+                                        .font(theme.typography.subheadline)
                                         .foregroundColor(theme.colors.textSecondary)
                                 }
 
-                                HStack(spacing: 16) {
+                                HStack(spacing: theme.metrics.largeSpacing) {
                                     VStack(alignment: .leading) {
                                         Text("Cards Reviewed")
-                                            .font(.caption)
+                                            .font(theme.typography.caption)
                                             .foregroundColor(theme.colors.textSecondary)
                                         Text("\(session.cardsReviewed)")
-                                            .font(.title3)
-                                            .fontWeight(.semibold)
+                                            .font(theme.typography.title3.weight(.semibold))
                                             .foregroundColor(theme.colors.textPrimary)
                                     }
 
                                     VStack(alignment: .leading) {
                                         Text("Correct")
-                                            .font(.caption)
+                                            .font(theme.typography.caption)
                                             .foregroundColor(theme.colors.textSecondary)
                                         Text("\(session.correctCount)")
-                                            .font(.title3)
-                                            .fontWeight(.semibold)
+                                            .font(theme.typography.title3.weight(.semibold))
                                             .foregroundColor(theme.colors.success)
                                     }
 
                                     VStack(alignment: .leading) {
                                         Text("Accuracy")
-                                            .font(.caption)
+                                            .font(theme.typography.caption)
                                             .foregroundColor(theme.colors.highlight.opacity(0.7))
                                         Text(accuracyText(for: session))
-                                            .font(.title3)
-                                            .fontWeight(.semibold)
+                                            .font(theme.typography.title3.weight(.semibold))
                                             .foregroundColor(accuracyColor(for: session))
                                     }
                                 }
                             }
-                            .padding(.vertical, 8)
+                            .padding(.vertical, theme.metrics.standardSpacing)
                         }
                         .onDelete(perform: deleteSessions)
                     }
                 }
-                .navigationTitle("Study Sessions")
-                .navigationBarTitleDisplayMode(.inline)
-                .scrollContentBackground(.hidden)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        EditButton()
-                    }
-                }
+                .listRowBackground(theme.colors.surfaceLight.opacity(0.5))
+            }
+            .scrollContentBackground(.hidden)
+        }
+        .navigationTitle("Session Stats")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                EditButton()
             }
         }
     }
@@ -133,6 +133,7 @@ struct SessionStatsView: View {
     session1.date = Date()
     session1.cardsReviewed = 10
     session1.correctCount = 8
+    session1.isActive = true  // Make this one active to show management UI
 
     let session2 = StudySession(context: context)
     session2.date = Date().addingTimeInterval(-86400) // Yesterday
@@ -146,6 +147,9 @@ struct SessionStatsView: View {
 
     try? context.save()
 
-    return SessionStatsView()
-        .environment(\.managedObjectContext, context)
+    return NavigationView {
+        SessionStatsView()
+            .environment(\.managedObjectContext, context)
+            .environment(\.theme, Theme.default)
+    }
 }
