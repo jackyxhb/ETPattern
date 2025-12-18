@@ -75,9 +75,36 @@ struct Theme {
             startPoint: .top,
             endPoint: .bottom
         )
+
+        let neutral = LinearGradient(
+            gradient: Gradient(colors: [
+                Color.teal.opacity(0.8),
+                Color.teal.opacity(0.6)
+            ]),
+            startPoint: .top,
+            endPoint: .bottom
+        )
     }
 
     struct Colors {
+        // Background colors
+        let background = Color(red: 0.05, green: 0.05, blue: 0.15)
+        let onBackground = Color.white
+        
+        // Surface colors (elevated)
+        let surface = Color.white.opacity(0.1)
+        let onSurface = Color.white
+        let surfaceVariant = Color.white.opacity(0.05)
+        let onSurfaceVariant = Color.white.opacity(0.8)
+        
+        // Elevated surface for menus/popovers
+        let surfaceElevated = Color.white.opacity(0.95)
+        let onSurfaceElevated = Color.black.opacity(0.8)
+        
+        // Outline/border
+        let outline = Color.white.opacity(0.2)
+        
+        // Legacy colors (keeping for compatibility)
         let backgroundStart = Color(red: 0.05, green: 0.05, blue: 0.15)
         let backgroundEnd = Color(red: 0.15, green: 0.15, blue: 0.25)
         let highlight = Color(red: 0.3, green: 0.6, blue: 1.0)
