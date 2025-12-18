@@ -116,9 +116,12 @@ xcodebuild test -project ETPattern.xcodeproj -scheme ETPattern
 ## Release Notes
 
 ### v1.4.0 (Latest)
-- Added onboarding experience for new users with guided introduction to app features.
-- Introduced settings view for customizing voice preferences, card order modes, and TTS settings.
-- Enhanced user experience with improved navigation and accessibility.
+- Enhanced UI theming with modern design system color tokens for improved accessibility and consistency.
+- Updated neutral gradient to purple for better button visibility.
+- Applied theme typography to hero header for consistent font styling.
+- Converted header actions to a dropdown menu with 3-dot ellipsis icon.
+- Replaced system Menu with custom Popover for full theme control over background and text colors.
+- Fixed popover visibility issues with proper contrast using theme-based colors.
 
 ### v1.3.0
 - Enhanced swipe animations: Added visual feedback with checkmark (✓) for "Easy" swipes and X (✗) for "Again" swipes
