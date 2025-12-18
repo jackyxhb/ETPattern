@@ -20,14 +20,14 @@ struct SessionManagementView: View {
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 24) {
+            VStack(spacing: theme.metrics.largeSpacing) {
                 // Session Info
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: theme.metrics.mediumSpacing) {
                     Text("Session Management")
-                        .font(.title2.bold())
+                        .font(theme.typography.title2.bold())
                         .foregroundColor(theme.colors.textPrimary)
 
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
                         HStack {
                             Text("Deck:")
                                 .foregroundColor(theme.colors.textSecondary)
@@ -53,20 +53,20 @@ struct SessionManagementView: View {
                             let accuracy = Double(correctCount) / Double(cardsReviewed) * 100
                             HStack {
                                 Text("Accuracy:")
-                                    .foregroundColor(.white.opacity(0.7))
+                                    .foregroundColor(theme.colors.textSecondary)
                                 Text(String(format: "%.1f%%", accuracy))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(theme.colors.textPrimary)
                             }
                         }
                     }
-                    .padding()
-                    .background(Color.white.opacity(0.1))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .padding(theme.metrics.buttonPadding)
+                    .background(theme.colors.surfaceMedium)
+                    .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cornerRadius))
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, theme.metrics.mediumSpacing)
 
                 // Management Actions
-                VStack(spacing: 16) {
+                VStack(spacing: theme.metrics.mediumSpacing) {
                     Button(action: {
                         // Reset current session
                         onResetSession()
@@ -76,12 +76,12 @@ struct SessionManagementView: View {
                             Image(systemName: "arrow.counterclockwise")
                             Text("Reset Session")
                         }
-                        .font(.headline)
+                        .font(theme.typography.headline)
                         .foregroundColor(theme.colors.textPrimary)
                         .frame(maxWidth: .infinity)
-                        .padding()
+                        .padding(theme.metrics.buttonPadding)
                         .background(theme.colors.danger.opacity(0.2))
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cornerRadius))
                     }
 
                     Button(action: {
@@ -92,19 +92,19 @@ struct SessionManagementView: View {
                             Image(systemName: "checkmark")
                             Text("Continue Studying")
                         }
-                        .font(.headline)
+                        .font(theme.typography.headline)
                         .foregroundColor(theme.colors.textPrimary)
                         .frame(maxWidth: .infinity)
-                        .padding()
+                        .padding(theme.metrics.buttonPadding)
                         .background(theme.gradients.success)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cornerRadius))
                     }
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, theme.metrics.mediumSpacing)
 
                 Spacer()
             }
-            .padding(.top, 40)
+            .padding(.top, theme.metrics.largeSpacing * 1.67)
             .background(theme.gradients.background.ignoresSafeArea())
             .navigationBarItems(trailing: Button("Done") {
                 dismiss()

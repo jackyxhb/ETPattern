@@ -100,10 +100,10 @@ struct AutoPlayView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(cardSet.name ?? "Auto Play")
                     .font(.title.bold())
-                    .foregroundColor(.white)
+                    .foregroundColor(theme.colors.textPrimary)
                 Text("Automatic playback")
                     .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(theme.colors.textSecondary)
             }
             Spacer()
         }
@@ -121,13 +121,13 @@ struct AutoPlayView: View {
 
                 Image(systemName: "waveform")
                     .font(.system(size: 60))
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(theme.colors.textSecondary)
             }
 
             VStack(spacing: 16) {
                 Text("No Cards to Play")
                     .font(.title.bold())
-                    .foregroundColor(.white)
+                    .foregroundColor(theme.colors.textPrimary)
                     .multilineTextAlignment(.center)
 
                 Text("This deck doesn't have any cards yet")
@@ -137,7 +137,7 @@ struct AutoPlayView: View {
 
                 Text("Add some cards to this deck or import a CSV file to start auto-playing through your patterns.")
                     .font(.body)
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(theme.colors.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
                     .padding(.horizontal, 32)
@@ -155,7 +155,7 @@ struct AutoPlayView: View {
                 let currentCardInCycle = cards.count > 0 ? ((cardsPlayedInSession - 1) % cards.count) + 1 : 0
                 Text("\(currentCardInCycle)/\(cards.count)")
                     .font(.caption.bold())
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(theme.colors.textSecondary)
                 
                 ProgressView(value: Double(currentCardInCycle), total: Double(cards.count))
                     .tint(theme.colors.highlight)
@@ -163,10 +163,10 @@ struct AutoPlayView: View {
                 
                 Text(cards.count > 0 ? "\(Int((Double(currentCardInCycle) / Double(cards.count)) * 100))%" : "0%")
                     .font(.caption2)
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(theme.colors.textSecondary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Color.white.opacity(0.1))
+                    .background(theme.colors.surfaceMedium)
                     .clipShape(Capsule())
             }
             .padding(.horizontal, 20)
@@ -182,7 +182,7 @@ struct AutoPlayView: View {
                 }) {
                     Image(systemName: isRandomOrder ? "shuffle" : "arrow.up.arrow.down")
                         .font(.title3)
-                        .foregroundColor(.white)
+                        .foregroundColor(theme.colors.textPrimary)
                         .frame(width: 44, height: 44)
                         .background(theme.colors.surfaceLight)
                         .clipShape(Circle())
@@ -198,9 +198,9 @@ struct AutoPlayView: View {
                 }) {
                     Image(systemName: "backward.end.fill")
                         .font(.title3)
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(theme.colors.textSecondary)
                         .frame(width: 44, height: 44)
-                        .background(Color.white.opacity(0.1))
+                        .background(theme.colors.surfaceMedium)
                         .clipShape(Circle())
                 }
                 .disabled(currentIndex == 0)
@@ -214,7 +214,7 @@ struct AutoPlayView: View {
                 }) {
                     Image(systemName: isPlaying ? "pause.fill" : "play.fill")
                         .font(.title)
-                        .foregroundColor(.white)
+                        .foregroundColor(theme.colors.textPrimary)
                         .frame(width: 60, height: 60)
                         .background(theme.gradients.accent)
                         .clipShape(Circle())
@@ -229,7 +229,7 @@ struct AutoPlayView: View {
                 }) {
                     Image(systemName: "forward.end.fill")
                         .font(.title3)
-                        .foregroundColor(.white)
+                        .foregroundColor(theme.colors.textPrimary)
                         .frame(width: 44, height: 44)
                         .background(theme.gradients.success)
                         .clipShape(Circle())
@@ -245,7 +245,7 @@ struct AutoPlayView: View {
                 }) {
                     Image(systemName: "xmark")
                         .font(.title3)
-                        .foregroundColor(.white)
+                        .foregroundColor(theme.colors.textPrimary)
                         .frame(width: 44, height: 44)
                         .background(theme.colors.surfaceLight)
                         .clipShape(Circle())

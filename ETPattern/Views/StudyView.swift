@@ -77,10 +77,10 @@ struct StudyView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(cardSet.name ?? "Study Session")
                 .font(.title.bold())
-                .foregroundColor(.white)
+                .foregroundColor(theme.colors.textPrimary)
             Text("Spaced repetition learning")
                 .font(.subheadline)
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundColor(theme.colors.textSecondary)
         }
     }
 
@@ -99,7 +99,7 @@ struct StudyView: View {
         VStack(spacing: 24) {
             Text("Session Complete")
                 .font(.largeTitle.bold())
-                .foregroundColor(.white)
+                .foregroundColor(theme.colors.textPrimary)
 
             VStack(spacing: 18) {
                 CompletionRow(title: "Cards Reviewed", value: "\(studySession?.cardsReviewed ?? 0)")
@@ -130,10 +130,10 @@ struct StudyView: View {
         VStack(spacing: 16) {
             Image(systemName: "sparkles")
                 .font(.largeTitle)
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundColor(theme.colors.textSecondary)
             Text("No cards due for review")
                 .font(.title2.weight(.semibold))
-                .foregroundColor(.white)
+                .foregroundColor(theme.colors.textPrimary)
             Button("Done") {
                 dismiss()
             }
@@ -141,7 +141,7 @@ struct StudyView: View {
             .padding(.horizontal, 32)
             .padding(.vertical, 12)
             .background(.ultraThinMaterial)
-            .foregroundColor(.white)
+            .foregroundColor(theme.colors.textPrimary)
             .clipShape(Capsule())
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
@@ -235,11 +235,11 @@ struct StudyView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text("Card \(currentCardNumber) of \(max(totalCardsInSession, 1))")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(theme.colors.textPrimary)
                 if let accuracy = currentAccuracy, accuracy > 0 {
                     Text("Accuracy \(Int(accuracy * 100))%")
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(theme.colors.textSecondary)
                 }
             }
 
@@ -248,13 +248,13 @@ struct StudyView: View {
             VStack(alignment: .trailing, spacing: 6) {
                 Text("Today")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(theme.colors.textSecondary)
                 Text("Total: \(totalCardsInSession)")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(theme.colors.textPrimary)
                 Text("Remaining: \(cardsRemaining)")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(theme.colors.textSecondary)
             }
         }
         .padding()
@@ -277,10 +277,10 @@ struct StudyView: View {
                 if let accuracy = currentAccuracy, accuracy > 0 {
                     Text("\(Int(accuracy * 100))%")
                         .font(.caption2)
-                        .foregroundColor(.white.opacity(0.6))
+                        .foregroundColor(theme.colors.textSecondary)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.white.opacity(0.1))
+                        .background(theme.colors.surfaceMedium)
                         .clipShape(Capsule())
                 }
             }
@@ -297,7 +297,7 @@ struct StudyView: View {
                 }) {
                     Image(systemName: isRandomOrder ? "shuffle" : "arrow.up.arrow.down")
                         .font(.title3)
-                        .foregroundColor(.white)
+                        .foregroundColor(theme.colors.textPrimary)
                         .frame(width: 44, height: 44)
                         .background(theme.colors.surfaceLight)
                         .clipShape(Circle())
@@ -311,7 +311,7 @@ struct StudyView: View {
                 }) {
                     Image(systemName: "arrow.counterclockwise")
                         .font(.title3)
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(theme.colors.textSecondary)
                         .frame(width: 44, height: 44)
                         .background(theme.gradients.danger)
                         .clipShape(Circle())
@@ -329,7 +329,7 @@ struct StudyView: View {
                 }) {
                     Image(systemName: isFlipped ? "arrow.uturn.backward" : "arrow.right")
                         .font(.title)
-                        .foregroundColor(.white)
+                        .foregroundColor(theme.colors.textPrimary)
                         .frame(width: 60, height: 60)
                         .background(theme.colors.surfaceLight)
                         .clipShape(Circle())
@@ -344,7 +344,7 @@ struct StudyView: View {
                 }) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.title3)
-                        .foregroundColor(.white)
+                        .foregroundColor(theme.colors.textPrimary)
                         .frame(width: 44, height: 44)
                         .background(theme.gradients.success)
                         .clipShape(Circle())
@@ -359,9 +359,9 @@ struct StudyView: View {
                 }) {
                     Image(systemName: "xmark")
                         .font(.title3)
-                        .foregroundColor(.white)
+                        .foregroundColor(theme.colors.textPrimary)
                         .frame(width: 44, height: 44)
-                        .background(Color.white.opacity(0.15))
+                        .background(theme.colors.surfaceLight)
                         .clipShape(Circle())
                 }
                 .accessibilityLabel("Close Session")
@@ -373,7 +373,7 @@ struct StudyView: View {
             // Swipe instructions at the bottom
             Text("Swipe left for Again · Swipe right for Easy")
                 .font(.caption)
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundColor(theme.colors.textSecondary)
                 .padding(.horizontal, 20)
                 .padding(.bottom, 16)
         }
@@ -390,8 +390,8 @@ struct StudyView: View {
                     .foregroundColor(.white)
                     .padding(10)
             }
-            .background(Color.white.opacity(0.2), in: Circle())
-            .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 4)
+            .background(theme.colors.surfaceMedium, in: Circle())
+            .shadow(color: theme.colors.shadow, radius: 6, x: 0, y: 4)
             .accessibilityLabel("Close session")
         }
     }
@@ -403,10 +403,10 @@ struct StudyView: View {
         var body: some View {
             HStack {
                 Text(title)
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(theme.colors.textSecondary)
                 Spacer()
                 Text(value)
-                    .foregroundColor(.white)
+                    .foregroundColor(theme.colors.textPrimary)
                     .fontWeight(.semibold)
             }
         }
