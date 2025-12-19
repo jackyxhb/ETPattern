@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreData
+import UIKit
 
 struct DeckDetailView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -144,13 +145,42 @@ private struct CardPreviewContainer: View {
     @EnvironmentObject private var ttsService: TTSService
     @Environment(\.theme) var theme
 
+    @State private var isFlipped = false
+
     var body: some View {
         ZStack(alignment: .topTrailing) {
             theme.gradients.background
                 .ignoresSafeArea()
 
-            CardView(card: card, currentIndex: index, totalCards: total)
-                .padding(.horizontal)
+            SharedCardDisplayView(
+                frontText: card.front ?? "No front",
+                backText: formatBackText(),
+                pattern: card.front ?? "",
+                isFlipped: isFlipped,
+                currentIndex: index,
+                totalCards: total,
+                showSwipeFeedback: false,
+                swipeDirection: nil,
+                theme: theme
+            )
+            .padding(.horizontal)
+            .onTapGesture {
+                UIImpactFeedbackGenerator.lightImpact()
+                withAnimation(.bouncy) {
+                    isFlipped.toggle()
+                    speakCurrentText()
+                }
+            }
+            .onAppear {
+                speakCurrentText()
+            }
+            .onChange(of: index) { _ in
+                // Reset to front side when card changes
+                isFlipped = false
+                // Stop any ongoing speech from previous card
+                ttsService.stop()
+                speakCurrentText()
+            }
 
             Button(action: onClose) {
                 Image(systemName: "xmark")
@@ -165,6 +195,17 @@ private struct CardPreviewContainer: View {
         .onDisappear {
             ttsService.stop()
         }
+    }
+
+    private func formatBackText() -> String {
+        guard let backText = card.back else { return "No back" }
+        // Replace <br> with newlines for proper display
+        return backText.replacingOccurrences(of: "<br>", with: "\n")
+    }
+
+    private func speakCurrentText() {
+        let textToSpeak = isFlipped ? formatBackText() : (card.front ?? "")
+        ttsService.speak(textToSpeak)
     }
 }
 
