@@ -48,29 +48,17 @@ struct AutoPlayView: View {
                     emptyState
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    ZStack {
-                        CardFace(
-                            text: cards[currentIndex].front ?? "No front",
-                            pattern: "",
-                            isFront: true,
-                            currentIndex: currentIndex,
-                            totalCards: cards.count
-                        )
-                        .opacity(isFlipped ? 0 : 1)
-                        .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
-
-                        CardFace(
-                            text: formatBackText,
-                            pattern: cards[currentIndex].front ?? "",
-                            isFront: false,
-                            currentIndex: currentIndex,
-                            totalCards: cards.count
-                        )
-                        .opacity(isFlipped ? 1 : 0)
-                        .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .padding(.vertical, 4)
+                    SharedCardDisplayView(
+                        frontText: cards[currentIndex].front ?? "No front",
+                        backText: formatBackText,
+                        pattern: cards[currentIndex].front ?? "",
+                        isFlipped: isFlipped,
+                        currentIndex: currentIndex,
+                        totalCards: cards.count,
+                        showSwipeFeedback: false,
+                        swipeDirection: nil,
+                        theme: theme
+                    )
                 }
             }
             .padding(.horizontal, 4)
@@ -95,18 +83,11 @@ struct AutoPlayView: View {
     }
 
     private var header: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 6) {
-                Text(cardSet.name ?? "Auto Play")
-                    .font(theme.typography.title.weight(.bold))
-                    .foregroundColor(theme.colors.textPrimary)
-                Text("Automatic playback")
-                    .font(theme.typography.subheadline)
-                    .foregroundColor(theme.colors.textSecondary)
-            }
-            Spacer()
-        }
-        .padding(.horizontal, 4)
+        SharedHeaderView(
+            title: cardSet.name ?? "Auto Play",
+            subtitle: "Automatic playback",
+            theme: theme
+        )
     }
 
     private var emptyState: some View {
@@ -157,31 +138,11 @@ struct AutoPlayView: View {
     }
 
     private var progressBarView: some View {
-        let currentCardInCycle = cards.count > 0 ? ((cardsPlayedInSession - 1) % cards.count) + 1 : 0
-        return HStack(spacing: 12) {
-            Text("\(currentCardInCycle)/\(cards.count)")
-                .font(theme.typography.caption.weight(.bold))
-                .foregroundColor(theme.colors.textSecondary)
-            
-            ProgressView(value: Double(currentCardInCycle), total: Double(cards.count))
-                .tint(theme.colors.highlight)
-                .frame(height: 4)
-            
-            percentageText(currentCardInCycle: currentCardInCycle)
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 16)
-        .padding(.bottom, 8)
-    }
-
-    private func percentageText(currentCardInCycle: Int) -> some View {
-        Text(cards.count > 0 ? "\(Int((Double(currentCardInCycle) / Double(cards.count)) * 100))%" : "0%")
-            .font(theme.typography.caption2)
-            .foregroundColor(theme.colors.textSecondary)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(theme.colors.surfaceMedium)
-            .clipShape(Capsule())
+        SharedProgressBarView(
+            currentPosition: cards.count > 0 ? ((cardsPlayedInSession - 1) % cards.count) + 1 : 0,
+            totalCards: cards.count,
+            theme: theme
+        )
     }
 
     private var mainControlsView: some View {
@@ -200,18 +161,14 @@ struct AutoPlayView: View {
     }
 
     private var orderToggleButton: some View {
-        Button(action: {
-            UIImpactFeedbackGenerator.lightImpact()
-            toggleOrderMode()
-        }) {
-            Image(systemName: isRandomOrder ? "shuffle" : "arrow.up.arrow.down")
-                .font(theme.typography.title3)
-                .foregroundColor(theme.colors.textPrimary)
-                .frame(width: 44, height: 44)
-                .background(theme.colors.surfaceLight)
-                .clipShape(Circle())
-        }
-        .accessibilityLabel(isRandomOrder ? "Random Order" : "Sequential Order")
+        SharedOrderToggleButton(
+            isRandomOrder: isRandomOrder,
+            theme: theme,
+            action: {
+                UIImpactFeedbackGenerator.lightImpact()
+                toggleOrderMode()
+            }
+        )
     }
 
     private var previousButton: some View {
@@ -263,18 +220,13 @@ struct AutoPlayView: View {
     }
 
     private var closeButton: some View {
-        Button(action: {
-            UIImpactFeedbackGenerator.lightImpact()
-            dismissAuto()
-        }) {
-            Image(systemName: "xmark")
-                .font(theme.typography.title3)
-                .foregroundColor(theme.colors.textPrimary)
-                .frame(width: 44, height: 44)
-                .background(theme.colors.surfaceLight)
-                .clipShape(Circle())
-        }
-        .accessibilityLabel("Close")
+        SharedCloseButton(
+            theme: theme,
+            action: {
+                UIImpactFeedbackGenerator.lightImpact()
+                dismissAuto()
+            }
+        )
     }
 
     private func prepareCards() {

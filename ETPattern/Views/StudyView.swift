@@ -31,10 +31,6 @@ struct StudyView: View {
 
     private let spacedRepetitionService = SpacedRepetitionService()
 
-    enum SwipeDirection {
-        case left, right
-    }
-
     var body: some View {
         ZStack {
             theme.gradients.background
@@ -72,18 +68,11 @@ struct StudyView: View {
     }
 
     private var header: some View {
-         HStack {
-            VStack(alignment: .leading, spacing: 6) {
-                Text(cardSet.name ?? "Study Session")
-                    .font(theme.typography.title.weight(.bold))
-                    .foregroundColor(theme.colors.textPrimary)
-                Text("Spaced repetition learning")
-                    .font(theme.typography.subheadline)
-                    .foregroundColor(theme.colors.textSecondary)
-            }
-            Spacer()
-        }
-        .padding(.horizontal, 4)
+        SharedHeaderView(
+            title: cardSet.name ?? "Study Session",
+            subtitle: "Spaced repetition learning",
+            theme: theme
+        )
     }
 
     @ViewBuilder
@@ -153,52 +142,17 @@ struct StudyView: View {
     private var studySessionContent: some View {
         VStack(spacing: 12) {
             if currentCardIndex < cardsDue.count {
-                ZStack {
-                    CardFace(
-                        text: cardsDue[currentCardIndex].front ?? "No front",
-                        pattern: "",
-                        isFront: true,
-                        currentIndex: cardsReviewedCount,
-                        totalCards: totalCardsInSession
-                    )
-                    .opacity(isFlipped ? 0 : 1)
-                    .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
-
-                    CardFace(
-                        text: formatBackText(),
-                        pattern: cardsDue[currentCardIndex].front ?? "",
-                        isFront: false,
-                        currentIndex: cardsReviewedCount,
-                        totalCards: totalCardsInSession
-                    )
-                    .opacity(isFlipped ? 1 : 0)
-                    .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
-
-                    // Swipe feedback overlay
-                    if showSwipeFeedback, let direction = swipeDirection {
-                        ZStack {
-                            theme.colors.surfaceLight
-                            VStack {
-                                Image(
-                                    systemName: direction == .right
-                                        ? "checkmark.circle.fill"
-                                        : "arrow.counterclockwise.circle.fill"
-                                )
-                                .font(.system(size: 60))
-                                .foregroundColor(
-                                    direction == .right ? theme.colors.success : theme.colors.danger
-                                )
-                                Text(direction == .right ? "Easy" : "Again")
-                                    .font(theme.typography.title.weight(.bold))
-                                    .foregroundColor(theme.colors.textPrimary)
-                            }
-                        }
-                        .clipShape(RoundedRectangle(cornerRadius: 24))
-                        .transition(.opacity)
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding(.vertical, 4)
+                SharedCardDisplayView(
+                    frontText: cardsDue[currentCardIndex].front ?? "No front",
+                    backText: formatBackText(),
+                    pattern: cardsDue[currentCardIndex].front ?? "",
+                    isFlipped: isFlipped,
+                    currentIndex: cardsReviewedCount,
+                    totalCards: totalCardsInSession,
+                    showSwipeFeedback: showSwipeFeedback,
+                    swipeDirection: swipeDirection,
+                    theme: theme
+                )
                 .offset(x: swipeOffset)
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("studyCard")
@@ -284,33 +238,12 @@ struct StudyView: View {
     }
 
     private var progressBarView: some View {
-        HStack(spacing: 12) {
-            let currentPosition =
-                sessionCardList.count > 0
-                ? ((cardsStudiedInSession % sessionCardList.count) + 1) : 0
-            Text("\(currentPosition)/\(sessionCardList.count)")
-                .font(theme.typography.caption.weight(.bold))
-                .foregroundColor(theme.colors.textPrimary.opacity(0.8))
-
-            ProgressView(value: progress)
-                .tint(theme.colors.highlight)
-                .frame(height: 4)
-
-            percentageText(currentPosition: currentPosition)
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 16)
-        .padding(.bottom, 8)
-    }
-
-    private func percentageText(currentPosition: Int) -> some View {
-        Text(sessionCardList.count > 0 ? "\(Int((Double(currentPosition) / Double(sessionCardList.count)) * 100))%" : "0%")
-            .font(theme.typography.caption2)
-            .foregroundColor(theme.colors.textSecondary)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(theme.colors.surfaceMedium)
-            .clipShape(Capsule())
+        SharedProgressBarView(
+            currentPosition: sessionCardList.count > 0
+                ? ((cardsStudiedInSession % sessionCardList.count) + 1) : 0,
+            totalCards: sessionCardList.count,
+            theme: theme
+        )
     }
 
     private var mainControlsView: some View {
@@ -329,18 +262,14 @@ struct StudyView: View {
     }
 
     private var orderToggleButton: some View {
-        Button(action: {
-            UIImpactFeedbackGenerator.lightImpact()
-            toggleOrderMode()
-        }) {
-            Image(systemName: isRandomOrder ? "shuffle" : "arrow.up.arrow.down")
-                .font(theme.typography.title3)
-                .foregroundColor(theme.colors.textPrimary)
-                .frame(width: 44, height: 44)
-                .background(theme.colors.surfaceLight)
-                .clipShape(Circle())
-        }
-        .accessibilityLabel(isRandomOrder ? "Random Order" : "Sequential Order")
+        SharedOrderToggleButton(
+            isRandomOrder: isRandomOrder,
+            theme: theme,
+            action: {
+                UIImpactFeedbackGenerator.lightImpact()
+                toggleOrderMode()
+            }
+        )
     }
 
     private var againButton: some View {
@@ -395,17 +324,13 @@ struct StudyView: View {
     }
 
     private var closeButton: some View {
-        Button(action: {
-            UIImpactFeedbackGenerator.lightImpact()
-            closeSession()
-        }) {
-            Image(systemName: "xmark")
-                .font(theme.typography.title3)
-                .foregroundColor(theme.colors.textPrimary)
-                .frame(width: 44, height: 44)
-                .background(theme.colors.surfaceLight)
-                .clipShape(Circle())
-        }
+        SharedCloseButton(
+            theme: theme,
+            action: {
+                UIImpactFeedbackGenerator.lightImpact()
+                closeSession()
+            }
+        )
         .accessibilityLabel("Close Session")
     }
 
