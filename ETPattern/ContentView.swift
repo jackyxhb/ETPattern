@@ -319,10 +319,21 @@ struct ContentView: View {
                             .padding()
                     }
                     .buttonStyle(.plain)
+
+                    Button {
+                        showingOnboarding = true
+                        uiState.showingHeaderMenu = false
+                    } label: {
+                        Label("Onboarding", systemImage: "questionmark.circle")
+                            .foregroundColor(theme.colors.onSurfaceElevated)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                    }
+                    .buttonStyle(.plain)
                 }
                 .padding()
             }
-            .presentationDetents([.height(200)])
+            .presentationDetents([.height(240)])
         }
     }
 
