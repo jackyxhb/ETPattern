@@ -135,6 +135,7 @@ struct Theme {
         let subheadline = Font.subheadline
         let body = Font.body
         let caption = Font.caption
+        let caption2 = Font.caption2
         let title = Font.title
         let title2 = Font.title2
         let title3 = Font.title3

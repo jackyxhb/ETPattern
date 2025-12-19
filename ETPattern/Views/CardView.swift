@@ -85,7 +85,7 @@ struct CardFace: View {
                     Text(text.isEmpty ? "No content" : text)
                         .font(.system(size: 42, weight: .bold, design: .rounded))
                         .multilineTextAlignment(.center)
-                        .foregroundColor(.white)
+                        .foregroundColor(theme.colors.textPrimary)
                         .frame(maxWidth: .infinity)
                         .minimumScaleFactor(0.5)
                         .lineLimit(3)
@@ -103,7 +103,7 @@ struct CardFace: View {
         HStack {
             Text("CARD \(currentIndex + 1)/\(max(totalCards, 1))")
                 .font(.caption.monospacedDigit())
-                .foregroundColor(.white.opacity(0.9))
+                .foregroundColor(theme.colors.textSecondary)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
                 .background(theme.colors.surfaceLight)
@@ -133,14 +133,14 @@ struct CardFace: View {
                 HStack(alignment: .top, spacing: 12) {
                     Text(String(format: "%02d", index + 1))
                         .font(.caption.bold())
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(theme.colors.textSecondary)
                         .padding(8)
                         .background(theme.colors.surfaceLight)
                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
                     Text(example)
                         .font(.system(size: 18, weight: .medium, design: .rounded))
-                        .foregroundColor(.white)
+                        .foregroundColor(theme.colors.textPrimary)
                         .lineSpacing(6)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }

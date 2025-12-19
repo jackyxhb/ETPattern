@@ -41,7 +41,7 @@ struct AutoPlayView: View {
             theme.gradients.background
                 .ignoresSafeArea()
 
-            VStack(spacing: 32) {
+            VStack(spacing: 8) {
                 header
 
                 if cards.isEmpty {
@@ -73,8 +73,7 @@ struct AutoPlayView: View {
                     .padding(.vertical, 4)
                 }
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 4)
             .safeAreaInset(edge: .bottom) {
                 bottomControlBar
             }
@@ -99,10 +98,10 @@ struct AutoPlayView: View {
         HStack {
             VStack(alignment: .leading, spacing: 6) {
                 Text(cardSet.name ?? "Auto Play")
-                    .font(.title.bold())
+                    .font(theme.typography.title.weight(.bold))
                     .foregroundColor(theme.colors.textPrimary)
                 Text("Automatic playback")
-                    .font(.subheadline)
+                    .font(theme.typography.subheadline)
                     .foregroundColor(theme.colors.textSecondary)
             }
             Spacer()
@@ -126,17 +125,17 @@ struct AutoPlayView: View {
 
             VStack(spacing: 16) {
                 Text("No Cards to Play")
-                    .font(.title.bold())
+                    .font(theme.typography.title.weight(.bold))
                     .foregroundColor(theme.colors.textPrimary)
                     .multilineTextAlignment(.center)
 
                 Text("This deck doesn't have any cards yet")
-                    .font(.title3)
+                    .font(theme.typography.title3)
                     .foregroundColor(theme.colors.highlight)
                     .multilineTextAlignment(.center)
 
                 Text("Add some cards to this deck or import a CSV file to start auto-playing through your patterns.")
-                    .font(.body)
+                    .font(theme.typography.body)
                     .foregroundColor(theme.colors.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
@@ -150,114 +149,132 @@ struct AutoPlayView: View {
 
     private var bottomControlBar: some View {
         VStack(spacing: 0) {
-            // Progress bar at the top of the control bar
-            HStack(spacing: 12) {
-                let currentCardInCycle = cards.count > 0 ? ((cardsPlayedInSession - 1) % cards.count) + 1 : 0
-                Text("\(currentCardInCycle)/\(cards.count)")
-                    .font(.caption.bold())
-                    .foregroundColor(theme.colors.textSecondary)
-                
-                ProgressView(value: Double(currentCardInCycle), total: Double(cards.count))
-                    .tint(theme.colors.highlight)
-                    .frame(height: 4)
-                
-                Text(cards.count > 0 ? "\(Int((Double(currentCardInCycle) / Double(cards.count)) * 100))%" : "0%")
-                    .font(.caption2)
-                    .foregroundColor(theme.colors.textSecondary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(theme.colors.surfaceMedium)
-                    .clipShape(Capsule())
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 16)
-            .padding(.bottom, 8)
-            
-            // Main control buttons in one horizontal line
-            HStack(spacing: 16) {
-                // Order toggle button
-                Button(action: {
-                    UIImpactFeedbackGenerator.lightImpact()
-                    toggleOrderMode()
-                }) {
-                    Image(systemName: isRandomOrder ? "shuffle" : "arrow.up.arrow.down")
-                        .font(.title3)
-                        .foregroundColor(theme.colors.textPrimary)
-                        .frame(width: 44, height: 44)
-                        .background(theme.colors.surfaceLight)
-                        .clipShape(Circle())
-                }
-                .accessibilityLabel(isRandomOrder ? "Random Order" : "Sequential Order")
-                
-                Spacer()
-                
-                // Previous/Skip back button
-                Button(action: {
-                    UIImpactFeedbackGenerator.lightImpact()
-                    goToPreviousCard()
-                }) {
-                    Image(systemName: "backward.end.fill")
-                        .font(.title3)
-                        .foregroundColor(theme.colors.textSecondary)
-                        .frame(width: 44, height: 44)
-                        .background(theme.colors.surfaceMedium)
-                        .clipShape(Circle())
-                }
-                .disabled(currentIndex == 0)
-                .opacity(currentIndex == 0 ? 0.3 : 1)
-                .accessibilityLabel("Previous Card")
-                
-                // Play/Pause button (larger, more prominent)
-                Button(action: {
-                    UIImpactFeedbackGenerator.mediumImpact()
-                    togglePlayback()
-                }) {
-                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                        .font(.title)
-                        .foregroundColor(theme.colors.textPrimary)
-                        .frame(width: 60, height: 60)
-                        .background(theme.gradients.accent)
-                        .clipShape(Circle())
-                        .shadow(color: theme.colors.highlight.opacity(0.3), radius: 8, x: 0, y: 4)
-                }
-                .accessibilityLabel(isPlaying ? "Pause" : "Play")
-                
-                // Skip forward button
-                Button(action: {
-                    UIImpactFeedbackGenerator.lightImpact()
-                    advanceToNextManually()
-                }) {
-                    Image(systemName: "forward.end.fill")
-                        .font(.title3)
-                        .foregroundColor(theme.colors.textPrimary)
-                        .frame(width: 44, height: 44)
-                        .background(theme.gradients.success)
-                        .clipShape(Circle())
-                }
-                .accessibilityLabel("Skip")
-                
-                Spacer()
-                
-                // Close button
-                Button(action: {
-                    UIImpactFeedbackGenerator.lightImpact()
-                    dismissAuto()
-                }) {
-                    Image(systemName: "xmark")
-                        .font(.title3)
-                        .foregroundColor(theme.colors.textPrimary)
-                        .frame(width: 44, height: 44)
-                        .background(theme.colors.surfaceLight)
-                        .clipShape(Circle())
-                }
-                .accessibilityLabel("Close")
-            }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 16)
-            .padding(.top, 8)
+            progressBarView
+            mainControlsView
         }
-        .background(.ultraThinMaterial)
+        .background(theme.colors.surface)
         .buttonStyle(.plain)
+    }
+
+    private var progressBarView: some View {
+        let currentCardInCycle = cards.count > 0 ? ((cardsPlayedInSession - 1) % cards.count) + 1 : 0
+        return HStack(spacing: 12) {
+            Text("\(currentCardInCycle)/\(cards.count)")
+                .font(theme.typography.caption.weight(.bold))
+                .foregroundColor(theme.colors.textSecondary)
+            
+            ProgressView(value: Double(currentCardInCycle), total: Double(cards.count))
+                .tint(theme.colors.highlight)
+                .frame(height: 4)
+            
+            percentageText(currentCardInCycle: currentCardInCycle)
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+        .padding(.bottom, 8)
+    }
+
+    private func percentageText(currentCardInCycle: Int) -> some View {
+        Text(cards.count > 0 ? "\(Int((Double(currentCardInCycle) / Double(cards.count)) * 100))%" : "0%")
+            .font(theme.typography.caption2)
+            .foregroundColor(theme.colors.textSecondary)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(theme.colors.surfaceMedium)
+            .clipShape(Capsule())
+    }
+
+    private var mainControlsView: some View {
+        HStack(spacing: 16) {
+            orderToggleButton
+            Spacer()
+            previousButton
+            playPauseButton
+            skipButton
+            Spacer()
+            closeButton
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 8)
+        .padding(.top, 8)
+    }
+
+    private var orderToggleButton: some View {
+        Button(action: {
+            UIImpactFeedbackGenerator.lightImpact()
+            toggleOrderMode()
+        }) {
+            Image(systemName: isRandomOrder ? "shuffle" : "arrow.up.arrow.down")
+                .font(theme.typography.title3)
+                .foregroundColor(theme.colors.textPrimary)
+                .frame(width: 44, height: 44)
+                .background(theme.colors.surfaceLight)
+                .clipShape(Circle())
+        }
+        .accessibilityLabel(isRandomOrder ? "Random Order" : "Sequential Order")
+    }
+
+    private var previousButton: some View {
+        Button(action: {
+            UIImpactFeedbackGenerator.lightImpact()
+            goToPreviousCard()
+        }) {
+            Image(systemName: "backward.end.fill")
+                .font(theme.typography.title3)
+                .foregroundColor(theme.colors.textSecondary)
+                .frame(width: 44, height: 44)
+                .background(theme.colors.surfaceMedium)
+                .clipShape(Circle())
+        }
+        .disabled(currentIndex == 0)
+        .opacity(currentIndex == 0 ? 0.3 : 1)
+        .accessibilityLabel("Previous Card")
+    }
+
+    private var playPauseButton: some View {
+        Button(action: {
+            UIImpactFeedbackGenerator.mediumImpact()
+            togglePlayback()
+        }) {
+            Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                .font(theme.typography.title)
+                .foregroundColor(theme.colors.textPrimary)
+                .frame(width: 60, height: 60)
+                .background(theme.gradients.accent)
+                .clipShape(Circle())
+                .shadow(color: theme.colors.highlight.opacity(0.3), radius: 8, x: 0, y: 4)
+        }
+        .accessibilityLabel(isPlaying ? "Pause" : "Play")
+    }
+
+    private var skipButton: some View {
+        Button(action: {
+            UIImpactFeedbackGenerator.lightImpact()
+            advanceToNextManually()
+        }) {
+            Image(systemName: "forward.end.fill")
+                .font(theme.typography.title3)
+                .foregroundColor(theme.colors.textPrimary)
+                .frame(width: 44, height: 44)
+                .background(theme.gradients.success)
+                .clipShape(Circle())
+        }
+        .accessibilityLabel("Skip")
+    }
+
+    private var closeButton: some View {
+        Button(action: {
+            UIImpactFeedbackGenerator.lightImpact()
+            dismissAuto()
+        }) {
+            Image(systemName: "xmark")
+                .font(theme.typography.title3)
+                .foregroundColor(theme.colors.textPrimary)
+                .frame(width: 44, height: 44)
+                .background(theme.colors.surfaceLight)
+                .clipShape(Circle())
+        }
+        .accessibilityLabel("Close")
     }
 
     private func prepareCards() {
