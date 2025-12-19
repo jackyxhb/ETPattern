@@ -139,6 +139,7 @@ struct Theme {
         let title = Font.title
         let title2 = Font.title2
         let title3 = Font.title3
+        let largeTitle = Font.largeTitle
     }
 }
 
