@@ -45,7 +45,8 @@ ETPattern/
 ├── Models/                   // Card, CardSet, StudySession entities
 ├── Services/                 // CSV, TTS, File, Spaced Repetition
 ├── Views/                    // ContentView, StudyView, AutoPlayView, SettingsView, OnboardingView, etc.
-├── Utilities/                // Constants + Extensions
+│   └── SharedViews.swift     // Shared UI components (SharedHeaderView, SharedCardDisplayView, etc.)
+├── Utilities/                // Constants + Extensions + Theme
 ├── Resources/                // Group1–12 CSV bundles feeding the ETPattern 300 deck
 ├── Assets.xcassets           // Colors + icons
 ├── Tests/                    // Unit tests
@@ -115,7 +116,16 @@ xcodebuild test -project ETPattern.xcodeproj -scheme ETPattern
 
 ## Release Notes
 
-### v1.4.0 (Latest)
+### v1.5.0 (Latest)
+- **Code Consolidation**: Extracted shared UI components into `SharedViews.swift` including `SharedHeaderView`, `SharedCardDisplayView`, `SharedProgressBarView`, `SharedOrderToggleButton`, `SharedCloseButton`, and `CardFace` struct.
+- **Enhanced Card Previews**: Replaced `CardView` with `SharedCardDisplayView` in `DeckDetailView` for consistent theming and added flip functionality with TTS support.
+- **UI Consistency**: Applied comprehensive theming to `AutoPlayView` and `StudyView` using shared components for uniform appearance across all views.
+- **Progress Indicators**: Added percentage text display to progress bars for better user feedback.
+- **Navigation Improvements**: Added Onboarding button to header menu for easy access to introduction flow.
+- **Code Cleanup**: Removed duplicate `CardView.swift` and resolved `SwipeDirection` enum conflicts by moving to global scope.
+- **Build Verification**: Successfully tested on iPhone 16 Pro Max simulator with all new features functional.
+
+### v1.4.0
 - Enhanced UI theming with modern design system color tokens for improved accessibility and consistency.
 - Updated neutral gradient to purple for better button visibility.
 - Applied theme typography to hero header for consistent font styling.

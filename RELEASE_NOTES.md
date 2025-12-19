@@ -1,9 +1,9 @@
-# English Thought v1.4.0 - English Pattern Flashcard App
+# English Thought v1.5.0 - English Pattern Flashcard App
 
 ## 🎉 Release Notes
 
 **Release Date:** December 19, 2025
-**Version:** 1.4.0
+**Version:** 1.5.0
 **Platform:** iOS 16.0+
 **Device:** iPhone 16 and later
 
@@ -11,27 +11,33 @@
 
 ## ✨ What's New
 
-### 🎨 Enhanced UI Theming & Accessibility
-- **Modern Design System**: Implemented comprehensive color tokens (background, onBackground, surface, onSurface, surfaceElevated, onSurfaceElevated, outline) for consistent theming across the app.
-- **Improved Gradient Visibility**: Updated neutral gradient to purple for better contrast and visibility of UI elements like buttons.
-- **Theme Typography**: Applied consistent theme fonts to hero header and other text elements for better readability.
-- **Custom Dropdown Menu**: Converted header actions to a 3-dot ellipsis icon with custom Popover for full theme control.
-- **Popover Theming**: Replaced system Menu with custom Popover using theme-based colors for proper contrast and modern appearance.
-- **Accessibility Fixes**: Ensured all UI elements meet contrast requirements with theme-compliant colors.
+### 🏗️ Code Architecture & UI Consolidation
+- **Shared Components Library**: Created `SharedViews.swift` with reusable UI components including `SharedHeaderView`, `SharedCardDisplayView`, `SharedProgressBarView`, `SharedOrderToggleButton`, `SharedCloseButton`, and `CardFace` struct.
+- **Card Display Unification**: Replaced `CardView` with `SharedCardDisplayView` in `DeckDetailView` for consistent theming and added interactive flip functionality with TTS support.
+- **Comprehensive Theming**: Applied uniform theming to `AutoPlayView` and `StudyView` using shared components for seamless visual consistency.
+- **Progress Enhancement**: Added percentage text display to progress bars across all views for improved user feedback.
+- **Navigation Enhancement**: Added Onboarding button to header menu for quick access to introduction flow.
 
-### 🔧 Technical Updates
-- **Theme System Expansion**: Added modern design system color tokens to Theme.swift for semantic color usage.
-- **UI Component Updates**: Modified ContentView.swift to use themed Popover with surfaceElevated background and onSurfaceElevated text.
-- **Build Verification**: Tested and verified on iPhone 16 Pro Max simulator with successful builds.
+### 🔧 Technical Improvements
+- **Code Deduplication**: Removed duplicate `CardView.swift` and consolidated card display logic into shared components.
+- **Enum Resolution**: Fixed `SwipeDirection` enum conflicts by moving to global scope in `SharedViews.swift`.
+- **Build Optimization**: Streamlined component architecture for better maintainability and performance.
+- **Testing Verification**: Successfully built and tested on iPhone 16 Pro Max simulator with all features functional.
+
+### 🎨 UI/UX Enhancements
+- **Consistent Card Previews**: Deck detail view now shows interactive card previews with flip animation and audio playback.
+- **Unified Progress Display**: All progress bars now show percentage completion for better learning progress tracking.
+- **Improved Navigation**: Easy access to onboarding from header menu for new users.
+- **Visual Consistency**: All views now share the same themed components for professional appearance.
 
 ---
 
 ## 📊 Statistics
 
-- **Total Commits:** 35+ commits since initial release
-- **Files Modified:** Theme.swift, ContentView.swift, and UI components
-- **UI Improvements:** Theming, accessibility, and modern design system implementation
-- **Testing:** Simulator verification on iPhone 16 Pro Max
+- **Total Commits:** 40+ commits since initial release
+- **Files Modified:** SharedViews.swift (new), DeckDetailView.swift, AutoPlayView.swift, StudyView.swift, CardView.swift (removed)
+- **Code Improvements:** UI component consolidation, theming consistency, and architecture optimization
+- **Testing:** Simulator verification on iPhone 16 Pro Max with successful builds
 
 ---
 
@@ -84,18 +90,20 @@ ios-deploy --bundle /path/to/ETPattern.app --id YOUR_DEVICE_ID
    - Listen to automatic TTS audio
    - **Swipe right for "Easy"** (✓ appears with slide animation)
    - **Swipe left for "Again"** (✗ appears with slide animation)
-   - Monitor progress with linear progress bar
+   - Monitor progress with linear progress bar showing percentage
    - Swipe instructions now visible in bottom navbar
-6. **Header Menu**: Tap the 3-dot icon in the top-right for Session Stats, Import, and Settings with themed popover
+6. **Header Menu**: Tap the 3-dot icon in the top-right for Session Stats, Import, Settings, and Onboarding with themed popover
+7. **Card Previews**: Tap card previews in deck details to flip and hear TTS audio
 
 ---
 
 ## 🔄 Migration Notes
 
-- **From v1.3.0**: UI changes are backward compatible
-- **Theme Updates**: All colors now use modern design system tokens
-- **Header Actions**: Now consolidated in themed dropdown menu
-- **Settings**: All existing preferences preserved
+- **From v1.4.0**: All changes are backward compatible
+- **UI Components**: Shared components ensure consistent theming across all views
+- **Card Previews**: Deck detail view now includes interactive card previews
+- **Navigation**: Onboarding now accessible from header menu
+- **Progress Display**: All progress bars now show percentage completion
 
 ---
 
