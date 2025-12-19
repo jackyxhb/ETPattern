@@ -16,24 +16,22 @@ struct AutoPlayView: View {
     @Environment(\.theme) var theme
     @EnvironmentObject private var ttsService: TTSService
 
-    @State private var cards: [Card] = []
-    @State private var originalCards: [Card] = [] // Keep original order for sequential mode
-    @State private var currentIndex: Int = 0
+    @StateObject private var sessionManager: SessionManager
+    @State private var currentCard: Card?
     @State private var isFlipped = false
     @State private var isPlaying = true
     @State private var scheduledTask: DispatchWorkItem?
     @State private var resumePhase: AutoPlayPhase = .front
     @State private var speechToken = UUID()
     @State private var activePhase: AutoPlayPhase = .front
-    @State private var isRandomOrder = false
-    @State private var cardsPlayedInSession: Int = 0
 
     private let fallbackFrontDelay: TimeInterval = 1.0
     private let fallbackBackDelay: TimeInterval = 1.5
     private let interCardDelay: TimeInterval = 1.0
-    private var progressKey: String {
-        let id = cardSet.objectID.uriRepresentation().absoluteString
-        return "autoPlayProgress-\(id)"
+
+    init(cardSet: CardSet) {
+        self.cardSet = cardSet
+        _sessionManager = StateObject(wrappedValue: SessionManager(cardSet: cardSet))
     }
 
     var body: some View {
@@ -44,17 +42,17 @@ struct AutoPlayView: View {
             VStack(spacing: 8) {
                 header
 
-                if cards.isEmpty {
+                if sessionManager.getCards().isEmpty {
                     emptyState
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     SharedCardDisplayView(
-                        frontText: cards[currentIndex].front ?? "No front",
-                        backText: formatBackText,
-                        pattern: cards[currentIndex].front ?? "",
+                        frontText: currentCard?.front ?? "No front",
+                        backText: (currentCard?.back ?? "No back").replacingOccurrences(of: "<br>", with: "\n"),
+                        pattern: currentCard?.groupName ?? "",
                         isFlipped: isFlipped,
-                        currentIndex: currentIndex,
-                        totalCards: cards.count,
+                        currentIndex: sessionManager.currentIndex,
+                        totalCards: sessionManager.getCards().count,
                         showSwipeFeedback: false,
                         swipeDirection: nil,
                         theme: theme
@@ -67,7 +65,8 @@ struct AutoPlayView: View {
             }
         }
         .onAppear {
-            prepareCards()
+            sessionManager.prepareSession()
+            updateCurrentCard()
             startPlaybackIfPossible()
         }
         .onDisappear {
@@ -139,8 +138,8 @@ struct AutoPlayView: View {
 
     private var progressBarView: some View {
         SharedProgressBarView(
-            currentPosition: cards.count > 0 ? ((cardsPlayedInSession - 1) % cards.count) + 1 : 0,
-            totalCards: cards.count,
+            currentPosition: sessionManager.getCards().count > 0 ? ((sessionManager.cardsPlayedInSession - 1) % sessionManager.getCards().count) + 1 : 0,
+            totalCards: sessionManager.getCards().count,
             theme: theme
         )
     }
@@ -151,7 +150,7 @@ struct AutoPlayView: View {
             Spacer()
             previousButton
             playPauseButton
-            skipButton
+            nextButton
             Spacer()
             closeButton
         }
@@ -162,11 +161,11 @@ struct AutoPlayView: View {
 
     private var orderToggleButton: some View {
         SharedOrderToggleButton(
-            isRandomOrder: isRandomOrder,
+            isRandomOrder: sessionManager.isRandomOrder,
             theme: theme,
             action: {
                 UIImpactFeedbackGenerator.lightImpact()
-                toggleOrderMode()
+                sessionManager.toggleOrderMode()
             }
         )
     }
@@ -183,8 +182,8 @@ struct AutoPlayView: View {
                 .background(theme.colors.surfaceMedium)
                 .clipShape(Circle())
         }
-        .disabled(currentIndex == 0)
-        .opacity(currentIndex == 0 ? 0.3 : 1)
+        .disabled(sessionManager.currentIndex == 0)
+        .opacity(sessionManager.currentIndex == 0 ? 0.3 : 1)
         .accessibilityLabel("Previous Card")
     }
 
@@ -204,7 +203,7 @@ struct AutoPlayView: View {
         .accessibilityLabel(isPlaying ? "Pause" : "Play")
     }
 
-    private var skipButton: some View {
+    private var nextButton: some View {
         Button(action: {
             UIImpactFeedbackGenerator.lightImpact()
             advanceToNextManually()
@@ -229,64 +228,14 @@ struct AutoPlayView: View {
         )
     }
 
-    private func prepareCards() {
-        guard cards.isEmpty, let setCards = cardSet.cards as? Set<Card> else { return }
-        let sorted = setCards.sorted { ($0.front ?? "") < ($1.front ?? "") }
-        originalCards = sorted
-        isRandomOrder = UserDefaults.standard.string(forKey: "autoPlayOrderMode") == "random"
-        cardsPlayedInSession = 0 // Reset for fresh session
-        applyOrderMode()
-        restoreProgressIfAvailable()
-    }
-
-    private func applyOrderMode() {
-        if isRandomOrder {
-            cards = originalCards.shuffled()
-        } else {
-            cards = originalCards
-        }
-        // Reset to first card when changing order
-        currentIndex = 0
-        isFlipped = false
-        resumePhase = .front
-    }
-
-    private func applyOrderModePreservingCurrentCard() {
-        let currentCard = cards.isEmpty ? nil : cards[currentIndex]
-
-        if isRandomOrder {
-            cards = originalCards.shuffled()
-        } else {
-            cards = originalCards
-        }
-
-        // Try to find the same card in the new order
-        if let currentCard = currentCard,
-           let newIndex = cards.firstIndex(where: { $0.objectID == currentCard.objectID }) {
-            currentIndex = newIndex
-        } else {
-            // If we can't find the card, reset to beginning
-            currentIndex = 0
-            isFlipped = false
-            resumePhase = .front
-        }
-    }
-
-    private func toggleOrderMode() {
-        isRandomOrder.toggle()
-        applyOrderModePreservingCurrentCard()
-        // Continue playing without interruption
-        // No need to stop and restart - just update the order
-    }
-
     private func startPlaybackIfPossible() {
-        guard !cards.isEmpty else { return }
+        guard !sessionManager.getCards().isEmpty else { return }
         isPlaying = true
         disableIdleTimer() // Prevent device sleep during auto-play
         
         // If this is the start of a fresh session (not resuming), count the first card
-        if cardsPlayedInSession == 0 {
-            cardsPlayedInSession = 1
+        if sessionManager.cardsPlayedInSession == 0 {
+            sessionManager.cardsPlayedInSession = 1
         }
         
         continueFromResumePhase()
@@ -303,7 +252,7 @@ struct AutoPlayView: View {
     }
 
     private func playFrontSide() {
-        guard isPlaying, !cards.isEmpty else { return }
+        guard isPlaying, !sessionManager.getCards().isEmpty else { return }
         withAnimation(.smooth) {
             isFlipped = false
         }
@@ -311,7 +260,7 @@ struct AutoPlayView: View {
     }
 
     private func flipToBack() {
-        guard isPlaying, !cards.isEmpty else { return }
+        guard isPlaying, !sessionManager.getCards().isEmpty else { return }
         withAnimation(.smooth) {
             isFlipped = true
         }
@@ -319,14 +268,13 @@ struct AutoPlayView: View {
     }
 
     private func moveToNextCard() {
-        guard isPlaying, !cards.isEmpty else { return }
-        currentIndex = (currentIndex + 1) % cards.count
-        cardsPlayedInSession += 1
+        guard isPlaying, !sessionManager.getCards().isEmpty else { return }
+        sessionManager.moveToNext()
         playFrontSide()
     }
 
     private func advanceToNextManually() {
-        guard !cards.isEmpty else { return }
+        guard !sessionManager.getCards().isEmpty else { return }
 
         // Completely stop current speech and reset all state
         ttsService.stop()
@@ -338,8 +286,9 @@ struct AutoPlayView: View {
         activePhase = .front
 
         // Move to next card
-        currentIndex = (currentIndex + 1) % cards.count
-        cardsPlayedInSession += 1
+        sessionManager.moveToNext()
+        updateCurrentCard()
+        sessionManager.saveProgress()
 
         // Reset card state
         withAnimation(.smooth) {
@@ -355,12 +304,10 @@ struct AutoPlayView: View {
                 self.playFrontSide()
             }
         }
-
-        saveProgress()
     }
 
     private func goToPreviousCard() {
-        guard !cards.isEmpty, currentIndex > 0 else { return }
+        guard !sessionManager.getCards().isEmpty else { return }
 
         // Completely stop current speech and reset all state
         ttsService.stop()
@@ -372,7 +319,9 @@ struct AutoPlayView: View {
         activePhase = .front
 
         // Move to previous card
-        currentIndex -= 1
+        sessionManager.moveToPrevious()
+        updateCurrentCard()
+        sessionManager.saveProgress()
 
         // Reset card state
         withAnimation(.smooth) {
@@ -389,7 +338,7 @@ struct AutoPlayView: View {
             }
         }
 
-        saveProgress()
+        sessionManager.saveProgress()
     }
 
     private func togglePlayback() {
@@ -407,14 +356,14 @@ struct AutoPlayView: View {
         resumePhase = isFlipped ? .back : .front
         enableIdleTimer() // Allow device sleep when paused
         resetSpeechFlow()
-        saveProgress()
+        sessionManager.saveProgress()
     }
 
     private func stopPlayback() {
         isPlaying = false
         enableIdleTimer() // Allow device sleep when stopped
         resetSpeechFlow()
-        saveProgress()
+
     }
 
     private func dismissAuto() {
@@ -447,9 +396,14 @@ struct AutoPlayView: View {
         return token
     }
 
+    private func updateCurrentCard() {
+        currentCard = sessionManager.currentCard
+    }
+
     private func speakPhase(_ phase: AutoPlayPhase) {
         let token = beginPhase(phase)
-        let text = text(for: phase, at: cards[currentIndex]).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let currentCard = currentCard else { return }
+        let text = text(for: phase, at: currentCard).trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !text.isEmpty else {
             schedule(after: fallbackDelay(for: phase), token: token) {
@@ -495,43 +449,10 @@ struct AutoPlayView: View {
     private func text(for phase: AutoPlayPhase, at card: Card) -> String {
         switch phase {
         case .front:
-            return card.front ?? ""
+            return card.front ?? "No front"
         case .back:
-            return formatBackText(for: card)
+            return (card.back ?? "No back").replacingOccurrences(of: "<br>", with: "\n")
         }
-    }
-
-    private func formatBackText(for card: Card) -> String {
-        (card.back ?? "").replacingOccurrences(of: "<br>", with: "\n")
-    }
-
-    private func saveProgress() {
-        guard !cards.isEmpty else { return }
-        let progress = AutoPlayProgress(index: currentIndex, phase: isFlipped ? .back : .front, isRandomOrder: isRandomOrder)
-        if let data = try? JSONEncoder().encode(progress) {
-            UserDefaults.standard.set(data, forKey: progressKey)
-        }
-    }
-
-    private func restoreProgressIfAvailable() {
-        guard
-            let data = UserDefaults.standard.data(forKey: progressKey),
-            let progress = try? JSONDecoder().decode(AutoPlayProgress.self, from: data),
-            !originalCards.isEmpty
-        else { return }
-
-        // Apply the saved order mode
-        isRandomOrder = progress.isRandomOrder
-        applyOrderMode()
-
-        // Restore position
-        let safeIndex = min(max(progress.index, 0), cards.count - 1)
-        currentIndex = safeIndex
-        isFlipped = progress.phase == .back
-        resumePhase = progress.phase
-        
-        // Set played count to current position (resumed session)
-        cardsPlayedInSession = currentIndex + 1
     }
 
     private func disableIdleTimer() {
@@ -540,10 +461,6 @@ struct AutoPlayView: View {
 
     private func enableIdleTimer() {
         UIApplication.shared.isIdleTimerDisabled = false
-    }
-
-    private var formatBackText: String {
-        (cards[currentIndex].back ?? "No back").replacingOccurrences(of: "<br>", with: "\n")
     }
 }
 //     let card: Card
@@ -585,24 +502,4 @@ struct AutoPlayView: View {
 private enum AutoPlayPhase: String, Codable {
     case front
     case back
-}
-
-private struct AutoPlayProgress: Codable {
-    let index: Int
-    let phase: AutoPlayPhase
-    let isRandomOrder: Bool
-}
-
-#Preview {
-    let context = PersistenceController.preview.container.viewContext
-    let cardSet = CardSet(context: context)
-    cardSet.name = "Preview Deck"
-
-    let sampleCard = Card(context: context)
-    sampleCard.front = "I think"
-    sampleCard.back = "I think it's okay.<br>I think it's great.<br>I think we should go."
-    cardSet.addToCards(sampleCard)
-
-    return AutoPlayView(cardSet: cardSet)
-        .environmentObject(TTSService())
 }

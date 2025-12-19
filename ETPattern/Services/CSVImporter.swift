@@ -30,7 +30,7 @@ class CSVImporter {
 
             if !front.isEmpty && !back.isEmpty {
                 let card = Card(context: viewContext)
-                card.id = Int32(lineNumber) // Assign ID based on line number
+                // ID will be assigned later in Persistence to ensure uniqueness
                 card.cardName = front  // Store the original pattern string
                 card.front = front     // Set front to the same value
                 card.back = back

@@ -142,10 +142,27 @@ struct PersistenceController {
 
         var totalImported = 0
         var importErrors: [String] = []
+        var nextCardId = 1 // Start IDs from 1
+
+        // Find the highest existing card ID to avoid conflicts
+        let existingCardsFetch: NSFetchRequest<Card> = Card.fetchRequest()
+        existingCardsFetch.sortDescriptors = [NSSortDescriptor(key: "id", ascending: false)]
+        existingCardsFetch.fetchLimit = 1
+        if let highestIdCard = (try? viewContext.fetch(existingCardsFetch))?.first,
+           let highestId = highestIdCard.id {
+            nextCardId = Int(highestId) + 1
+        }
 
         for fileName in bundledFiles {
             if let content = FileManagerService.loadBundledCSV(named: fileName) {
                 let cards = csvImporter.parseCSV(content, cardSetName: masterDeckName)
+                
+                // Assign unique IDs to avoid duplicates across multiple CSV files
+                for card in cards {
+                    card.id = Int32(nextCardId)
+                    nextCardId += 1
+                }
+                
                 for card in cards {
                     card.cardSet = masterDeck
                     masterDeck.addToCards(card)
