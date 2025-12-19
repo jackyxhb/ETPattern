@@ -28,7 +28,7 @@ struct DeckDetailView: View {
                     .foregroundColor(theme.colors.textSecondary)
             } else {
                 ScrollView {
-                    LazyVStack(spacing: 16) {
+                    LazyVStack(spacing: 4) {
                         ForEach(sortedGroupNames, id: \.self) { groupName in
                             DisclosureGroup {
                                 LazyVStack(spacing: 12) {
