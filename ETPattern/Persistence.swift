@@ -148,9 +148,8 @@ struct PersistenceController {
         let existingCardsFetch: NSFetchRequest<Card> = Card.fetchRequest()
         existingCardsFetch.sortDescriptors = [NSSortDescriptor(key: "id", ascending: false)]
         existingCardsFetch.fetchLimit = 1
-        if let highestIdCard = (try? viewContext.fetch(existingCardsFetch))?.first,
-           let highestId = highestIdCard.id {
-            nextCardId = Int(highestId) + 1
+        if let highestIdCard = (try? viewContext.fetch(existingCardsFetch))?.first {
+            nextCardId = Int(highestIdCard.id) + 1
         }
 
         for fileName in bundledFiles {
