@@ -90,7 +90,7 @@ struct DeckDetailView: View {
 
     private var groupedCards: [String: [Card]] {
         guard let cards = cardSet.cards as? Set<Card> else { return [:] }
-        let sortedCards = cards.sorted { ($0.front ?? "") < ($1.front ?? "") }
+        let sortedCards = cards.sorted { ($0.id, $0.front ?? "") < ($1.id, $1.front ?? "") }
         return Dictionary(grouping: sortedCards) { $0.groupName ?? "Ungrouped" }
     }
 
