@@ -132,7 +132,25 @@ struct PersistenceController {
         // Ensure the single master deck exists and is populated if empty.
         let masterDeck = fetchOrCreateCardSet(named: masterDeckName)
         if cardCount(in: masterDeck) > 0 {
-            // Master deck already exists.
+            // Master deck already exists. Check if any cards have nil id and assign IDs.
+            let cards = masterDeck.cards as? Set<Card> ?? Set()
+            let cardsWithNilId = cards.filter { $0.id == 0 }
+            if !cardsWithNilId.isEmpty {
+                var nextId = 1
+                // Find the highest existing card ID to avoid conflicts
+                let existingCardsFetch: NSFetchRequest<Card> = Card.fetchRequest()
+                existingCardsFetch.sortDescriptors = [NSSortDescriptor(key: "id", ascending: false)]
+                existingCardsFetch.fetchLimit = 1
+                if let highestIdCard = (try? viewContext.fetch(existingCardsFetch))?.first {
+                    nextId = Int(highestIdCard.id) + 1
+                }
+                for card in cardsWithNilId {
+                    card.id = Int32(nextId)
+                    nextId += 1
+                }
+                try? viewContext.save()
+                print("DEBUG: Assigned IDs to \(cardsWithNilId.count) cards with id == 0")
+            }
             if viewContext.hasChanges {
                 try? viewContext.save()
             }

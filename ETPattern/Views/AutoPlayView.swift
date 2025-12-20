@@ -53,6 +53,7 @@ struct AutoPlayView: View {
                         isFlipped: isFlipped,
                         currentIndex: sessionManager.currentIndex,
                         totalCards: sessionManager.getCards().count,
+                        cardId: currentCard?.id != nil ? Int(currentCard!.id) : nil,
                         showSwipeFeedback: false,
                         swipeDirection: nil,
                         theme: theme

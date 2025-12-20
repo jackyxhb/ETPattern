@@ -149,6 +149,7 @@ struct StudyView: View {
                     isFlipped: isFlipped,
                     currentIndex: cardsReviewedCount,
                     totalCards: totalCardsInSession,
+                    cardId: cardsDue[currentCardIndex].id != nil ? Int(cardsDue[currentCardIndex].id) : nil,
                     showSwipeFeedback: showSwipeFeedback,
                     swipeDirection: swipeDirection,
                     theme: theme

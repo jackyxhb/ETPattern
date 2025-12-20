@@ -32,6 +32,7 @@ struct SharedCardDisplayView: View {
     let isFlipped: Bool
     let currentIndex: Int
     let totalCards: Int
+    let cardId: Int?
     let showSwipeFeedback: Bool
     let swipeDirection: SwipeDirection?
     let theme: Theme
@@ -43,7 +44,8 @@ struct SharedCardDisplayView: View {
                 pattern: "",
                 isFront: true,
                 currentIndex: currentIndex,
-                totalCards: totalCards
+                totalCards: totalCards,
+                cardId: cardId.map { Int32($0) }
             )
             .opacity(isFlipped ? 0 : 1)
             .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
@@ -53,7 +55,8 @@ struct SharedCardDisplayView: View {
                 pattern: pattern,
                 isFront: false,
                 currentIndex: currentIndex,
-                totalCards: totalCards
+                totalCards: totalCards,
+                cardId: cardId.map { Int32($0) }
             )
             .opacity(isFlipped ? 1 : 0)
             .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
@@ -125,6 +128,7 @@ struct CardFace: View {
     let isFront: Bool
     let currentIndex: Int
     let totalCards: Int
+    let cardId: Int32?
 
     @Environment(\.theme) var theme
 
@@ -161,13 +165,23 @@ struct CardFace: View {
 
     private var header: some View {
         HStack {
-            Text("CARD \(currentIndex + 1)/\(max(totalCards, 1))")
-                .font(.caption.monospacedDigit())
-                .foregroundColor(theme.colors.textSecondary)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(theme.colors.surfaceLight)
-                .clipShape(Capsule())
+            if let cardId = cardId {
+                Text("\(cardId)/\(max(totalCards, 1))")
+                    .font(.caption.monospacedDigit())
+                    .foregroundColor(theme.colors.textSecondary)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(theme.colors.surfaceLight)
+                    .clipShape(Capsule())
+            } else {
+                Text("?/\(max(totalCards, 1))")
+                    .font(.caption.monospacedDigit())
+                    .foregroundColor(theme.colors.textSecondary)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(theme.colors.surfaceLight)
+                    .clipShape(Capsule())
+            }
 
             Spacer()
 
