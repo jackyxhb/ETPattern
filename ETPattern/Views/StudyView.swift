@@ -277,15 +277,15 @@ struct StudyView: View {
             UIImpactFeedbackGenerator.mediumImpact()
             markAsAgain()
         }) {
-            Image(systemName: "arrow.counterclockwise")
+            Image(systemName: "bookmark.fill")
                 .font(theme.typography.title3)
-                .foregroundColor(theme.colors.textSecondary)
+                .foregroundColor(theme.colors.textPrimary)
                 .frame(width: 44, height: 44)
-                .background(theme.gradients.danger)
+                .background(theme.gradients.accent)
                 .clipShape(Circle())
         }
-        .accessibilityLabel("Again")
-        .accessibilityIdentifier("Again")
+        .accessibilityLabel("Keep it")
+        .accessibilityIdentifier("Keep")
     }
 
     private var flipButton: some View {
@@ -296,7 +296,7 @@ struct StudyView: View {
                 speakCurrentText()
             }
         }) {
-            Image(systemName: isFlipped ? "arrow.uturn.backward" : "arrow.right")
+            Image(systemName: "arrow.2.squarepath")
                 .font(theme.typography.title)
                 .foregroundColor(theme.colors.textPrimary)
                 .frame(width: 60, height: 60)
@@ -312,15 +312,15 @@ struct StudyView: View {
             UIImpactFeedbackGenerator.mediumImpact()
             markAsEasy()
         }) {
-            Image(systemName: "checkmark.circle.fill")
+            Image(systemName: "trash.fill")
                 .font(theme.typography.title3)
                 .foregroundColor(theme.colors.textPrimary)
                 .frame(width: 44, height: 44)
-                .background(theme.gradients.success)
+                .background(theme.gradients.danger)
                 .clipShape(Circle())
         }
-        .accessibilityLabel("Easy")
-        .accessibilityIdentifier("Easy")
+        .accessibilityLabel("Remove it")
+        .accessibilityIdentifier("Remove")
     }
 
     private var closeButton: some View {
@@ -335,7 +335,7 @@ struct StudyView: View {
     }
 
     private var swipeInstructionsView: some View {
-        Text("Swipe left for Again · Swipe right for Easy")
+        Text("Swipe left to Keep · Swipe right to Remove")
             .font(theme.typography.caption)
             .foregroundColor(theme.colors.textSecondary)
             .padding(.horizontal, 20)
@@ -588,7 +588,6 @@ struct StudyView: View {
         if cardsDue.isEmpty {
             endStudySession()
         } else {
-            // Speak the next card's text since currentCardIndex didn't change but the card did
             speakCurrentText()
         }
     }
