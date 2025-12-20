@@ -1,9 +1,9 @@
-# English Thought v1.5.0 - English Pattern Flashcard App
+# English Thought v1.6.0 - English Pattern Flashcard App
 
 ## 🎉 Release Notes
 
-**Release Date:** December 19, 2025
-**Version:** 1.5.0
+**Release Date:** December 21, 2025
+**Version:** 1.6.0
 **Platform:** iOS 16.0+
 **Device:** iPhone 16 and later
 
@@ -11,32 +11,28 @@
 
 ## ✨ What's New
 
-### 🏗️ Code Architecture & UI Consolidation
-- **Shared Components Library**: Created `SharedViews.swift` with reusable UI components including `SharedHeaderView`, `SharedCardDisplayView`, `SharedProgressBarView`, `SharedOrderToggleButton`, `SharedCloseButton`, and `CardFace` struct.
-- **Card Display Unification**: Replaced `CardView` with `SharedCardDisplayView` in `DeckDetailView` for consistent theming and added interactive flip functionality with TTS support.
-- **Comprehensive Theming**: Applied uniform theming to `AutoPlayView` and `StudyView` using shared components for seamless visual consistency.
-- **Progress Enhancement**: Added percentage text display to progress bars across all views for improved user feedback.
-- **Navigation Enhancement**: Added Onboarding button to header menu for quick access to introduction flow.
+### 🆔 Global Unique Card IDs
+- **Unique Identifier System**: Implemented globally unique card identifiers across all imported decks to prevent content duplication issues.
+- **ID Display**: Added card ID numbers in headers showing "ID/Total" format (e.g., "5/300") for easy reference and navigation.
+- **ID-based Ordering**: Cards in deck details now sort by their unique ID numbers instead of alphabetically for logical sequence navigation.
 
-### 🔧 Technical Improvements
-- **Code Deduplication**: Removed duplicate `CardView.swift` and consolidated card display logic into shared components.
-- **Enum Resolution**: Fixed `SwipeDirection` enum conflicts by moving to global scope in `SharedViews.swift`.
-- **Build Optimization**: Streamlined component architecture for better maintainability and performance.
-- **Testing Verification**: Successfully built and tested on iPhone 16 Pro Max simulator with all features functional.
+### 🔧 Data Integrity & Migration
+- **Automatic Migration**: System automatically handles existing cards to ensure ID uniqueness and data integrity.
+- **Type Safety**: Resolved Int32/Int type conversion issues throughout the codebase for better reliability.
+- **Core Data Enhancement**: Updated Persistence layer to assign globally unique IDs during data seeding.
 
-### 🎨 UI/UX Enhancements
-- **Consistent Card Previews**: Deck detail view now shows interactive card previews with flip animation and audio playback.
-- **Unified Progress Display**: All progress bars now show percentage completion for better learning progress tracking.
-- **Improved Navigation**: Easy access to onboarding from header menu for new users.
-- **Visual Consistency**: All views now share the same themed components for professional appearance.
+### 🎨 UI Improvements
+- **Card Navigation**: Improved card ordering in DeckDetailView for better user experience.
+- **Header Information**: Card headers now display unique identifiers for easy reference.
+- **Consistent Display**: All views show card IDs uniformly across the application.
 
 ---
 
 ## 📊 Statistics
 
-- **Total Commits:** 40+ commits since initial release
-- **Files Modified:** SharedViews.swift (new), DeckDetailView.swift, AutoPlayView.swift, StudyView.swift, CardView.swift (removed)
-- **Code Improvements:** UI component consolidation, theming consistency, and architecture optimization
+- **Total Commits:** 45+ commits since initial release
+- **Files Modified:** Persistence.swift, DeckDetailView.swift, SharedViews.swift, SettingsView.swift, README.md
+- **Code Improvements:** Data integrity, UI consistency, and navigation enhancements
 - **Testing:** Simulator verification on iPhone 16 Pro Max with successful builds
 
 ---

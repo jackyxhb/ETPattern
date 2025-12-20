@@ -13,6 +13,7 @@ English Thought (abbreviated **ET**) is a native SwiftUI iOS app that helps lear
 - Event-driven Auto Play keeps the flip animation and speech perfectly in sync — the card only advances when TTS finishes.
 - Leitner-inspired spaced repetition powers swipe gestures (`Again` vs `Easy`) and keeps daily goals manageable.
 - Full-screen, center-aligned typography with responsive flip animation for both manual and automatic review.
+- **Card ID Display**: Every card now shows its unique ID number (e.g., "5/300") in the header for easy reference and navigation.
 
 **Audio & TTS**
 - AVSpeechSynthesizer wrapper (single shared instance) speaks every side as it becomes visible.
@@ -22,6 +23,11 @@ English Thought (abbreviated **ET**) is a native SwiftUI iOS app that helps lear
 - Built-in **ETPattern 300** deck that aggregates the 12 bundled CSV groups (all 300 expression patterns).
 - 12 bundled CSV decks (Groups 1–12) plus unlimited user imports following the `Front;;Back;;Tags` format.
 - Long-press any deck to rename, delete, or re-import; per-deck progress persists between launches.
+- **ID-based Ordering**: Cards in deck details are now sorted by their unique ID numbers for logical sequence navigation.
+
+**Data Integrity**
+- **Global Unique IDs**: Cards now have globally unique identifiers across all imported decks, preventing content duplication issues.
+- **Migration Support**: Automatic data migration handles existing cards to ensure ID uniqueness.
 
 **Experience**
 - Gradient-rich interface, modern buttons, and progress components tuned for iPhone 16 displays.
@@ -31,26 +37,24 @@ English Thought (abbreviated **ET**) is a native SwiftUI iOS app that helps lear
 
 ## Requirements
 
-- iOS 16.0+ (runs great on iOS 18 simulators)
+- iOS 16.0+ (optimized for iPhone 16 and later)
 - Xcode 15+
 - Swift 5+
-- iPhone 16 simulator or device recommended for previews
+- iPhone 16 simulator or device recommended for optimal experience
 
 ## Project Structure
 
 ```
 ETPattern/
 ├── ETPatternApp.swift        // App entry + DI
-├── Persistence.swift         // Core Data stack
+├── Persistence.swift         // Core Data stack + global unique ID assignment
 ├── Models/                   // Card, CardSet, StudySession entities
 ├── Services/                 // CSV, TTS, File, Spaced Repetition
 ├── Views/                    // ContentView, StudyView, AutoPlayView, SettingsView, OnboardingView, etc.
 │   └── SharedViews.swift     // Shared UI components (SharedHeaderView, SharedCardDisplayView, etc.)
 ├── Utilities/                // Constants + Extensions + Theme
 ├── Resources/                // Group1–12 CSV bundles feeding the ETPattern 300 deck
-├── Assets.xcassets           // Colors + icons
-├── Tests/                    // Unit tests
-└── UITests/                  // UI automation
+└── Assets.xcassets           // Colors + icons
 ```
 
 ## Getting Started
@@ -63,7 +67,22 @@ cd ETPattern
 open ETPattern.xcodeproj
 ```
 
-Build (simulator example):
+### Quick Install & Run
+
+Use the included install script for automatic device detection and installation:
+
+```bash
+./install.sh
+```
+
+The script automatically:
+- Detects connected iOS devices (prioritizing physical devices over simulators)
+- Builds the project for the selected device
+- Installs and launches the app
+
+### Manual Build Options
+
+Build for simulator:
 
 ```bash
 xcodebuild -project ETPattern.xcodeproj -scheme ETPattern -sdk iphonesimulator -configuration Debug build
@@ -74,7 +93,7 @@ Install/run on a specific simulator:
 ```bash
 # Replace DEVICE_ID with the simulator identifier from `xcrun simctl list`
 xcrun simctl install DEVICE_ID build/Build/Products/Debug-iphonesimulator/ETPattern.app
-xcrun simctl launch DEVICE_ID aaaa.ETPattern
+xcrun simctl launch DEVICE_ID com.jack.ETPattern
 ```
 
 ## CSV Format
@@ -93,30 +112,24 @@ Guidelines:
 
 ## Architecture Notes
 
-- **Core Data** keeps Card ↔ CardSet relationships, intervals, ease factors, and session history.
+- **Core Data** keeps Card ↔ CardSet relationships, intervals, ease factors, and session history with globally unique card IDs.
 - **SpacedRepetitionService** updates `interval`, `nextReviewDate`, and `easeFactor` for `Again` vs `Easy` ratings.
 - **TTSService** wraps `AVSpeechSynthesizer` with token-based cancellation so Auto Play and Study views never overlap audio.
-- **CSVImporter** parses bundled/user CSVs, normalizes `<br>` newlines, and persists new Card objects atomically.
+- **CSVImporter** parses bundled/user CSVs, normalizes `<br>` newlines, and persists new Card objects atomically with unique ID assignment.
 - **FileManagerService** surfaces the 12 bundled CSVs and user-selected documents.
-
-## Testing
-
-| Suite | Location | Focus |
-| --- | --- | --- |
-| Unit | `ETPatternTests/CSVImporterTests.swift` | CSV parsing & data integrity |
-| Unit | `ETPatternTests/SpacedRepetitionTests.swift` | Leitner math & scheduling |
-| UI   | `ETPatternUITests/CardFlipTests.swift` | Flip animation and gestures |
-| UI   | `ETPatternUITests/StudySessionTests.swift` | End-to-end review flow |
-
-Run everything:
-
-```bash
-xcodebuild test -project ETPattern.xcodeproj -scheme ETPattern
-```
+- **Card ID System**: Each card has a globally unique ID displayed in headers (e.g., "5/300") for easy reference and navigation.
+- **Data Migration**: Automatic migration ensures existing cards receive unique IDs and maintains data integrity.
 
 ## Release Notes
 
-### v1.5.0 (Latest)
+### v1.6.0 (Latest)
+- **Global Unique Card IDs**: Implemented globally unique card identifiers across all imported decks to prevent content duplication issues.
+- **Card ID Display**: Added card ID numbers in headers showing "ID/Total" format (e.g., "5/300") for easy reference and navigation.
+- **ID-based Card Ordering**: Cards in deck details now sort by their unique ID numbers instead of alphabetically for logical sequence navigation.
+- **Data Migration**: Automatic migration system handles existing cards to ensure ID uniqueness and data integrity.
+- **Type Safety Improvements**: Resolved Int32/Int type conversion issues throughout the codebase for better reliability.
+
+### v1.5.0
 - **Code Consolidation**: Extracted shared UI components into `SharedViews.swift` including `SharedHeaderView`, `SharedCardDisplayView`, `SharedProgressBarView`, `SharedOrderToggleButton`, `SharedCloseButton`, and `CardFace` struct.
 - **Enhanced Card Previews**: Replaced `CardView` with `SharedCardDisplayView` in `DeckDetailView` for consistent theming and added flip functionality with TTS support.
 - **UI Consistency**: Applied comprehensive theming to `AutoPlayView` and `StudyView` using shared components for uniform appearance across all views.

@@ -215,10 +215,10 @@ struct SettingsView: View {
             .listRowBackground(theme.colors.surfaceLight)
 
             Section(header: Text("About").foregroundColor(theme.colors.textPrimary)) {
-                Text("English Pattern Flashcards")
+                Text("English Thought")
                     .font(theme.typography.headline)
                     .foregroundColor(theme.colors.textPrimary)
-                Text("Version 1.0")
+                Text("Version 1.6.0")
                     .foregroundColor(theme.colors.textSecondary)
                 Text("Learn English patterns with spaced repetition")
                     .foregroundColor(theme.colors.textSecondary)
