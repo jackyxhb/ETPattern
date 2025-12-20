@@ -149,7 +149,7 @@ struct StudyView: View {
                     isFlipped: isFlipped,
                     currentIndex: cardsReviewedCount,
                     totalCards: totalCardsInSession,
-                    cardId: cardsDue[currentCardIndex].id != nil ? Int(cardsDue[currentCardIndex].id) : nil,
+                    cardId: Int(cardsDue[currentCardIndex].id),
                     showSwipeFeedback: showSwipeFeedback,
                     swipeDirection: swipeDirection,
                     theme: theme
@@ -240,9 +240,8 @@ struct StudyView: View {
 
     private var progressBarView: some View {
         SharedProgressBarView(
-            currentPosition: sessionCardList.count > 0
-                ? ((cardsStudiedInSession % sessionCardList.count) + 1) : 0,
-            totalCards: sessionCardList.count,
+            currentPosition: currentCardNumber,
+            totalCards: totalCardsInSession,
             theme: theme
         )
     }
@@ -378,9 +377,8 @@ struct StudyView: View {
     }
 
     private var progress: Double {
-        guard sessionCardList.count > 0 else { return 0 }
-        let currentPosition = (cardsStudiedInSession % sessionCardList.count) + 1
-        return Double(currentPosition) / Double(sessionCardList.count)
+        guard totalCardsInSession > 0 else { return 0 }
+        return Double(currentCardNumber) / Double(totalCardsInSession)
     }
 
     private var totalCardsInSession: Int {
@@ -393,8 +391,7 @@ struct StudyView: View {
 
     private var currentCardNumber: Int {
         guard totalCardsInSession > 0 else { return 0 }
-        let nextNumber = cardsReviewedCount + 1
-        return min(nextNumber, totalCardsInSession)
+        return cardsReviewedCount + currentCardIndex + 1
     }
 
     private var cardsRemaining: Int {
@@ -549,6 +546,9 @@ struct StudyView: View {
             session.remainingCards = remaining as NSSet
         }
 
+        // Remove the card from cardsDue to keep the array in sync
+        cardsDue.remove(at: currentCardIndex)
+
         moveToNextCard()
     }
 
@@ -572,17 +572,24 @@ struct StudyView: View {
             session.remainingCards = remaining as NSSet
         }
 
+        // Remove the card from cardsDue to keep the array in sync
+        cardsDue.remove(at: currentCardIndex)
+
         moveToNextCard()
     }
 
     private func moveToNextCard() {
         cardsStudiedInSession += 1
-        currentCardIndex += 1
+        // Don't increment currentCardIndex since we remove the card from cardsDue
+        // currentCardIndex stays at the same position as the array shrinks
         studySession?.currentCardIndex = Int32(currentCardIndex)
         isFlipped = false  // Reset card to front side
 
-        if currentCardIndex >= cardsDue.count {
+        if cardsDue.isEmpty {
             endStudySession()
+        } else {
+            // Speak the next card's text since currentCardIndex didn't change but the card did
+            speakCurrentText()
         }
     }
 
@@ -636,18 +643,23 @@ struct StudyView: View {
     private func toggleOrderMode() {
         isRandomOrder.toggle()
         UserDefaults.standard.set(isRandomOrder ? "random" : "sequential", forKey: "cardOrderMode")
-        applyOrderModePreservingCurrentCard()
-    }
 
-    private func applyOrderModePreservingCurrentCard() {
-        let currentCard = cardsDue.isEmpty ? nil : cardsDue[currentCardIndex]
+        // Store current card before changing order
+        let currentCard = currentCardIndex < cardsDue.count ? cardsDue[currentCardIndex] : nil
 
         // Recreate session list with new order
         createSessionList()
 
-        // Filter session list to only include remaining cards
+        // Filter to only include remaining cards (not yet reviewed in this session)
         let remainingCardIDs = Set(cardsDue.map { $0.objectID })
         cardsDue = sessionCardList.filter { remainingCardIDs.contains($0.objectID) }
+
+        // Reorder the remaining cards according to the new order mode
+        if isRandomOrder {
+            cardsDue.shuffle()
+        } else {
+            cardsDue.sort { ($0.front ?? "") < ($1.front ?? "") }
+        }
 
         // Try to find the same card in the new order
         if let currentCard = currentCard,
@@ -657,11 +669,10 @@ struct StudyView: View {
         } else {
             // If we can't find the card, reset to beginning
             currentCardIndex = 0
-            isFlipped = false
         }
 
-        // Reset session progress when order changes
-        cardsStudiedInSession = Int(studySession?.cardsReviewed ?? 0)
+        // Don't reset cardsStudiedInSession when changing order - preserve session progress
+        // cardsStudiedInSession remains as is to maintain accurate progress tracking
     }
 
     private func formatBackText() -> String {

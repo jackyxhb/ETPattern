@@ -159,7 +159,7 @@ private struct CardPreviewContainer: View {
                 isFlipped: isFlipped,
                 currentIndex: index,
                 totalCards: total,
-                cardId: card.id != nil ? Int(card.id) : nil,
+                cardId: Int(card.id),
                 showSwipeFeedback: false,
                 swipeDirection: nil,
                 theme: theme

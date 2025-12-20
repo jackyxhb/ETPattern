@@ -23,6 +23,7 @@ struct AutoPlayView: View {
     @State private var scheduledTask: DispatchWorkItem?
     @State private var resumePhase: AutoPlayPhase = .front
     @State private var speechToken = UUID()
+    @State private var cardToken = UUID()
     @State private var activePhase: AutoPlayPhase = .front
 
     private let fallbackFrontDelay: TimeInterval = 1.0
@@ -254,6 +255,7 @@ struct AutoPlayView: View {
 
     private func playFrontSide() {
         guard isPlaying, !sessionManager.getCards().isEmpty else { return }
+        _ = beginCard()
         withAnimation(.smooth) {
             isFlipped = false
         }
@@ -271,6 +273,7 @@ struct AutoPlayView: View {
     private func moveToNextCard() {
         guard isPlaying, !sessionManager.getCards().isEmpty else { return }
         sessionManager.moveToNext()
+        updateCurrentCard()
         playFrontSide()
     }
 
@@ -284,6 +287,7 @@ struct AutoPlayView: View {
         // Generate new token to invalidate any pending operations
         let newToken = UUID()
         speechToken = newToken
+        cardToken = newToken
         activePhase = .front
 
         // Move to next card
@@ -317,6 +321,7 @@ struct AutoPlayView: View {
         // Generate new token to invalidate any pending operations
         let newToken = UUID()
         speechToken = newToken
+        cardToken = newToken
         activePhase = .front
 
         // Move to previous card
@@ -385,14 +390,16 @@ struct AutoPlayView: View {
     private func resetSpeechFlow() {
         scheduledTask?.cancel()
         speechToken = UUID()
+        cardToken = UUID()
         activePhase = .front
         ttsService.stop()
     }
 
-    private func beginPhase(_ phase: AutoPlayPhase) -> UUID {
+    private func beginCard() -> UUID {
         scheduledTask?.cancel()
-        activePhase = phase
+        activePhase = .front
         let token = UUID()
+        cardToken = token
         speechToken = token
         return token
     }
@@ -402,13 +409,14 @@ struct AutoPlayView: View {
     }
 
     private func speakPhase(_ phase: AutoPlayPhase) {
-        let token = beginPhase(phase)
+        activePhase = phase
         guard let currentCard = currentCard else { return }
         let text = text(for: phase, at: currentCard).trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentCardToken = cardToken
 
         guard !text.isEmpty else {
-            schedule(after: fallbackDelay(for: phase), token: token) {
-                guard isPlaying, speechToken == token, activePhase == phase else { return }
+            schedule(after: fallbackDelay(for: phase), token: currentCardToken) {
+                guard isPlaying, cardToken == currentCardToken, activePhase == phase else { return }
                 advance(from: phase)
             }
             return
@@ -417,7 +425,7 @@ struct AutoPlayView: View {
         ttsService.speak(text) {
             // Triple-check token and state are still valid before advancing
             DispatchQueue.main.async {
-                guard self.isPlaying, self.speechToken == token, self.activePhase == phase else { return }
+                guard self.isPlaying, self.cardToken == currentCardToken, self.activePhase == phase else { return }
                 self.advance(from: phase)
             }
         }
@@ -433,11 +441,13 @@ struct AutoPlayView: View {
     }
 
     private func enqueueNextCard() {
-        let token = speechToken
-        schedule(after: interCardDelay, token: token) {
-            guard isPlaying, speechToken == token else { return }
-            moveToNextCard()
+        scheduledTask?.cancel()
+        let workItem = DispatchWorkItem {
+            guard self.isPlaying else { return }
+            self.moveToNextCard()
         }
+        scheduledTask = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + interCardDelay, execute: workItem)
     }
 
     private func fallbackDelay(for phase: AutoPlayPhase) -> TimeInterval {

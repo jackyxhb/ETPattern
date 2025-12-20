@@ -21,6 +21,8 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
     private var currentVolume: Float
     private var currentPause: TimeInterval
     private var completionHandler: (() -> Void)?
+    private var completionSequence: Int = 0
+    private var currentUtteranceSequence: Int = 0
     private var isManuallyStopped = false
     private var lastError: AppError?
 
@@ -78,6 +80,8 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
         }
 
         completionHandler = completion
+        currentUtteranceSequence += 1
+        completionSequence = currentUtteranceSequence
 
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = voice
@@ -94,6 +98,7 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
         isManuallyStopped = true
         synthesizer.stopSpeaking(at: .immediate)
         completionHandler = nil
+        currentUtteranceSequence += 1  // Invalidate any pending completion handlers
         isSpeaking = false
     }
 
@@ -209,7 +214,7 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
     // MARK: - AVSpeechSynthesizerDelegate
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
         // Check state synchronously to prevent race conditions
-        guard !isManuallyStopped, let handler = completionHandler else {
+        guard !isManuallyStopped, let handler = completionHandler, completionSequence == currentUtteranceSequence else {
             return
         }
 
