@@ -26,14 +26,14 @@ class SessionManager: ObservableObject {
     private let cardSet: CardSet
     private var progressKey: String {
         let id = cardSet.objectID.uriRepresentation().absoluteString
-        return "autoPlayProgress-\(id)"
+        return "studyProgress-\(id)"
     }
     private var sessionKey: String {
         let id = cardSet.objectID.uriRepresentation().absoluteString
-        return "autoPlaySession-\(id)"
+        return "studySession-\(id)"
     }
     private var orderKey: String {
-        "autoPlayOrderMode"
+        "studyOrderMode"
     }
 
     // MARK: - Initialization
