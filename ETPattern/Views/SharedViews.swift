@@ -56,6 +56,9 @@ struct SharedCardDisplayView: View {
             )
             .opacity(isFlipped ? 0 : 1)
             .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
+            .accessibilityHidden(isFlipped) // Hide front when flipped
+            .accessibilityLabel("Card front: \(frontText.isEmpty ? "No content" : frontText)")
+            .accessibilityHint("Double tap to flip card and hear pronunciation")
 
             CardFace(
                 text: backText,
@@ -67,6 +70,9 @@ struct SharedCardDisplayView: View {
             )
             .opacity(isFlipped ? 1 : 0)
             .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
+            .accessibilityHidden(!isFlipped) // Hide back when not flipped
+            .accessibilityLabel("Card back: \(backText.isEmpty ? "No content" : backText.replacingOccurrences(of: "<br>", with: ". "))")
+            .accessibilityHint("Double tap to flip card back to front")
 
             // Swipe feedback overlay
             if showSwipeFeedback, let direction = swipeDirection {
@@ -82,6 +88,7 @@ struct SharedCardDisplayView: View {
                         .foregroundColor(
                             direction == .right ? theme.colors.success : theme.colors.danger
                         )
+                        .accessibilityHidden(true) // Decorative
                         Text(direction == .right ? "Easy" : "Again")
                             .font(theme.typography.title.weight(.bold))
                             .foregroundColor(theme.colors.textPrimary)
@@ -89,10 +96,15 @@ struct SharedCardDisplayView: View {
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 24))
                 .transition(.opacity)
+                .accessibilityLabel(direction == .right ? "Marked as easy" : "Marked as again")
+                .accessibilityHint("Card will be rated and next card will appear")
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.vertical, 4)
+        .accessibilityElement(children: .contain) // Group card elements together
+        .accessibilityLabel("Flashcard \(currentIndex + 1) of \(totalCards)")
+        .accessibilityValue(isFlipped ? "Showing back" : "Showing front")
     }
 }
 
@@ -106,16 +118,22 @@ struct SharedProgressBarView: View {
             Text("\(currentPosition)/\(totalCards)")
                 .font(theme.typography.caption.weight(.bold))
                 .foregroundColor(theme.colors.textSecondary)
+                .dynamicTypeSize(.large ... .accessibility5)
 
             ProgressView(value: Double(currentPosition), total: Double(totalCards))
                 .tint(theme.colors.highlight)
                 .frame(height: 4)
+                .accessibilityLabel("Study Progress")
+                .accessibilityValue("\(currentPosition) of \(totalCards) cards completed")
 
             percentageText
         }
         .padding(.horizontal, 20)
         .padding(.top, 16)
         .padding(.bottom, 8)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Study Session Progress")
+        .accessibilityValue("Card \(currentPosition) of \(totalCards), \(percentage)% complete")
     }
 
     private var percentageText: some View {
@@ -126,6 +144,12 @@ struct SharedProgressBarView: View {
             .padding(.vertical, 4)
             .background(theme.colors.surfaceMedium)
             .clipShape(Capsule())
+            .dynamicTypeSize(.large ... .accessibility5)
+            .accessibilityHidden(true) // Already included in parent accessibility value
+    }
+
+    private var percentage: Int {
+        totalCards > 0 ? Int((Double(currentPosition) / Double(totalCards)) * 100) : 0
     }
 }
 
@@ -154,12 +178,13 @@ struct CardFace: View {
                 Spacer(minLength: 0)
                 if isFront {
                     Text(text.isEmpty ? "No content" : text)
-                        .font(.system(size: 42, weight: .bold, design: .rounded))
+                        .font(theme.typography.largeTitle.weight(.bold))
                         .multilineTextAlignment(.center)
                         .foregroundColor(theme.colors.textPrimary)
                         .frame(maxWidth: .infinity)
                         .minimumScaleFactor(0.5)
                         .lineLimit(3)
+                        .dynamicTypeSize(.large ... .accessibility5) // Support dynamic type
                 } else {
                     backContent
                 }
@@ -220,10 +245,11 @@ struct CardFace: View {
                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
                     Text(example)
-                        .font(.system(size: 18, weight: .medium, design: .rounded))
+                        .font(theme.typography.body.weight(.medium))
                         .foregroundColor(theme.colors.textPrimary)
                         .lineSpacing(6)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .dynamicTypeSize(.large ... .accessibility5) // Support dynamic type
                 }
                 .padding(.horizontal, 6)
             }

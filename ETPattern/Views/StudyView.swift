@@ -85,6 +85,19 @@ struct StudyView: View {
                             speakCurrentText()
                         }
                     }
+                    .accessibilityAction(named: "Flip Card") {
+                        UIImpactFeedbackGenerator.lightImpact()
+                        withAnimation(.bouncy) {
+                            isFlipped.toggle()
+                            speakCurrentText()
+                        }
+                    }
+                    .accessibilityAction(named: "Mark as Easy") {
+                        handleSwipe(.right)
+                    }
+                    .accessibilityAction(named: "Mark as Again") {
+                        handleSwipe(.left)
+                    }
                 }
             }
             .padding(.horizontal, 4)
@@ -92,6 +105,9 @@ struct StudyView: View {
                 bottomControlBar
             }
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("English Pattern Study Session")
+        .dynamicTypeSize(.large ... .accessibility5) // Support dynamic type throughout the view
         .onAppear {
             sessionManager.prepareSession()
             updateCurrentCard()
@@ -107,6 +123,10 @@ struct StudyView: View {
             ttsService.stop()
             // Auto-read the new card
             speakCurrentText()
+            // Announce card change for accessibility
+            if let card = currentCard {
+                UIAccessibility.post(notification: .announcement, argument: "Now showing card \(sessionManager.currentIndex + 1) of \(sessionManager.getCards().count)")
+            }
         }
     }
 
@@ -216,6 +236,7 @@ struct StudyView: View {
         .disabled(sessionManager.currentIndex == 0)
         .opacity(sessionManager.currentIndex == 0 ? 0.3 : 1)
         .accessibilityLabel("Previous Card")
+        .accessibilityHint(sessionManager.currentIndex == 0 ? "No previous card available" : "Go to previous card in study session")
     }
 
     private var speakCurrentButton: some View {
@@ -223,14 +244,16 @@ struct StudyView: View {
             UIImpactFeedbackGenerator.lightImpact()
             speakCurrentText()
         }) {
-            Image(systemName: "speaker.wave.2.fill")
+            Image(systemName: ttsService.isSpeaking ? "speaker.wave.2.fill" : "speaker.wave.2")
                 .font(theme.typography.title3)
                 .foregroundColor(theme.colors.textPrimary)
                 .frame(width: 60, height: 60)
-                .background(theme.gradients.success)
+                .background(ttsService.isSpeaking ? theme.gradients.danger : theme.gradients.success)
                 .clipShape(Circle())
         }
-        .accessibilityLabel("Speak Current Card")
+        .accessibilityLabel(ttsService.isSpeaking ? "Stop speaking" : "Speak current card")
+        .accessibilityHint(ttsService.isSpeaking ? "Double tap to stop text-to-speech" : "Double tap to hear the current card content spoken aloud")
+        .accessibilityValue(ttsService.isSpeaking ? "Currently speaking" : "Ready to speak")
     }
 
     private var nextButton: some View {
@@ -248,6 +271,7 @@ struct StudyView: View {
                 .clipShape(Circle())
         }
         .accessibilityLabel("Next Card")
+        .accessibilityHint("Go to next card in study session")
     }
 
     private var closeButton: some View {
