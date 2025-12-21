@@ -128,6 +128,36 @@ struct Theme {
         let largeSpacing: CGFloat = 24.0
         let buttonPadding: CGFloat = 16.0
         let sliderHeight: CGFloat = 44.0
+        
+        // ContentView specific metrics
+        let contentHorizontalPadding: CGFloat = 16.0
+        let contentTopPadding: CGFloat = 20.0
+        let mainContentSpacing: CGFloat = 16.0
+        
+        // Empty state metrics
+        let emptyStateCircleSize: CGFloat = 120.0
+        let emptyStateCircleOpacity: CGFloat = 0.2
+        let emptyStateVerticalSpacing: CGFloat = 24.0
+        let emptyStateTextSpacing: CGFloat = 12.0
+        let emptyStateHorizontalPadding: CGFloat = 0.0
+        let emptyStateIconSize: CGFloat = 60.0
+        let emptyStateButtonHorizontalPadding: CGFloat = 32.0
+        let emptyStateButtonVerticalPadding: CGFloat = 16.0
+        let emptyStateButtonTopPadding: CGFloat = 20.0
+        let emptyStateVerticalPadding: CGFloat = 60.0
+        let emptyStateButtonSpacing: CGFloat = 16.0
+        let emptyStateButtonCornerRadius: CGFloat = 16.0
+        
+        // CardSetActionBar metrics
+        let actionBarButtonSpacing: CGFloat = 8.0
+        let actionBarHorizontalPadding: CGFloat = 6.0
+        let actionBarVerticalPadding: CGFloat = 6.0
+        let actionBarCornerRadius: CGFloat = 24.0
+        let actionBarContainerHorizontalPadding: CGFloat = 16.0
+        
+        // ActionButton metrics
+        let actionButtonVerticalPadding: CGFloat = 10.0
+        let actionButtonCornerRadius: CGFloat = 16.0
     }
 
     struct Typography {

@@ -182,7 +182,7 @@ struct ContentView: View {
 
     // MARK: - Main Content
     private var mainContent: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: theme.metrics.mainContentSpacing) {
             HeaderView(viewModel: viewModel)
 
             ScrollView {
@@ -194,8 +194,8 @@ struct ContentView: View {
                 }
             }
         }
-        .padding(.horizontal)
-        .padding(.top, 20)
+        .padding(.horizontal, theme.metrics.contentHorizontalPadding)
+        .padding(.top, theme.metrics.contentTopPadding)
     }
 
     private var emptyStateView: some View {
@@ -203,17 +203,17 @@ struct ContentView: View {
             title: "No Decks Yet",
             description: "Create your first flashcard deck or import CSV files to get started with learning English patterns.",
             theme: theme,
-            circleSize: 120,
-            circleOpacity: 0.2,
-            verticalSpacing: 24,
-            textSpacing: 12,
-            horizontalPadding: 0
+            circleSize: theme.metrics.emptyStateCircleSize,
+            circleOpacity: theme.metrics.emptyStateCircleOpacity,
+            verticalSpacing: theme.metrics.emptyStateVerticalSpacing,
+            textSpacing: theme.metrics.emptyStateTextSpacing,
+            horizontalPadding: theme.metrics.emptyStateHorizontalPadding
         ) {
             Image(systemName: "plus.circle.fill")
-                .font(.system(size: 60))
+                .font(.system(size: theme.metrics.emptyStateIconSize))
                 .foregroundColor(theme.colors.textPrimary)
         } additionalContent: {
-            VStack(spacing: 16) {
+            VStack(spacing: theme.metrics.emptyStateButtonSpacing) {
                 Button(action: {
                     UIImpactFeedbackGenerator.mediumImpact()
                     viewModel.addCardSet()
@@ -221,10 +221,10 @@ struct ContentView: View {
                     Label("Create New Deck", systemImage: "plus")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
+                        .padding(.vertical, theme.metrics.emptyStateButtonVerticalPadding)
                         .background(theme.gradients.accent)
                         .foregroundColor(theme.colors.textPrimary)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: theme.metrics.emptyStateButtonCornerRadius, style: .continuous))
                 }
 
                 Button(action: {
@@ -234,17 +234,17 @@ struct ContentView: View {
                     Label("Import CSV", systemImage: "square.and.arrow.down")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
+                        .padding(.vertical, theme.metrics.emptyStateButtonVerticalPadding)
                         .background(.ultraThinMaterial)
                         .foregroundColor(theme.colors.textPrimary)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: theme.metrics.emptyStateButtonCornerRadius, style: .continuous))
                 }
             }
-            .padding(.horizontal, 32)
-            .padding(.top, 20)
+            .padding(.horizontal, theme.metrics.emptyStateButtonHorizontalPadding)
+            .padding(.top, theme.metrics.emptyStateButtonTopPadding)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        .padding(.vertical, 60)
+        .padding(.vertical, theme.metrics.emptyStateVerticalPadding)
     }
 }
 
@@ -258,7 +258,7 @@ private struct CardSetActionBar: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 8) {
+            HStack(spacing: theme.metrics.actionBarButtonSpacing) {
                 ActionButton(
                     title: "Study", systemImage: "book", gradient: theme.gradients.accent,
                     action: onStudy)
@@ -269,12 +269,12 @@ private struct CardSetActionBar: View {
                     title: "Browse", systemImage: "list.bullet", gradient: theme.gradients.neutral,
                     action: onBrowse)
             }
-            .padding(.horizontal, 6)
-            .padding(.vertical, 6)
+            .padding(.horizontal, theme.metrics.actionBarHorizontalPadding)
+            .padding(.vertical, theme.metrics.actionBarVerticalPadding)
         }
         .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .padding(.horizontal, 16)
+        .clipShape(RoundedRectangle(cornerRadius: theme.metrics.actionBarCornerRadius, style: .continuous))
+        .padding(.horizontal, theme.metrics.actionBarContainerHorizontalPadding)
     }
 
     private struct ActionButton: View {
@@ -293,10 +293,10 @@ private struct CardSetActionBar: View {
                 Label(title, systemImage: systemImage)
                     .font(theme.typography.subheadline.bold())
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
+                    .padding(.vertical, theme.metrics.actionButtonVerticalPadding)
                     .background(gradient)
                     .foregroundColor(theme.colors.textPrimary)
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: theme.metrics.actionButtonCornerRadius, style: .continuous))
             }
             .buttonStyle(.plain)
         }
