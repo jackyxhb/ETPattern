@@ -34,57 +34,32 @@ struct SettingsView: View {
             theme.gradients.background
                 .ignoresSafeArea()
             Form {
-            Section(header: Text("Study Mode").foregroundColor(theme.colors.textPrimary)) {
-                Picker(selection: $cardOrderMode) {
-                    ForEach(orderOptions.keys.sorted(), id: \.self) { orderKey in
-                        Text(orderOptions[orderKey] ?? orderKey)
-                            .foregroundColor(theme.colors.textPrimary)
-                            .tag(orderKey)
-                    }
-                } label: {
-                    Text("Card Order")
-                        .foregroundColor(theme.colors.textPrimary)
-                }
-                .pickerStyle(.menu)
-                .onChange(of: cardOrderMode) { newValue in
-                    UserDefaults.standard.set(newValue, forKey: "cardOrderMode")
-                }
-            }
-            .listRowBackground(theme.colors.surfaceLight)
+            SharedSettingsPickerSection(
+                header: "Study Mode",
+                label: "Card Order",
+                options: orderOptions,
+                selection: $cardOrderMode,
+                userDefaultsKey: "cardOrderMode"
+            )
 
-            Section(header: Text("Auto Play Mode").foregroundColor(theme.colors.textPrimary)) {
-                Picker(selection: $autoPlayOrderMode) {
-                    ForEach(orderOptions.keys.sorted(), id: \.self) { orderKey in
-                        Text(orderOptions[orderKey] ?? orderKey)
-                            .foregroundColor(theme.colors.textPrimary)
-                            .tag(orderKey)
-                    }
-                } label: {
-                    Text("Card Order")
-                        .foregroundColor(theme.colors.textPrimary)
-                }
-                .pickerStyle(.menu)
-                .onChange(of: autoPlayOrderMode) { newValue in
-                    UserDefaults.standard.set(newValue, forKey: "autoPlayOrderMode")
-                }
-            }
-            .listRowBackground(theme.colors.surfaceLight)
+            SharedSettingsPickerSection(
+                header: "Auto Play Mode",
+                label: "Card Order",
+                options: orderOptions,
+                selection: $autoPlayOrderMode,
+                userDefaultsKey: "autoPlayOrderMode"
+            )
 
             Section(header: Text("Text-to-Speech").foregroundColor(theme.colors.textPrimary)) {
-                Picker(selection: $selectedVoice) {
-                    ForEach(voiceOptions.keys.sorted(), id: \.self) { voiceId in
-                        Text(voiceOptions[voiceId] ?? voiceId)
-                            .foregroundColor(theme.colors.textPrimary)
-                            .tag(voiceId)
+                SharedSettingsPickerSection(
+                    header: "",
+                    label: "Voice",
+                    options: voiceOptions,
+                    selection: $selectedVoice,
+                    onChange: { newValue in
+                        ttsService.setVoice(newValue)
                     }
-                } label: {
-                    Text("Voice")
-                        .foregroundColor(theme.colors.textPrimary)
-                }
-                .pickerStyle(.menu)
-                .onChange(of: selectedVoice) { newValue in
-                    ttsService.setVoice(newValue)
-                }
+                )
 
                 VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
                     Text("Speech Speed: \(Int(ttsPercentage))%")
@@ -126,80 +101,47 @@ struct SettingsView: View {
                 .padding(.vertical, theme.metrics.smallSpacing)
                 .listRowBackground(theme.colors.surfaceLight)
 
-                VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
-                    Text("Pitch: \(Int(ttsPitch * 100))%")
-                        .font(theme.typography.subheadline)
-                        .foregroundColor(theme.colors.textPrimary)
-
-                    Slider(value: $ttsPitch, in: Constants.TTS.minPitch...Constants.TTS.maxPitch, step: 0.1) {
-                        Text("Pitch")
-                            .foregroundColor(theme.colors.textPrimary)
-                    } minimumValueLabel: {
-                        Text("50%")
-                            .font(theme.typography.caption)
-                            .foregroundColor(theme.colors.textSecondary)
-                    } maximumValueLabel: {
-                        Text("200%")
-                            .font(theme.typography.caption)
-                            .foregroundColor(theme.colors.textSecondary)
-                    }
-                    .tint(theme.colors.highlight)
-                    .onChange(of: ttsPitch) { newValue in
+                SharedSettingsSliderSection(
+                    label: "Pitch",
+                    value: $ttsPitch,
+                    minValue: Constants.TTS.minPitch,
+                    maxValue: Constants.TTS.maxPitch,
+                    step: 0.1,
+                    minLabel: "50%",
+                    maxLabel: "200%",
+                    valueFormatter: { "\(Int($0 * 100))%" },
+                    onChange: { newValue in
                         ttsService.setPitch(newValue)
                     }
-                }
-                .padding(.vertical, theme.metrics.smallSpacing)
-                .listRowBackground(theme.colors.surfaceLight)
+                )
 
-                VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
-                    Text("Volume: \(Int(ttsVolume * 100))%")
-                        .font(theme.typography.subheadline)
-                        .foregroundColor(theme.colors.textPrimary)
-
-                    Slider(value: $ttsVolume, in: Constants.TTS.minVolume...Constants.TTS.maxVolume, step: 0.1) {
-                        Text("Volume")
-                            .foregroundColor(theme.colors.textPrimary)
-                    } minimumValueLabel: {
-                        Text("0%")
-                            .font(theme.typography.caption)
-                            .foregroundColor(theme.colors.textSecondary)
-                    } maximumValueLabel: {
-                        Text("100%")
-                            .font(theme.typography.caption)
-                            .foregroundColor(theme.colors.textSecondary)
-                    }
-                    .tint(theme.colors.highlight)
-                    .onChange(of: ttsVolume) { newValue in
+                SharedSettingsSliderSection(
+                    label: "Volume",
+                    value: $ttsVolume,
+                    minValue: Constants.TTS.minVolume,
+                    maxValue: Constants.TTS.maxVolume,
+                    step: 0.1,
+                    minLabel: "0%",
+                    maxLabel: "100%",
+                    valueFormatter: { "\(Int($0 * 100))%" },
+                    onChange: { newValue in
                         ttsService.setVolume(newValue)
                     }
-                }
-                .padding(.vertical, theme.metrics.smallSpacing)
-                .listRowBackground(theme.colors.surfaceLight)
+                )
 
-                VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
-                    Text("Pause: \(String(format: "%.1f", ttsPause))s")
-                        .font(theme.typography.subheadline)
-                        .foregroundColor(theme.colors.textPrimary)
-
-                    Slider(value: $ttsPause, in: Constants.TTS.minPause...Constants.TTS.maxPause, step: 0.1) {
-                        Text("Pause")
-                            .foregroundColor(theme.colors.textPrimary)
-                    } minimumValueLabel: {
-                        Text("0s")
-                            .font(theme.typography.caption)
-                            .foregroundColor(theme.colors.textSecondary)
-                    } maximumValueLabel: {
-                        Text("2s")
-                            .font(theme.typography.caption)
-                            .foregroundColor(theme.colors.textSecondary)
-                    }
-                    .tint(theme.colors.highlight)
-                    .onChange(of: ttsPause) { newValue in
+                SharedSettingsSliderSection(
+                    label: "Pause",
+                    value: $ttsPause,
+                    minValue: Constants.TTS.minPause,
+                    maxValue: Constants.TTS.maxPause,
+                    step: 0.1,
+                    minLabel: "0s",
+                    maxLabel: "2s",
+                    valueFormatter: { String(format: "%.1f", $0) + "s" },
+                    onChange: { newValue in
                         ttsService.setPause(newValue)
                     }
-                }
-                .padding(.vertical, theme.metrics.smallSpacing)
-                .listRowBackground(theme.colors.surfaceLight)
+                )
 
                 Button("Test Voice") {
                     UIImpactFeedbackGenerator.lightImpact()

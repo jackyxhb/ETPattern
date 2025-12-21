@@ -334,3 +334,107 @@ struct SharedModalContainer<Content: View>: View {
         }
     }
 }
+
+struct SharedSettingsPickerSection: View {
+    @Environment(\.theme) var theme
+    let header: String
+    let label: String
+    let options: [String: String]
+    @Binding var selection: String
+    let userDefaultsKey: String?
+    let onChange: ((String) -> Void)?
+
+    init(header: String, label: String, options: [String: String], selection: Binding<String>, userDefaultsKey: String) {
+        self.header = header
+        self.label = label
+        self.options = options
+        self._selection = selection
+        self.userDefaultsKey = userDefaultsKey
+        self.onChange = nil
+    }
+
+    init(header: String, label: String, options: [String: String], selection: Binding<String>, onChange: @escaping (String) -> Void) {
+        self.header = header
+        self.label = label
+        self.options = options
+        self._selection = selection
+        self.userDefaultsKey = nil
+        self.onChange = onChange
+    }
+
+    var body: some View {
+        Section(header: Text(header).foregroundColor(theme.colors.textPrimary)) {
+            Picker(selection: $selection) {
+                ForEach(options.keys.sorted(), id: \.self) { key in
+                    Text(options[key] ?? key)
+                        .foregroundColor(theme.colors.textPrimary)
+                        .tag(key)
+                }
+            } label: {
+                Text(label)
+                    .foregroundColor(theme.colors.textPrimary)
+            }
+            .pickerStyle(.menu)
+            .onChange(of: selection) { newValue in
+                if let userDefaultsKey = userDefaultsKey {
+                    UserDefaults.standard.set(newValue, forKey: userDefaultsKey)
+                } else if let onChange = onChange {
+                    onChange(newValue)
+                }
+            }
+        }
+        .listRowBackground(theme.colors.surfaceLight)
+    }
+}
+
+struct SharedSettingsSliderSection: View {
+    @Environment(\.theme) var theme
+    let label: String
+    @Binding var value: Float
+    let minValue: Float
+    let maxValue: Float
+    let step: Float
+    let minLabel: String
+    let maxLabel: String
+    let valueFormatter: (Float) -> String
+    let onChange: (Float) -> Void
+
+    init(label: String, value: Binding<Float>, minValue: Float, maxValue: Float, step: Float, minLabel: String, maxLabel: String, valueFormatter: @escaping (Float) -> String = { "\(Int($0))%" }, onChange: @escaping (Float) -> Void) {
+        self.label = label
+        self._value = value
+        self.minValue = minValue
+        self.maxValue = maxValue
+        self.step = step
+        self.minLabel = minLabel
+        self.maxLabel = maxLabel
+        self.valueFormatter = valueFormatter
+        self.onChange = onChange
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
+            Text("\(label): \(valueFormatter(value))")
+                .font(theme.typography.subheadline)
+                .foregroundColor(theme.colors.textPrimary)
+
+            Slider(value: $value, in: minValue...maxValue, step: step) {
+                Text(label)
+                    .foregroundColor(theme.colors.textPrimary)
+            } minimumValueLabel: {
+                Text(minLabel)
+                    .font(theme.typography.caption)
+                    .foregroundColor(theme.colors.textSecondary)
+            } maximumValueLabel: {
+                Text(maxLabel)
+                    .font(theme.typography.caption)
+                    .foregroundColor(theme.colors.textSecondary)
+            }
+            .tint(theme.colors.highlight)
+            .onChange(of: value) { newValue in
+                onChange(newValue)
+            }
+        }
+        .padding(.vertical, theme.metrics.smallSpacing)
+        .listRowBackground(theme.colors.surfaceLight)
+    }
+}
