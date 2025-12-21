@@ -387,19 +387,19 @@ struct SharedSettingsPickerSection: View {
     }
 }
 
-struct SharedSettingsSliderSection: View {
+struct SharedSettingsSliderSection<T: BinaryFloatingPoint>: View {
     @Environment(\.theme) var theme
     let label: String
-    @Binding var value: Float
-    let minValue: Float
-    let maxValue: Float
-    let step: Float
+    @Binding var value: T
+    let minValue: T
+    let maxValue: T
+    let step: T
     let minLabel: String
     let maxLabel: String
-    let valueFormatter: (Float) -> String
-    let onChange: (Float) -> Void
+    let valueFormatter: (T) -> String
+    let onChange: (T) -> Void
 
-    init(label: String, value: Binding<Float>, minValue: Float, maxValue: Float, step: Float, minLabel: String, maxLabel: String, valueFormatter: @escaping (Float) -> String = { "\(Int($0))%" }, onChange: @escaping (Float) -> Void) {
+    init(label: String, value: Binding<T>, minValue: T, maxValue: T, step: T, minLabel: String, maxLabel: String, valueFormatter: @escaping (T) -> String = { "\($0)" }, onChange: @escaping (T) -> Void) {
         self.label = label
         self._value = value
         self.minValue = minValue
@@ -417,7 +417,10 @@ struct SharedSettingsSliderSection: View {
                 .font(theme.typography.subheadline)
                 .foregroundColor(theme.colors.textPrimary)
 
-            Slider(value: $value, in: minValue...maxValue, step: step) {
+            Slider(value: Binding(
+                get: { Double(value) },
+                set: { value = T($0) }
+            ), in: Double(minValue)...Double(maxValue), step: Double(step)) {
                 Text(label)
                     .foregroundColor(theme.colors.textPrimary)
             } minimumValueLabel: {
@@ -505,5 +508,155 @@ extension View {
             message: message,
             isPresented: isPresented
         ))
+    }
+}
+
+// MARK: - Onboarding Components
+
+struct SharedOnboardingPageView: View {
+    @Environment(\.theme) var theme
+    let title: String
+    let subtitle: String
+    let description: String
+    let systemImage: String
+    let gradient: LinearGradient
+
+    init(title: String, subtitle: String, description: String, systemImage: String, gradient: LinearGradient) {
+        self.title = title
+        self.subtitle = subtitle
+        self.description = description
+        self.systemImage = systemImage
+        self.gradient = gradient
+    }
+
+    var body: some View {
+        VStack(spacing: 32) {
+            Spacer()
+
+            ZStack {
+                Circle()
+                    .fill(gradient.opacity(0.2))
+                    .frame(width: 200, height: 200)
+
+                Image(systemName: systemImage)
+                    .font(.system(size: 80))
+                    .foregroundColor(theme.colors.textPrimary)
+            }
+            .padding(.bottom, 20)
+
+            VStack(spacing: 16) {
+                Text(title)
+                    .font(.title.bold())
+                    .foregroundColor(theme.colors.textPrimary)
+                    .multilineTextAlignment(.center)
+
+                Text(subtitle)
+                    .font(.title3)
+                    .foregroundColor(theme.colors.highlight)
+                    .multilineTextAlignment(.center)
+
+                Text(description)
+                    .font(.body)
+                    .foregroundColor(theme.colors.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+                    .padding(.horizontal, 32)
+            }
+
+            Spacer()
+        }
+        .padding(.horizontal, 24)
+    }
+}
+
+struct SharedOnboardingContainer<Content: View>: View {
+    @Environment(\.theme) var theme
+    let pages: [Content]
+    let currentPage: Binding<Int>
+    let onComplete: () -> Void
+
+    init(pages: [Content], currentPage: Binding<Int>, onComplete: @escaping () -> Void) {
+        self.pages = pages
+        self.currentPage = currentPage
+        self.onComplete = onComplete
+    }
+
+    var body: some View {
+        ZStack {
+            theme.gradients.background
+                .ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                TabView(selection: currentPage) {
+                    ForEach(pages.indices, id: \.self) { index in
+                        pages[index]
+                            .tag(index)
+                    }
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+
+                // Custom page indicators
+                HStack(spacing: 8) {
+                    ForEach(pages.indices, id: \.self) { index in
+                        Circle()
+                            .fill(currentPage.wrappedValue == index ? theme.colors.highlight : theme.colors.surfaceMedium)
+                            .frame(width: 8, height: 8)
+                            .animation(.smooth, value: currentPage.wrappedValue)
+                    }
+                }
+                .padding(.vertical, 20)
+
+                // Navigation buttons
+                HStack(spacing: 16) {
+                    if currentPage.wrappedValue > 0 {
+                        Button(action: {
+                            UIImpactFeedbackGenerator.lightImpact()
+                            withAnimation(.smooth) {
+                                currentPage.wrappedValue -= 1
+                            }
+                        }) {
+                            Text("Back")
+                                .font(.headline)
+                                .foregroundColor(.white.opacity(0.8))
+                                .frame(width: 80, height: 50)
+                        }
+                    }
+
+                    Spacer()
+
+                    if currentPage.wrappedValue < pages.count - 1 {
+                        Button(action: {
+                            UIImpactFeedbackGenerator.lightImpact()
+                            withAnimation(.smooth) {
+                                currentPage.wrappedValue += 1
+                            }
+                        }) {
+                            Text("Next")
+                                .font(.headline.bold())
+                                .foregroundColor(theme.colors.textPrimary)
+                                .frame(width: 80, height: 50)
+                                .background(theme.gradients.accent)
+                                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        }
+                    } else {
+                        Button(action: {
+                            UINotificationFeedbackGenerator.success()
+                            withAnimation(.bouncy) {
+                                onComplete()
+                            }
+                        }) {
+                            Text("Get Started")
+                                .font(.headline.bold())
+                                .foregroundColor(theme.colors.textPrimary)
+                                .frame(width: 140, height: 50)
+                                .background(theme.gradients.success)
+                                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        }
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 40)
+            }
+        }
     }
 }
