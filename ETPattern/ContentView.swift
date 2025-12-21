@@ -20,12 +20,14 @@ struct ContentView: View {
         animation: .default)
     private var cardSets: FetchedResults<CardSet>
 
-    // MARK: - UI State
-    @State private var uiState = UIState()
+    @StateObject private var viewModel: ContentViewModel
 
     // MARK: - Onboarding State
     @State private var hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
-    @State private var showingOnboarding = false
+
+    init() {
+        _viewModel = StateObject(wrappedValue: ContentViewModel(viewContext: PersistenceController.shared.container.viewContext))
+    }
 
     var body: some View {
         NavigationView {
@@ -39,34 +41,34 @@ struct ContentView: View {
             .navigationBarHidden(true) // Custom header
         }
         .safeAreaInset(edge: .bottom) {
-            if let selectedCardSet = uiState.selectedCardSet {
+            if let selectedCardSet = viewModel.uiState.selectedCardSet {
                 CardSetActionBar(
-                    onStudy: { startStudy(for: selectedCardSet) },
-                    onAuto: { startAuto(for: selectedCardSet) },
-                    onBrowse: { uiState.browseCardSet = selectedCardSet }
+                    onStudy: { viewModel.startStudy(for: selectedCardSet) },
+                    onAuto: { viewModel.startAuto(for: selectedCardSet) },
+                    onBrowse: { viewModel.showBrowse(for: selectedCardSet) }
                 )
             } else {
                 EmptyView()
             }
         }
-        .fullScreenCover(isPresented: $uiState.showingStudyView) {
-            if let cardSet = uiState.selectedCardSet {
+        .fullScreenCover(isPresented: $viewModel.uiState.showingStudyView) {
+            if let cardSet = viewModel.uiState.selectedCardSet {
                 StudyView(cardSet: cardSet)
             }
         }
-        .fullScreenCover(isPresented: $uiState.showingAutoView) {
-            if let cardSet = uiState.selectedCardSet {
+        .fullScreenCover(isPresented: $viewModel.uiState.showingAutoView) {
+            if let cardSet = viewModel.uiState.selectedCardSet {
                 AutoPlayView(cardSet: cardSet)
             }
         }
-        .sheet(isPresented: $uiState.showingSessionStats) {
+        .sheet(isPresented: $viewModel.uiState.showingSessionStats) {
             NavigationView {
                 SessionStatsView()
                     .navigationTitle("Session Stats")
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button("Done") { uiState.showingSessionStats = false }
+                            Button("Done") { viewModel.uiState.showingSessionStats = false }
                         }
                     }
                     .toolbarBackground(.ultraThinMaterial.opacity(0.8), for: .navigationBar)
@@ -74,14 +76,14 @@ struct ContentView: View {
                     .toolbarColorScheme(.dark, for: .navigationBar)
                 }
         }
-        .sheet(isPresented: $uiState.showingImport) {
+        .sheet(isPresented: $viewModel.uiState.showingImport) {
             NavigationView {
                 ImportView()
                     .navigationTitle("Import")
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button("Done") { uiState.showingImport = false }
+                            Button("Done") { viewModel.uiState.showingImport = false }
                         }
                     }
                     .toolbarBackground(.ultraThinMaterial.opacity(0.8), for: .navigationBar)
@@ -89,14 +91,14 @@ struct ContentView: View {
                     .toolbarColorScheme(.dark, for: .navigationBar)
                 }
         }
-        .sheet(isPresented: $uiState.showingSettings) {
+        .sheet(isPresented: $viewModel.uiState.showingSettings) {
             NavigationView {
                 SettingsView()
                     .navigationTitle("Settings")
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button("Done") { uiState.showingSettings = false }
+                            Button("Done") { viewModel.uiState.showingSettings = false }
                         }
                     }
                     .toolbarBackground(.ultraThinMaterial.opacity(0.8), for: .navigationBar)
@@ -104,14 +106,14 @@ struct ContentView: View {
                     .toolbarColorScheme(.dark, for: .navigationBar)
                 }
         }
-        .sheet(item: $uiState.browseCardSet) { deck in
+        .sheet(item: $viewModel.uiState.browseCardSet) { deck in
             NavigationView {
                 DeckDetailView(cardSet: deck)
                     .navigationTitle(deck.name ?? "Deck Details")
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button("Close") { uiState.browseCardSet = nil }
+                            Button("Close") { viewModel.uiState.browseCardSet = nil }
                         }
                     }
                     .toolbarBackground(.ultraThinMaterial.opacity(0.8), for: .navigationBar)
@@ -119,69 +121,61 @@ struct ContentView: View {
                     .toolbarColorScheme(.dark, for: .navigationBar)
                 }
         }
-        .alert("Rename Deck", isPresented: $uiState.showingRenameAlert) {
-            TextField("Deck Name", text: $uiState.newName)
+        .alert("Rename Deck", isPresented: $viewModel.uiState.showingRenameAlert) {
+            TextField("Deck Name", text: $viewModel.uiState.newName)
             Button("Cancel", role: .cancel) {}
             Button("Save") {
-                if let cardSet = uiState.selectedCardSet {
-                    cardSet.name = uiState.newName
-                    try? viewContext.save()
-                }
+                viewModel.performRename()
             }
         }
-        .alert("Delete Deck", isPresented: $uiState.showingDeleteAlert) {
+        .alert("Delete Deck", isPresented: $viewModel.uiState.showingDeleteAlert) {
             Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) {
-                if let cardSet = uiState.selectedCardSet {
-                    viewContext.delete(cardSet)
-                    uiState.clearSelection()
-                    try? viewContext.save()
-                }
+                viewModel.performDelete()
             }
         } message: {
             Text("Are you sure you want to delete this deck? This action cannot be undone.")
         }
-        .alert("Export Deck", isPresented: $uiState.showingExportAlert) {
+        .alert("Export Deck", isPresented: $viewModel.uiState.showingExportAlert) {
             Button("Cancel", role: .cancel) {}
             Button("Export") {
-                if let cardSet = uiState.selectedCardSet {
-                    exportDeck(cardSet)
+                if let cardSet = viewModel.uiState.selectedCardSet {
+                    viewModel.exportDeck(cardSet)
                 }
             }
         } message: {
             Text("Export this deck as a CSV file?")
         }
-        .alert("Re-import Deck", isPresented: $uiState.showingReimportAlert) {
+        .alert("Re-import Deck", isPresented: $viewModel.uiState.showingReimportAlert) {
             Button("Cancel", role: .cancel) {}
             Button("Re-import", role: .destructive) {
-                guard let cardSet = uiState.selectedCardSet else { return }
-                performReimport(for: cardSet)
+                viewModel.performReimport()
             }
         } message: {
             Text("This will replace all cards in the deck with the source CSV.")
         }
         .fileImporter(
-            isPresented: $uiState.showingReimportFilePicker,
+            isPresented: $viewModel.uiState.showingReimportFilePicker,
             allowedContentTypes: [UTType.commaSeparatedText],
             allowsMultipleSelection: false
         ) { result in
-            handleReimportFileSelection(result)
+            viewModel.handleReimportFileSelection(result)
         }
-        .alert(uiState.errorTitle, isPresented: $uiState.showErrorAlert) {
+        .alert(viewModel.uiState.errorTitle, isPresented: $viewModel.uiState.showErrorAlert) {
             Button("OK", role: .cancel) {}
         } message: {
-            Text(uiState.errorMessage)
+            Text(viewModel.uiState.errorMessage)
         }
-        .fullScreenCover(isPresented: $showingOnboarding) {
+        .fullScreenCover(isPresented: $viewModel.uiState.showingOnboarding) {
             OnboardingView {
                 UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
                 hasSeenOnboarding = true
-                showingOnboarding = false
+                viewModel.uiState.showingOnboarding = false
             }
         }
         .onAppear {
             if !hasSeenOnboarding {
-                showingOnboarding = true
+                viewModel.uiState.showingOnboarding = true
             }
         }
     }
@@ -189,173 +183,19 @@ struct ContentView: View {
     // MARK: - Main Content
     private var mainContent: some View {
         VStack(alignment: .leading, spacing: 16) {
-            heroHeader
+            HeaderView(viewModel: viewModel)
 
             ScrollView {
                 if cardSets.isEmpty {
                     emptyStateView
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    deckList
+                    DeckListView(viewModel: viewModel, cardSets: cardSets)
                 }
             }
         }
         .padding(.horizontal)
         .padding(.top, 20)
-    }
-
-    // MARK: - Deck List
-    private var deckList: some View {
-        LazyVStack(spacing: 14) {
-            ForEach(cardSets) { cardSet in
-                deckCard(for: cardSet)
-                    .contextMenu { contextMenu(for: cardSet) }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(role: .destructive) {
-                            deleteCardSet(cardSet)
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
-                    }
-            }
-        }
-        .padding(.bottom, 120)
-    }
-
-    // MARK: - Context Menu
-    @ViewBuilder
-    private func contextMenu(for cardSet: CardSet) -> some View {
-        Button {
-            promptRename(for: cardSet)
-        } label: {
-            Label("Rename", systemImage: "pencil")
-        }
-        Button {
-            promptReimport(for: cardSet)
-        } label: {
-            Label("Re-import", systemImage: "arrow.clockwise")
-        }
-        Button {
-            uiState.selectedCardSet = cardSet
-            uiState.showingExportAlert = true
-        } label: {
-            Label("Export", systemImage: "square.and.arrow.up")
-        }
-        Button(role: .destructive) {
-            promptDelete(for: cardSet)
-        } label: {
-            Label("Delete", systemImage: "trash")
-        }
-    }
-
-    // MARK: - Bottom Action Bar
-    private var actionBar: some View {
-        Group {
-            if let selectedCardSet = uiState.selectedCardSet {
-                CardSetActionBar(
-                    onStudy: { startStudy(for: selectedCardSet) },
-                    onAuto: { startAuto(for: selectedCardSet) },
-                    onBrowse: { uiState.browseCardSet = selectedCardSet }
-                )
-            } else {
-                EmptyView()
-            }
-        }
-    }
-
-    // MARK: - Subviews
-    private var heroHeader: some View {
-        HStack(alignment: .center, spacing: 12) {
-            Text("English Thought")
-                .font(theme.typography.title.bold())
-                .foregroundColor(theme.colors.textPrimary)
-            Spacer()
-            headerActions
-        }
-    }
-
-    private var headerActions: some View {
-        Button(action: {
-            UIImpactFeedbackGenerator.lightImpact()
-            uiState.showingHeaderMenu = true
-        }) {
-            headerIcon(systemName: "ellipsis")
-        }
-        .popover(isPresented: $uiState.showingHeaderMenu) {
-            ZStack {
-                theme.colors.surfaceElevated
-                    .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cornerRadius))
-                    .shadow(color: theme.colors.shadow.opacity(0.3), radius: 10)
-                VStack(spacing: 0) {
-                    Button {
-                        uiState.showingSessionStats = true
-                        uiState.showingHeaderMenu = false
-                    } label: {
-                        Label("Session Stats", systemImage: "chart.bar")
-                            .foregroundColor(theme.colors.onSurfaceElevated)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding()
-                    }
-                    .buttonStyle(.plain)
-
-                    Button {
-                        uiState.showingImport = true
-                        uiState.showingHeaderMenu = false
-                    } label: {
-                        Label("Import", systemImage: "square.and.arrow.down")
-                            .foregroundColor(theme.colors.onSurfaceElevated)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding()
-                    }
-                    .buttonStyle(.plain)
-
-                    Button {
-                        uiState.showingSettings = true
-                        uiState.showingHeaderMenu = false
-                    } label: {
-                        Label("Settings", systemImage: "gear")
-                            .foregroundColor(theme.colors.onSurfaceElevated)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding()
-                    }
-                    .buttonStyle(.plain)
-
-                    Button {
-                        showingOnboarding = true
-                        uiState.showingHeaderMenu = false
-                    } label: {
-                        Label("Onboarding", systemImage: "questionmark.circle")
-                            .foregroundColor(theme.colors.onSurfaceElevated)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding()
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding()
-            }
-            .presentationDetents([.height(240)])
-        }
-    }
-
-    private func headerButton(systemName: String, action: @escaping () -> Void) -> some View {
-        Button {
-            UIImpactFeedbackGenerator.lightImpact()
-            action()
-        } label: {
-            headerIcon(systemName: systemName)
-        }
-        .buttonStyle(.plain)
-        .accessibilityIdentifier(systemName)
-        .accessibilityLabel(systemName)
-    }
-
-    private func headerIcon(systemName: String) -> some View {
-        Image(systemName: systemName)
-            .imageScale(.medium)
-            .foregroundColor(theme.colors.textPrimary)
-            .padding(10)
-            .background(theme.colors.surfaceLight)
-            .clipShape(Circle())
     }
 
     private var emptyStateView: some View {
@@ -376,7 +216,7 @@ struct ContentView: View {
             VStack(spacing: 16) {
                 Button(action: {
                     UIImpactFeedbackGenerator.mediumImpact()
-                    addCardSet()
+                    viewModel.addCardSet()
                 }) {
                     Label("Create New Deck", systemImage: "plus")
                         .font(.headline)
@@ -389,7 +229,7 @@ struct ContentView: View {
 
                 Button(action: {
                     UIImpactFeedbackGenerator.lightImpact()
-                    uiState.showingImport = true
+                    viewModel.uiState.showingImport = true
                 }) {
                     Label("Import CSV", systemImage: "square.and.arrow.down")
                         .font(.headline)
@@ -405,329 +245,6 @@ struct ContentView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .padding(.vertical, 60)
-    }
-
-    private func deckCard(for cardSet: CardSet) -> some View {
-        let cardCount = (cardSet.cards as? Set<Card>)?.count ?? 0
-        let createdText = dateFormatter.string(from: cardSet.createdDate ?? Date())
-
-        return Button {
-            UIImpactFeedbackGenerator.lightImpact()
-            toggleSelection(for: cardSet)
-        } label: {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("(\(cardCount))\(cardSet.name ?? "Unnamed Deck")")
-                            .font(.headline)
-                            .foregroundColor(theme.colors.textPrimary)
-                        Text("Created \(createdText)")
-                            .font(.caption)
-                            .foregroundColor(theme.colors.textSecondary)
-                    }
-                    Spacer()
-                    if isSelected(cardSet) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(theme.colors.highlight)
-                            .imageScale(.large)
-                    }
-                }
-            }
-            .padding(.vertical, 16)
-            .padding(.horizontal, 18)
-            .background(
-                theme.gradients.card
-                    .opacity(isSelected(cardSet) ? 1 : 0.85)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
-                    .stroke(
-                        isSelected(cardSet)
-                            ? theme.colors.highlight.opacity(0.8) : theme.colors.surfaceLight,
-                        lineWidth: 1.5)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .shadow(color: theme.colors.shadow.opacity(0.3), radius: 14, x: 0, y: 10)
-        }
-        .buttonStyle(.plain)
-        .accessibilityIdentifier("deckCard")
-    }
-
-    // MARK: - Helper Methods
-    private func toggleSelection(for cardSet: CardSet) {
-        if uiState.selectedCardSet == cardSet {
-            uiState.clearSelection()
-        } else {
-            uiState.selectedCardSet = cardSet
-        }
-    }
-
-    private func isSelected(_ cardSet: CardSet) -> Bool {
-        uiState.selectedCardSet == cardSet
-    }
-
-    private func startStudy(for cardSet: CardSet) {
-        uiState.selectedCardSet = cardSet
-        uiState.showingStudyView = true
-    }
-
-    private func startAuto(for cardSet: CardSet) {
-        uiState.selectedCardSet = cardSet
-        uiState.showingAutoView = true
-    }
-
-    private func promptRename(for cardSet: CardSet) {
-        uiState.selectedCardSet = cardSet
-        uiState.newName = cardSet.name ?? ""
-        uiState.showingRenameAlert = true
-    }
-
-    private func promptDelete(for cardSet: CardSet) {
-        uiState.selectedCardSet = cardSet
-        uiState.showingDeleteAlert = true
-    }
-
-    private func promptReimport(for cardSet: CardSet) {
-        uiState.selectedCardSet = cardSet
-        uiState.showingReimportAlert = true
-    }
-
-    // MARK: - Business Logic Methods
-    private func addCardSet() {
-        withAnimation {
-            let newCardSet = CardSet(context: viewContext)
-            newCardSet.name = "New Deck"
-            newCardSet.createdDate = Date()
-
-            do {
-                try viewContext.save()
-            } catch {
-                uiState.errorTitle = "Failed to Create Deck"
-                uiState.errorMessage = error.localizedDescription
-                uiState.showErrorAlert = true
-                viewContext.rollback()
-            }
-        }
-    }
-
-    private func deleteCardSet(_ cardSet: CardSet) {
-        withAnimation {
-            viewContext.delete(cardSet)
-            if uiState.selectedCardSet == cardSet {
-                uiState.clearSelection()
-            }
-            do {
-                try viewContext.save()
-            } catch {
-                uiState.errorTitle = "Failed to Delete Deck"
-                uiState.errorMessage = error.localizedDescription
-                uiState.showErrorAlert = true
-                viewContext.rollback()
-            }
-        }
-    }
-
-    private func performReimport(for cardSet: CardSet) {
-        if let kind = bundledDeckKind(for: cardSet) {
-            reimportBundledDeck(cardSet, kind: kind)
-        } else {
-            uiState.showingReimportFilePicker = true
-        }
-    }
-
-    private func handleReimportFileSelection(_ result: Result<[URL], Error>) {
-        switch result {
-        case .success(let urls):
-            guard let url = urls.first, let cardSet = uiState.selectedCardSet else { return }
-            reimportCustomDeck(cardSet, from: url)
-        case .failure(let error):
-            uiState.errorTitle = "Re-import Failed"
-            uiState.errorMessage = error.localizedDescription
-            uiState.showErrorAlert = true
-        }
-    }
-
-    private func exportDeck(_ cardSet: CardSet) {
-        var csvContent = "Front;;Back;;Tags\n"
-
-        if let cards = cardSet.cards as? Set<Card> {
-            for card in cards.sorted(by: { ($0.front ?? "") < ($1.front ?? "") }) {
-                let front = card.front?.replacingOccurrences(of: "\"", with: "\"\"") ?? ""
-                let back =
-                    card.back?.replacingOccurrences(of: "\"", with: "\"\"").replacingOccurrences(
-                        of: "\n", with: "<br>") ?? ""
-                let tags = card.tags?.replacingOccurrences(of: "\"", with: "\"\"") ?? ""
-
-                csvContent += "\"\(front)\";;\"\(back)\";;\"\(tags)\"\n"
-            }
-        }
-
-        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(
-            "\(cardSet.name ?? "deck").csv")
-        do {
-            try csvContent.write(to: tempURL, atomically: true, encoding: .utf8)
-
-            let activityVC = UIActivityViewController(
-                activityItems: [tempURL], applicationActivities: nil)
-
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                let window = windowScene.windows.first,
-                let rootVC = window.rootViewController
-            {
-                rootVC.present(activityVC, animated: true)
-            }
-        } catch {
-            // Error exporting deck
-        }
-    }
-
-    private enum BundledDeckKind {
-        case master
-        case group(fileName: String)
-    }
-
-    private func bundledDeckKind(for cardSet: CardSet) -> BundledDeckKind? {
-        let name = (cardSet.name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        if name == Constants.Decks.bundledMasterName
-            || name == Constants.Decks.legacyBundledMasterName
-        {
-            return .master
-        }
-        if name.hasPrefix("Group "),
-            let number = Int(name.replacingOccurrences(of: "Group ", with: "")),
-            (1...12).contains(number)
-        {
-            return .group(fileName: "Group\(number)")
-        }
-        return nil
-    }
-
-    private func deleteAllCards(in cardSet: CardSet) {
-        if let cards = cardSet.cards as? Set<Card> {
-            for card in cards {
-                viewContext.delete(card)
-            }
-        }
-    }
-
-    private func reimportBundledDeck(_ cardSet: CardSet, kind: BundledDeckKind) {
-        let csvImporter = CSVImporter(viewContext: viewContext)
-        let bundledFiles = FileManagerService.getBundledCSVFiles()
-
-        deleteAllCards(in: cardSet)
-
-        var importedCount = 0
-        var failures: [String] = []
-
-        switch kind {
-        case .master:
-            cardSet.name = Constants.Decks.bundledMasterName
-            for fileName in bundledFiles {
-                guard let content = FileManagerService.loadBundledCSV(named: fileName) else {
-                    failures.append(fileName)
-                    continue
-                }
-                let cards = csvImporter.parseCSV(
-                    content, cardSetName: Constants.Decks.bundledMasterName)
-                for card in cards {
-                    card.cardSet = cardSet
-                    cardSet.addToCards(card)
-                }
-                importedCount += cards.count
-            }
-        case .group(let fileName):
-            guard let content = FileManagerService.loadBundledCSV(named: fileName) else {
-                uiState.errorTitle = "Re-import Failed"
-                uiState.errorMessage = "Failed to load bundled CSV \(fileName)."
-                uiState.showErrorAlert = true
-                viewContext.rollback()
-                return
-            }
-            let cards = csvImporter.parseCSV(content, cardSetName: cardSet.name ?? "")
-            for card in cards {
-                card.cardSet = cardSet
-                cardSet.addToCards(card)
-            }
-            importedCount = cards.count
-        }
-
-        do {
-            try viewContext.save()
-        } catch {
-            uiState.errorTitle = "Re-import Failed"
-            uiState.errorMessage = error.localizedDescription
-            uiState.showErrorAlert = true
-            viewContext.rollback()
-            return
-        }
-
-        if !failures.isEmpty {
-            uiState.errorTitle = "Re-import Partially Failed"
-            uiState.errorMessage =
-                "Imported \(importedCount) cards, but failed to load: \(failures.joined(separator: ", "))."
-            uiState.showErrorAlert = true
-        }
-    }
-
-    private func reimportCustomDeck(_ cardSet: CardSet, from url: URL) {
-        guard url.startAccessingSecurityScopedResource() else {
-            uiState.errorTitle = "Re-import Failed"
-            uiState.errorMessage = "Cannot access the selected file."
-            uiState.showErrorAlert = true
-            return
-        }
-        defer { url.stopAccessingSecurityScopedResource() }
-
-        do {
-            let content = try String(contentsOf: url, encoding: .utf8)
-            let csvImporter = CSVImporter(viewContext: viewContext)
-            let cards = csvImporter.parseCSV(content, cardSetName: cardSet.name ?? "")
-
-            guard !cards.isEmpty else {
-                uiState.errorTitle = "Re-import Failed"
-                uiState.errorMessage = "No valid cards found in the CSV file. Please check the format."
-                uiState.showErrorAlert = true
-                return
-            }
-
-            deleteAllCards(in: cardSet)
-            for card in cards {
-                card.cardSet = cardSet
-                cardSet.addToCards(card)
-            }
-
-            try viewContext.save()
-        } catch {
-            uiState.errorTitle = "Re-import Failed"
-            uiState.errorMessage = error.localizedDescription
-            uiState.showErrorAlert = true
-            viewContext.rollback()
-        }
-    }
-}
-
-// MARK: - UI State Struct
-private struct UIState {
-    var selectedCardSet: CardSet?
-    var showingStudyView = false
-    var showingAutoView = false
-    var showingRenameAlert = false
-    var showingDeleteAlert = false
-    var showingExportAlert = false
-    var showingReimportAlert = false
-    var showingReimportFilePicker = false
-    var newName = ""
-    var browseCardSet: CardSet?
-    var showErrorAlert = false
-    var errorMessage = ""
-    var errorTitle = ""
-    var showingSessionStats = false
-    var showingImport = false
-    var showingSettings = false
-    var showingHeaderMenu = false
-
-    mutating func clearSelection() {
-        selectedCardSet = nil
     }
 }
 
@@ -785,14 +302,6 @@ private struct CardSetActionBar: View {
         }
     }
 }
-
-// MARK: - Date Formatter
-private let dateFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .medium
-    formatter.timeStyle = .none
-    return formatter
-}()
 
 #Preview {
     ContentView()
