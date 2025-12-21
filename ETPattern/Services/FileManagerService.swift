@@ -21,7 +21,6 @@ class FileManagerService {
         do {
             return try String(contentsOf: url, encoding: .utf8)
         } catch {
-            print("Error loading bundled CSV \(fileName): \(error)")
             return nil
         }
     }

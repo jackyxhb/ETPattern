@@ -44,7 +44,7 @@ struct StudyView: View {
                         isFlipped: isFlipped,
                         currentIndex: sessionManager.currentIndex,
                         totalCards: sessionManager.getCards().count,
-                        cardId: currentCard?.id != nil ? Int(currentCard!.id) : nil,
+                        cardId: (currentCard?.id).flatMap { Int($0) },
                         showSwipeFeedback: false,
                         swipeDirection: nil,
                         theme: theme

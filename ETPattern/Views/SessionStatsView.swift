@@ -119,7 +119,6 @@ struct SessionStatsView: View {
                 try viewContext.save()
             } catch {
                 // Handle error
-                print("Error deleting sessions: \(error.localizedDescription)")
             }
         }
     }

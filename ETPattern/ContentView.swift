@@ -589,7 +589,7 @@ struct ContentView: View {
                 rootVC.present(activityVC, animated: true)
             }
         } catch {
-            print("Error exporting deck: \(error)")
+            // Error exporting deck
         }
     }
 

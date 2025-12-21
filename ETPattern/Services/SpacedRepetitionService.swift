@@ -30,7 +30,8 @@ class SpacedRepetitionService {
         let now = Date()
         return (cardSet.cards?.allObjects as? [Card])?.filter { card in
             // Cards with no nextReviewDate (never reviewed) or past due dates are due
-            card.nextReviewDate == nil || card.nextReviewDate! <= now
+            guard let nextReviewDate = card.nextReviewDate else { return true }
+            return nextReviewDate <= now
         }.sorted { (card1, card2) in
             let date1 = card1.nextReviewDate ?? Date.distantPast
             let date2 = card2.nextReviewDate ?? Date.distantPast

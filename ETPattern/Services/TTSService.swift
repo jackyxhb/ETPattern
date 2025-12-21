@@ -75,7 +75,6 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
             let error = AppError.ttsVoiceNotAvailable(voice: voicePreference)
             lastError = error
             errorMessage = error.localizedDescription
-            print("TTS Error: \(error.localizedDescription)")
             return
         }
 
@@ -148,7 +147,6 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
         let error = AppError.ttsVoiceNotAvailable(voice: voicePreference)
         lastError = error
         errorMessage = error.localizedDescription
-        print("TTS Error: \(error.localizedDescription)")
     }
 
     private func bestVoiceIdentifier(forLanguage language: String) -> String? {

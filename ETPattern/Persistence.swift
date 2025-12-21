@@ -72,7 +72,10 @@ struct PersistenceController {
         container = NSPersistentContainer(name: modelName, managedObjectModel: model)
         let containerRef = container
         if inMemory {
-            container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
+            guard let firstDescription = container.persistentStoreDescriptions.first else {
+                fatalError("No persistent store descriptions found")
+            }
+            firstDescription.url = URL(fileURLWithPath: "/dev/null")
         }
 
         container.loadPersistentStores(completionHandler: { (_, error) in
@@ -94,7 +97,6 @@ struct PersistenceController {
 
     private static func seedBundledCardSets(viewContext: NSManagedObjectContext) {
 
-        print("DEBUG: Ensuring bundled card sets are initialized...")
         let csvImporter = CSVImporter(viewContext: viewContext)
         let bundledFiles = FileManagerService.getBundledCSVFiles()
         let masterDeckName = Constants.Decks.bundledMasterName
@@ -106,7 +108,6 @@ struct PersistenceController {
             legacyFetch.fetchLimit = 1
             legacyFetch.predicate = NSPredicate(format: "name == %@", legacyName)
             if let legacyDeck = (try? viewContext.fetch(legacyFetch))?.first {
-                print("DEBUG: Renaming legacy master deck '\(legacyName)' -> '\(masterDeckName)'")
                 legacyDeck.name = masterDeckName
                 try? viewContext.save()
             }
@@ -149,12 +150,10 @@ struct PersistenceController {
                     nextId += 1
                 }
                 try? viewContext.save()
-                print("DEBUG: Assigned IDs to \(cardsWithNilId.count) cards with id == 0")
             }
             if viewContext.hasChanges {
                 try? viewContext.save()
             }
-            print("DEBUG: Master deck '\(masterDeckName)' already has \(cardCount(in: masterDeck)) cards, skipping re-import")
             return
         }
 
@@ -185,25 +184,20 @@ struct PersistenceController {
                     masterDeck.addToCards(card)
                 }
                 totalImported += cards.count
-                print("DEBUG: Imported \(cards.count) cards from \(fileName) into '\(masterDeckName)'")
             } else {
                 let errorMessage = "Failed to load bundled CSV \(fileName)"
                 importErrors.append(errorMessage)
-                print("ERROR: \(errorMessage)")
             }
         }
 
         do {
             if totalImported > 0 && viewContext.hasChanges {
                 try viewContext.save()
-                print("DEBUG: Saved \(totalImported) bundled cards to deck '\(masterDeckName)'")
             } else {
-                print("DEBUG: No bundled cards imported; nothing to save")
             }
         } catch {
             let errorMessage = "Failed to save bundled card sets: \(error.localizedDescription)"
             importErrors.append(errorMessage)
-            print("ERROR: \(errorMessage)")
         }
 
         // Store any import errors for potential user notification
