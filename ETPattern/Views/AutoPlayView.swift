@@ -73,6 +73,7 @@ struct AutoPlayView: View {
         }
         .onDisappear {
             stopPlayback()
+            sessionManager.saveProgress()
         }
         .onChange(of: isPlaying) { playing in
             if playing {
@@ -140,7 +141,7 @@ struct AutoPlayView: View {
 
     private var progressBarView: some View {
         SharedProgressBarView(
-            currentPosition: sessionManager.getCards().count > 0 ? ((sessionManager.cardsPlayedInSession - 1) % sessionManager.getCards().count) + 1 : 0,
+            currentPosition: sessionManager.getCards().count > 0 ? sessionManager.currentIndex + 1 : 0,
             totalCards: sessionManager.getCards().count,
             theme: theme
         )
@@ -274,6 +275,7 @@ struct AutoPlayView: View {
         guard isPlaying, !sessionManager.getCards().isEmpty else { return }
         sessionManager.moveToNext()
         updateCurrentCard()
+        sessionManager.saveProgress()
         playFrontSide()
     }
 
@@ -374,6 +376,7 @@ struct AutoPlayView: View {
 
     private func dismissAuto() {
         stopPlayback()
+        sessionManager.saveProgress()
         dismiss()
     }
 

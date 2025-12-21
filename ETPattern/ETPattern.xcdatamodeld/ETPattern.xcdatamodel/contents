@@ -31,6 +31,7 @@
         <attribute name="correctCount" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="isActive" optional="NO" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="currentCardIndex" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="currentCardID" optional="YES" attributeType="Integer 32" usesScalarValueType="NO"/>
         <attribute name="totalCards" optional="NO" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
         <relationship name="cardSet" optional="NO" maxCount="1" deletionRule="Nullify" destinationEntity="CardSet" inverseName="studySessions" inverseEntity="CardSet"/>
         <relationship name="reviewedCards" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Card" inverseName="reviewedSessions" inverseEntity="Card"/>

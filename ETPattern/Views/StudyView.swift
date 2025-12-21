@@ -29,7 +29,20 @@ struct StudyView: View {
     @State private var sessionCardList: [Card] = []  // Exclusive session list for study mode
     @State private var cardsStudiedInSession: Int = 0  // Progress counter for session
 
+    // SessionManager-like properties
+    @State private var sessionCardIDs: [Int] = []
+    @State private var sessionCardsPlayed: Int = 0
+
     private let spacedRepetitionService = SpacedRepetitionService()
+
+    private var progressKey: String {
+        let id = cardSet.objectID.uriRepresentation().absoluteString
+        return "studyProgress-\(id)"
+    }
+    private var sessionKey: String {
+        let id = cardSet.objectID.uriRepresentation().absoluteString
+        return "studySession-\(id)"
+    }
 
     var body: some View {
         ZStack {
@@ -60,10 +73,10 @@ struct StudyView: View {
         }
         .onAppear {
             isRandomOrder = UserDefaults.standard.string(forKey: "cardOrderMode") == "random"
-            loadOrCreateSession()
+            prepareSession()
         }
         .onDisappear {
-            try? viewContext.save()
+            saveProgress()
         }
     }
 
@@ -147,8 +160,8 @@ struct StudyView: View {
                     backText: formatBackText(),
                     pattern: cardsDue[currentCardIndex].front ?? "",
                     isFlipped: isFlipped,
-                    currentIndex: cardsReviewedCount,
-                    totalCards: totalCardsInSession,
+                    currentIndex: currentCardIndex + 1,
+                    totalCards: cardsDue.count,
                     cardId: Int(cardsDue[currentCardIndex].id),
                     showSwipeFeedback: showSwipeFeedback,
                     swipeDirection: swipeDirection,
@@ -240,8 +253,8 @@ struct StudyView: View {
 
     private var progressBarView: some View {
         SharedProgressBarView(
-            currentPosition: currentCardNumber,
-            totalCards: totalCardsInSession,
+            currentPosition: currentCardIndex + 1,
+            totalCards: cardsDue.count,
             theme: theme
         )
     }
@@ -391,7 +404,9 @@ struct StudyView: View {
 
     private var currentCardNumber: Int {
         guard totalCardsInSession > 0 else { return 0 }
-        return cardsReviewedCount + currentCardIndex + 1
+        let result = cardsReviewedCount + currentCardIndex + 1
+        print("DEBUG: currentCardNumber calculation: cardsReviewedCount=\(cardsReviewedCount) + currentCardIndex=\(currentCardIndex) + 1 = \(result)")
+        return result
     }
 
     private var cardsRemaining: Int {
@@ -446,13 +461,14 @@ struct StudyView: View {
         }
     }
 
-    private func createSessionList() {
-        guard let setCards = cardSet.cards as? Set<Card> else {
-            sessionCardList = []
-            return
-        }
+    private func getAllCards() -> [Card] {
+        guard let allCards = cardSet.cards as? Set<Card> else { return [] }
+        return Array(allCards)
+    }
 
-        let sorted = setCards.sorted { ($0.front ?? "") < ($1.front ?? "") }
+    private func createSessionList() {
+        let allCards = getAllCards()
+        let sorted = allCards.sorted { ($0.front ?? "") < ($1.front ?? "") }
         if isRandomOrder {
             sessionCardList = sorted.shuffled()
         } else {
@@ -460,71 +476,49 @@ struct StudyView: View {
         }
     }
 
-    private func loadOrCreateSession() {
-        let fetchRequest: NSFetchRequest<StudySession> = StudySession.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "cardSet == %@ AND isActive == YES", cardSet)
+    private func saveProgress() {
+        UserDefaults.standard.set(currentCardIndex, forKey: progressKey)
+    }
 
-        do {
-            let existingSessions = try viewContext.fetch(fetchRequest)
-            print(
-                "DEBUG: Found \(existingSessions.count) active sessions for cardSet '\(cardSet.name ?? "unnamed")'"
-            )
-            if let existingSession = existingSessions.first {
-                print("DEBUG: Resuming existing session")
-                studySession = existingSession
-                let remainingCards = existingSession.remainingCards as? Set<Card> ?? []
-                cardsDue = sortCardsByDueDate(Array(remainingCards))
-
-                if cardsDue.isEmpty {
-                    endStudySession()
-                    return
-                }
-
-                // Recreate session list in the same order as when session was created
-                createSessionList()
-                cardsStudiedInSession = Int(existingSession.cardsReviewed)
-                currentCardIndex = 0
-                existingSession.currentCardIndex = 0
-                sessionStartTime = Date()
-                // Existing sessions resume without changing order to preserve card sequence
-            } else {
-                print("DEBUG: Creating new session")
-                createSessionList()
-                cardsDue = sessionCardList  // Start with all cards in session
-                cardsStudiedInSession = 0
-
-                studySession = StudySession(context: viewContext)
-                studySession?.date = Date()
-                studySession?.cardsReviewed = 0
-                studySession?.correctCount = 0
-                studySession?.cardSet = cardSet
-                studySession?.remainingCards = NSSet(array: cardsDue)
-                studySession?.reviewedCards = NSSet()
-                studySession?.currentCardIndex = 0
-                studySession?.totalCards = Int32(sessionCardList.count)
-                studySession?.isActive = true
-                sessionStartTime = Date()
-                print("DEBUG: Created new session with \(cardsDue.count) cards")
-            }
-        } catch {
-            print("DEBUG: Error fetching sessions: \(error)")
-            // Fallback to new session
-            createSessionList()
-            cardsDue = sessionCardList
-            cardsStudiedInSession = 0
-            studySession = StudySession(context: viewContext)
-            studySession?.date = Date()
-            studySession?.cardsReviewed = 0
-            studySession?.correctCount = 0
-            studySession?.cardSet = cardSet
-            studySession?.remainingCards = NSSet(array: cardsDue)
-            studySession?.reviewedCards = NSSet()
-            studySession?.currentCardIndex = 0
-            studySession?.totalCards = Int32(sessionCardList.count)
-            studySession?.isActive = true
-            sessionStartTime = Date()
-            print("DEBUG: Created fallback session with \(cardsDue.count) cards")
+    private func restoreProgressIfAvailable() {
+        if let savedIndex = UserDefaults.standard.object(forKey: progressKey) as? Int,
+           savedIndex >= 0 && savedIndex < sessionCardIDs.count {
+            currentCardIndex = savedIndex
+        } else {
+            currentCardIndex = 0
         }
+    }
+
+    private func prepareSession() {
+        createSessionList()
+        cardsDue = sessionCardList
+        cardsStudiedInSession = 0
+
+        // Load or create session card IDs
+        if let saved = UserDefaults.standard.array(forKey: sessionKey) as? [Int],
+           Set(saved) == Set(sessionCardList.map { Int($0.id) }) {
+            sessionCardIDs = saved
+        } else {
+            sessionCardIDs = sessionCardList.map { Int($0.id) }
+            saveSession()
+        }
+
+        // Restore progress if available
+        restoreProgressIfAvailable()
+
+        // Create Core Data session for statistics (but not for state management)
+        studySession = StudySession(context: viewContext)
+        studySession?.date = Date()
+        studySession?.cardsReviewed = 0
+        studySession?.correctCount = 0
+        studySession?.cardSet = cardSet
+        studySession?.remainingCards = NSSet(array: cardsDue)
+        studySession?.reviewedCards = NSSet()
+        studySession?.currentCardIndex = Int32(currentCardIndex)
+        studySession?.totalCards = Int32(sessionCardList.count)
+        studySession?.isActive = true
+
+        sessionStartTime = Date()
     }
 
     private func markAsAgain() {
@@ -583,6 +577,7 @@ struct StudyView: View {
         // Don't increment currentCardIndex since we remove the card from cardsDue
         // currentCardIndex stays at the same position as the array shrinks
         studySession?.currentCardIndex = Int32(currentCardIndex)
+        
         isFlipped = false  // Reset card to front side
 
         if cardsDue.isEmpty {
@@ -643,35 +638,31 @@ struct StudyView: View {
         isRandomOrder.toggle()
         UserDefaults.standard.set(isRandomOrder ? "random" : "sequential", forKey: "cardOrderMode")
 
-        // Store current card before changing order
-        let currentCard = currentCardIndex < cardsDue.count ? cardsDue[currentCardIndex] : nil
+        // Store current card ID before changing order
+        let currentCardID = sessionCardIDs.indices.contains(currentCardIndex) ? sessionCardIDs[currentCardIndex] : nil
 
-        // Recreate session list with new order
-        createSessionList()
-
-        // Filter to only include remaining cards (not yet reviewed in this session)
-        let remainingCardIDs = Set(cardsDue.map { $0.objectID })
-        cardsDue = sessionCardList.filter { remainingCardIDs.contains($0.objectID) }
-
-        // Reorder the remaining cards according to the new order mode
+        // Apply new order mode
         if isRandomOrder {
-            cardsDue.shuffle()
+            sessionCardIDs.shuffle()
         } else {
-            cardsDue.sort { ($0.front ?? "") < ($1.front ?? "") }
+            sessionCardIDs.sort()
+        }
+        saveSession()
+
+        // Update cardsDue to match new order
+        let allCards = getAllCards()
+        cardsDue = sessionCardIDs.compactMap { cardID in
+            allCards.first { Int($0.id) == cardID }
         }
 
         // Try to find the same card in the new order
-        if let currentCard = currentCard,
-            let newIndex = cardsDue.firstIndex(where: { $0.objectID == currentCard.objectID })
-        {
+        if let currentCardID = currentCardID,
+           let newIndex = sessionCardIDs.firstIndex(of: currentCardID) {
             currentCardIndex = newIndex
         } else {
             // If we can't find the card, reset to beginning
             currentCardIndex = 0
         }
-
-        // Don't reset cardsStudiedInSession when changing order - preserve session progress
-        // cardsStudiedInSession remains as is to maintain accurate progress tracking
     }
 
     private func formatBackText() -> String {
@@ -688,6 +679,11 @@ struct StudyView: View {
         let card = cardsDue[currentCardIndex]
         let textToSpeak = isFlipped ? formatBackText() : (card.front ?? "")
         ttsService.speak(textToSpeak)
+    }
+
+    // MARK: - Session Management Helpers
+    private func saveSession() {
+        UserDefaults.standard.set(sessionCardIDs, forKey: sessionKey)
     }
 }
 

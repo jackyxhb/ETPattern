@@ -109,13 +109,20 @@ class SessionManager: ObservableObject {
 
     // MARK: - Progress Management
     func saveProgress() {
-        UserDefaults.standard.set(currentIndex, forKey: progressKey)
+        let progress = [
+            "currentIndex": currentIndex,
+            "cardsPlayedInSession": cardsPlayedInSession
+        ]
+        UserDefaults.standard.set(progress, forKey: progressKey)
     }
 
     private func restoreProgressIfAvailable() {
-        if let savedIndex = UserDefaults.standard.object(forKey: progressKey) as? Int,
+        if let savedProgress = UserDefaults.standard.dictionary(forKey: progressKey) as? [String: Int],
+           let savedIndex = savedProgress["currentIndex"],
+           let savedCardsPlayed = savedProgress["cardsPlayedInSession"],
            savedIndex >= 0 && savedIndex < sessionCardIDs.count {
             currentIndex = savedIndex
+            cardsPlayedInSession = savedCardsPlayed
         }
     }
 
