@@ -19,6 +19,9 @@ struct StudyView: View {
     @StateObject private var sessionManager: SessionManager
     @State private var currentCard: Card?
     @State private var isFlipped = false
+    @State private var showSwipeFeedback = false
+    @State private var swipeDirection: SwipeDirection?
+    @State private var isSwipeInProgress = false
 
     init(cardSet: CardSet) {
         self.cardSet = cardSet
@@ -45,9 +48,35 @@ struct StudyView: View {
                         currentIndex: sessionManager.currentIndex,
                         totalCards: sessionManager.getCards().count,
                         cardId: (currentCard?.id).flatMap { Int($0) },
-                        showSwipeFeedback: false,
-                        swipeDirection: nil,
+                        showSwipeFeedback: showSwipeFeedback,
+                        swipeDirection: swipeDirection,
                         theme: theme
+                    )
+                    .gesture(
+                        DragGesture(minimumDistance: 50)
+                            .onChanged { value in
+                                if !isSwipeInProgress {
+                                    let horizontalAmount = value.translation.width
+                                    let verticalAmount = value.translation.height
+
+                                    // Only trigger if horizontal movement is greater than vertical
+                                    if abs(horizontalAmount) > abs(verticalAmount) && abs(horizontalAmount) > 30 {
+                                        isSwipeInProgress = true
+                                        swipeDirection = horizontalAmount > 0 ? .right : .left
+                                        showSwipeFeedback = true
+                                        UIImpactFeedbackGenerator.lightImpact()
+                                    }
+                                }
+                            }
+                            .onEnded { value in
+                                if isSwipeInProgress {
+                                    handleSwipe(swipeDirection!)
+                                }
+                                // Reset swipe state
+                                showSwipeFeedback = false
+                                swipeDirection = nil
+                                isSwipeInProgress = false
+                            }
                     )
                     .onTapGesture {
                         UIImpactFeedbackGenerator.lightImpact()
@@ -246,6 +275,41 @@ struct StudyView: View {
             (currentCard.back ?? "").replacingOccurrences(of: "<br>", with: "\n") :
             currentCard.front ?? ""
         ttsService.speak(text)
+    }
+
+    private func handleSwipe(_ direction: SwipeDirection) {
+        guard let currentCard = currentCard else { return }
+
+        // Update spaced repetition data
+        let spacedRepetitionService = SpacedRepetitionService()
+        let rating: DifficultyRating = direction == .right ? .easy : .again
+        spacedRepetitionService.updateCardDifficulty(currentCard, rating: rating)
+
+        // Save the changes
+        do {
+            try currentCard.managedObjectContext?.save()
+        } catch {
+            // Handle save error silently for now
+        }
+
+        // Provide haptic feedback
+        let generator = UIImpactFeedbackGenerator(style: direction == .right ? .heavy : .rigid)
+        generator.impactOccurred()
+
+        // Move to next card after a brief delay to show feedback
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation {
+                sessionManager.moveToNext()
+                updateCurrentCard()
+                sessionManager.saveProgress()
+                // Reset to front side for new card
+                isFlipped = false
+                // Stop any ongoing speech
+                ttsService.stop()
+                // Auto-read the new card
+                speakCurrentText()
+            }
+        }
     }
 }
 #Preview {
