@@ -304,3 +304,33 @@ struct SharedCloseButton: View {
         .accessibilityLabel("Close")
     }
 }
+
+struct SharedModalContainer<Content: View>: View {
+    @Environment(\.theme) var theme
+    let content: Content
+    let onClose: () -> Void
+
+    init(onClose: @escaping () -> Void, @ViewBuilder content: () -> Content) {
+        self.content = content()
+        self.onClose = onClose
+    }
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            theme.gradients.background
+                .ignoresSafeArea()
+
+            content
+
+            Button(action: onClose) {
+                Image(systemName: "xmark")
+                    .font(.headline)
+                    .foregroundColor(theme.colors.textPrimary)
+                    .padding(10)
+                    .background(theme.colors.textPrimary.opacity(0.2), in: Circle())
+                    .padding()
+            }
+            .accessibilityLabel("Close")
+        }
+    }
+}

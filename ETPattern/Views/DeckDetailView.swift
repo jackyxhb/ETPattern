@@ -148,10 +148,7 @@ private struct CardPreviewContainer: View {
     @State private var isFlipped = false
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            theme.gradients.background
-                .ignoresSafeArea()
-
+        SharedModalContainer(onClose: onClose) {
             SharedCardDisplayView(
                 frontText: card.front ?? "No front",
                 backText: formatBackText(),
@@ -183,16 +180,6 @@ private struct CardPreviewContainer: View {
                 ttsService.stop()
                 speakCurrentText()
             }
-
-            Button(action: onClose) {
-                Image(systemName: "xmark")
-                    .font(.headline)
-                    .foregroundColor(theme.colors.textPrimary)
-                    .padding(10)
-                    .background(theme.colors.textPrimary.opacity(0.2), in: Circle())
-                    .padding()
-            }
-            .accessibilityLabel("Close preview")
         }
         .onDisappear {
             ttsService.stop()

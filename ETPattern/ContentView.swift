@@ -359,32 +359,20 @@ struct ContentView: View {
     }
 
     private var emptyStateView: some View {
-        VStack(spacing: 24) {
-            ZStack {
-                Circle()
-                    .fill(theme.gradients.accent.opacity(0.2))
-                    .frame(width: 120, height: 120)
-
-                Image(systemName: "plus.circle.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(theme.colors.textPrimary)
-            }
-
-            VStack(spacing: 12) {
-                Text("No Decks Yet")
-                    .font(.title2.bold())
-                    .foregroundColor(theme.colors.textPrimary)
-
-                Text(
-                    "Create your first flashcard deck or import CSV files to get started with learning English patterns."
-                )
-                .font(.body)
-                .foregroundColor(theme.colors.textSecondary)
-                .multilineTextAlignment(.center)
-                .lineSpacing(4)
-                .padding(.horizontal, 32)
-            }
-
+        SharedEmptyStateView(
+            title: "No Decks Yet",
+            description: "Create your first flashcard deck or import CSV files to get started with learning English patterns.",
+            theme: theme,
+            circleSize: 120,
+            circleOpacity: 0.2,
+            verticalSpacing: 24,
+            textSpacing: 12,
+            horizontalPadding: 0
+        ) {
+            Image(systemName: "plus.circle.fill")
+                .font(.system(size: 60))
+                .foregroundColor(theme.colors.textPrimary)
+        } additionalContent: {
             VStack(spacing: 16) {
                 Button(action: {
                     UIImpactFeedbackGenerator.mediumImpact()

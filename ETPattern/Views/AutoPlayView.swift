@@ -94,62 +94,18 @@ struct AutoPlayView: View {
     }
 
     private var emptyState: some View {
-        VStack(spacing: 32) {
-            Spacer()
-
-            ZStack {
-                Circle()
-                    .fill(theme.gradients.card.opacity(0.3))
-                    .frame(width: 160, height: 160)
-
-                Image(systemName: "waveform")
-                    .font(.system(size: 60))
-                    .foregroundColor(theme.colors.textSecondary)
-            }
-
-            VStack(spacing: 16) {
-                Text("No Cards to Play")
-                    .font(theme.typography.title.weight(.bold))
-                    .foregroundColor(theme.colors.textPrimary)
-                    .multilineTextAlignment(.center)
-
-                Text("This deck doesn't have any cards yet")
-                    .font(theme.typography.title3)
-                    .foregroundColor(theme.colors.highlight)
-                    .multilineTextAlignment(.center)
-
-                Text("Add some cards to this deck or import a CSV file to start auto-playing through your patterns.")
-                    .font(theme.typography.body)
-                    .foregroundColor(theme.colors.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-                    .padding(.horizontal, 32)
-            }
-
-            Spacer()
-        }
-        .padding(.horizontal, 24)
-    }
-
-    private var bottomControlBar: some View {
-        VStack(spacing: 0) {
-            progressBarView
-            mainControlsView
-        }
-        .background(theme.colors.surface)
-        .buttonStyle(.plain)
-    }
-
-    private var progressBarView: some View {
-        SharedProgressBarView(
-            currentPosition: sessionManager.getCards().count > 0 ? sessionManager.currentIndex + 1 : 0,
-            totalCards: sessionManager.getCards().count,
+        SharedEmptyStateView(
+            title: "No Cards to Play",
+            subtitle: "This deck doesn't have any cards yet",
+            description: "Add some cards to this deck or import a CSV file to start auto-playing through your patterns.",
+            icon: "waveform",
+            iconColor: theme.colors.textSecondary,
             theme: theme
         )
     }
 
-    private var mainControlsView: some View {
-        SharedMainControlsView(
+    private var bottomControlBar: some View {
+        SharedBottomControlBarView(
             orderToggleAction: {
                 UIImpactFeedbackGenerator.lightImpact()
                 sessionManager.toggleOrderMode()
@@ -168,6 +124,8 @@ struct AutoPlayView: View {
             },
             isPreviousDisabled: sessionManager.currentIndex == 0,
             isRandomOrder: sessionManager.isRandomOrder,
+            currentPosition: sessionManager.getCards().count > 0 ? sessionManager.currentIndex + 1 : 0,
+            totalCards: sessionManager.getCards().count,
             theme: theme,
             previousHint: sessionManager.currentIndex == 0 ? "No previous card available" : "Go to previous card",
             nextHint: "Skip to next card"
