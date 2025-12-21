@@ -235,12 +235,12 @@ struct AutoPlayView: View {
         guard !sessionManager.getCards().isEmpty else { return }
         isPlaying = true
         disableIdleTimer() // Prevent device sleep during auto-play
-        
+
         // If this is the start of a fresh session (not resuming), count the first card
         if sessionManager.cardsPlayedInSession == 0 {
             sessionManager.cardsPlayedInSession = 1
         }
-        
+
         continueFromResumePhase()
     }
 

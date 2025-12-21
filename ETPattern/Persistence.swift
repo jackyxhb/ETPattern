@@ -173,13 +173,13 @@ struct PersistenceController {
         for fileName in bundledFiles {
             if let content = FileManagerService.loadBundledCSV(named: fileName) {
                 let cards = csvImporter.parseCSV(content, cardSetName: masterDeckName)
-                
+
                 // Assign unique IDs to avoid duplicates across multiple CSV files
                 for card in cards {
                     card.id = Int32(nextCardId)
                     nextCardId += 1
                 }
-                
+
                 for card in cards {
                     card.cardSet = masterDeck
                     masterDeck.addToCards(card)

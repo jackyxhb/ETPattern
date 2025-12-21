@@ -1,3 +1,10 @@
+//
+//  SharedViews.swift
+//  ETPattern
+//
+//  Created by admin on 25/11/2025.
+//
+
 import SwiftUI
 
 enum SwipeDirection {

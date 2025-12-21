@@ -90,7 +90,7 @@ struct SettingsView: View {
                     Text("Speech Speed: \(Int(ttsPercentage))%")
                         .font(theme.typography.subheadline)
                         .foregroundColor(theme.colors.textPrimary)
-                    
+
                     GeometryReader { geometry in
                         Slider(value: $ttsPercentage, in: Constants.TTS.minPercentage...Constants.TTS.maxPercentage, step: 10) {
                             Text("Speech Speed")
@@ -130,7 +130,7 @@ struct SettingsView: View {
                     Text("Pitch: \(Int(ttsPitch * 100))%")
                         .font(theme.typography.subheadline)
                         .foregroundColor(theme.colors.textPrimary)
-                    
+
                     Slider(value: $ttsPitch, in: Constants.TTS.minPitch...Constants.TTS.maxPitch, step: 0.1) {
                         Text("Pitch")
                             .foregroundColor(theme.colors.textPrimary)
@@ -155,7 +155,7 @@ struct SettingsView: View {
                     Text("Volume: \(Int(ttsVolume * 100))%")
                         .font(theme.typography.subheadline)
                         .foregroundColor(theme.colors.textPrimary)
-                    
+
                     Slider(value: $ttsVolume, in: Constants.TTS.minVolume...Constants.TTS.maxVolume, step: 0.1) {
                         Text("Volume")
                             .foregroundColor(theme.colors.textPrimary)
@@ -180,7 +180,7 @@ struct SettingsView: View {
                     Text("Pause: \(String(format: "%.1f", ttsPause))s")
                         .font(theme.typography.subheadline)
                         .foregroundColor(theme.colors.textPrimary)
-                    
+
                     Slider(value: $ttsPause, in: Constants.TTS.minPause...Constants.TTS.maxPause, step: 0.1) {
                         Text("Pause")
                             .foregroundColor(theme.colors.textPrimary)

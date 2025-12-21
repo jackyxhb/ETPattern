@@ -33,7 +33,7 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
         let storedPreference = UserDefaults.standard.string(forKey: "selectedVoice") ?? Constants.TTS.defaultVoice
         self.voicePreference = storedPreference
         self.resolvedVoiceIdentifier = nil
-        
+
         // Load stored percentage, default to 100% if not set
         let storedPercentage = UserDefaults.standard.float(forKey: "ttsPercentage")
         self.currentPercentage = storedPercentage > 0 ? storedPercentage : Constants.TTS.defaultPercentage

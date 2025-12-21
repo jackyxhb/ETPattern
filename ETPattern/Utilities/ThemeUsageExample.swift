@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ThemeUsageExample: View {
     @Environment(\.theme) var theme: Theme
-    
+
     var body: some View {
         VStack(spacing: theme.metrics.mediumSpacing) {
             // Using theme colors

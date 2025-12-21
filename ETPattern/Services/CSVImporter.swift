@@ -35,7 +35,7 @@ class CSVImporter {
                 card.front = front     // Set front to the same value
                 card.back = back
                 card.tags = tags
-                
+
                 // Parse groupId and groupName from tags
                 if !tags.isEmpty {
                     // Find the first dash after a number (e.g., "2-Agree-Disagree")
@@ -55,7 +55,7 @@ class CSVImporter {
                     card.groupId = 0
                     card.groupName = ""
                 }
-                
+
                 card.difficulty = 0
                 card.nextReviewDate = Date()
                 card.interval = 1

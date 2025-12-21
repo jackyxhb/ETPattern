@@ -25,12 +25,12 @@ struct Constants {
         static let defaultPause: TimeInterval = 0.0 // 0 seconds
         static let minPause: TimeInterval = 0.0 // 0 seconds
         static let maxPause: TimeInterval = 2.0 // 2 seconds
-        
+
         // Convert percentage to AVSpeechSynthesizer rate
         static func percentageToRate(_ percentage: Float) -> Float {
             return percentage / 200.0  // 50% = 0.25, 100% = 0.5, 120% = 0.6
         }
-        
+
         // Convert AVSpeechSynthesizer rate to percentage
         static func rateToPercentage(_ rate: Float) -> Float {
             return rate * 200.0  // 0.25 = 50%, 0.5 = 100%, 0.6 = 120%
