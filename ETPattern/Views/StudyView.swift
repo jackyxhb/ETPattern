@@ -195,49 +195,35 @@ struct StudyView: View {
     }
 
     private var mainControlsView: some View {
-        HStack(spacing: 16) {
-            orderToggleButton
-            Spacer()
-            previousButton
-            speakCurrentButton
-            nextButton
-            Spacer()
-            closeButton
-        }
-        .padding(.horizontal, 20)
-        .padding(.bottom, 8)
-        .padding(.top, 8)
-    }
-
-    private var orderToggleButton: some View {
-        SharedOrderToggleButton(
-            isRandomOrder: sessionManager.isRandomOrder,
-            theme: theme,
-            action: {
+        SharedMainControlsView(
+            orderToggleAction: {
                 UIImpactFeedbackGenerator.lightImpact()
                 sessionManager.toggleOrderMode()
-            }
-        )
-    }
-
-    private var previousButton: some View {
-        Button(action: {
-            UIImpactFeedbackGenerator.lightImpact()
-            sessionManager.moveToPrevious()
-            updateCurrentCard()
-            sessionManager.saveProgress()
-        }) {
-            Image(systemName: "backward.end.fill")
-                .font(theme.typography.title3)
-                .foregroundColor(theme.colors.textSecondary)
-                .frame(width: 44, height: 44)
-                .background(theme.colors.surfaceMedium)
-                .clipShape(Circle())
+            },
+            previousAction: {
+                UIImpactFeedbackGenerator.lightImpact()
+                sessionManager.moveToPrevious()
+                updateCurrentCard()
+                sessionManager.saveProgress()
+            },
+            nextAction: {
+                UIImpactFeedbackGenerator.lightImpact()
+                sessionManager.moveToNext()
+                updateCurrentCard()
+                sessionManager.saveProgress()
+            },
+            closeAction: {
+                UIImpactFeedbackGenerator.lightImpact()
+                dismissStudy()
+            },
+            isPreviousDisabled: sessionManager.currentIndex == 0,
+            isRandomOrder: sessionManager.isRandomOrder,
+            theme: theme,
+            previousHint: sessionManager.currentIndex == 0 ? "No previous card available" : "Go to previous card in study session",
+            nextHint: "Go to next card in study session"
+        ) {
+            speakCurrentButton
         }
-        .disabled(sessionManager.currentIndex == 0)
-        .opacity(sessionManager.currentIndex == 0 ? 0.3 : 1)
-        .accessibilityLabel("Previous Card")
-        .accessibilityHint(sessionManager.currentIndex == 0 ? "No previous card available" : "Go to previous card in study session")
     }
 
     private var speakCurrentButton: some View {
@@ -257,33 +243,7 @@ struct StudyView: View {
         .accessibilityValue(ttsService.isSpeaking ? "Currently speaking" : "Ready to speak")
     }
 
-    private var nextButton: some View {
-        Button(action: {
-            UIImpactFeedbackGenerator.lightImpact()
-            sessionManager.moveToNext()
-            updateCurrentCard()
-            sessionManager.saveProgress()
-        }) {
-            Image(systemName: "forward.end.fill")
-                .font(theme.typography.title3)
-                .foregroundColor(theme.colors.textPrimary)
-                .frame(width: 44, height: 44)
-                .background(theme.gradients.success)
-                .clipShape(Circle())
-        }
-        .accessibilityLabel("Next Card")
-        .accessibilityHint("Go to next card in study session")
-    }
 
-    private var closeButton: some View {
-        SharedCloseButton(
-            theme: theme,
-            action: {
-                UIImpactFeedbackGenerator.lightImpact()
-                dismissStudy()
-            }
-        )
-    }
 
     private func dismissStudy() {
         sessionManager.saveProgress()

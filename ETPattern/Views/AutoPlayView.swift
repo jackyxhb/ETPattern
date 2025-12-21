@@ -149,46 +149,31 @@ struct AutoPlayView: View {
     }
 
     private var mainControlsView: some View {
-        HStack(spacing: 16) {
-            orderToggleButton
-            Spacer()
-            previousButton
-            playPauseButton
-            nextButton
-            Spacer()
-            closeButton
-        }
-        .padding(.horizontal, 20)
-        .padding(.bottom, 8)
-        .padding(.top, 8)
-    }
-
-    private var orderToggleButton: some View {
-        SharedOrderToggleButton(
-            isRandomOrder: sessionManager.isRandomOrder,
-            theme: theme,
-            action: {
+        SharedMainControlsView(
+            orderToggleAction: {
                 UIImpactFeedbackGenerator.lightImpact()
                 sessionManager.toggleOrderMode()
-            }
-        )
-    }
-
-    private var previousButton: some View {
-        Button(action: {
-            UIImpactFeedbackGenerator.lightImpact()
-            goToPreviousCard()
-        }) {
-            Image(systemName: "backward.end.fill")
-                .font(theme.typography.title3)
-                .foregroundColor(theme.colors.textSecondary)
-                .frame(width: 44, height: 44)
-                .background(theme.colors.surfaceMedium)
-                .clipShape(Circle())
+            },
+            previousAction: {
+                UIImpactFeedbackGenerator.lightImpact()
+                goToPreviousCard()
+            },
+            nextAction: {
+                UIImpactFeedbackGenerator.lightImpact()
+                advanceToNextManually()
+            },
+            closeAction: {
+                UIImpactFeedbackGenerator.lightImpact()
+                dismissAuto()
+            },
+            isPreviousDisabled: sessionManager.currentIndex == 0,
+            isRandomOrder: sessionManager.isRandomOrder,
+            theme: theme,
+            previousHint: sessionManager.currentIndex == 0 ? "No previous card available" : "Go to previous card",
+            nextHint: "Skip to next card"
+        ) {
+            playPauseButton
         }
-        .disabled(sessionManager.currentIndex == 0)
-        .opacity(sessionManager.currentIndex == 0 ? 0.3 : 1)
-        .accessibilityLabel("Previous Card")
     }
 
     private var playPauseButton: some View {
@@ -207,30 +192,7 @@ struct AutoPlayView: View {
         .accessibilityLabel(isPlaying ? "Pause" : "Play")
     }
 
-    private var nextButton: some View {
-        Button(action: {
-            UIImpactFeedbackGenerator.lightImpact()
-            advanceToNextManually()
-        }) {
-            Image(systemName: "forward.end.fill")
-                .font(theme.typography.title3)
-                .foregroundColor(theme.colors.textPrimary)
-                .frame(width: 44, height: 44)
-                .background(theme.gradients.success)
-                .clipShape(Circle())
-        }
-        .accessibilityLabel("Skip")
-    }
 
-    private var closeButton: some View {
-        SharedCloseButton(
-            theme: theme,
-            action: {
-                UIImpactFeedbackGenerator.lightImpact()
-                dismissAuto()
-            }
-        )
-    }
 
     private func startPlaybackIfPossible() {
         guard !sessionManager.getCards().isEmpty else { return }
