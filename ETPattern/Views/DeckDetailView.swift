@@ -155,7 +155,8 @@ private struct CardPreviewContainer: View {
             SharedCardDisplayView(
                 frontText: card.front ?? "No front",
                 backText: formatBackText(),
-                pattern: card.front ?? "",
+                groupName: card.groupName ?? "",
+                cardName: card.cardName ?? "",
                 isFlipped: isFlipped,
                 currentIndex: index,
                 totalCards: total,

@@ -35,7 +35,8 @@ struct SharedHeaderView: View {
 struct SharedCardDisplayView: View {
     let frontText: String
     let backText: String
-    let pattern: String
+    let groupName: String
+    let cardName: String
     let isFlipped: Bool
     let currentIndex: Int
     let totalCards: Int
@@ -49,6 +50,7 @@ struct SharedCardDisplayView: View {
             CardFace(
                 text: frontText,
                 pattern: "",
+                groupName: groupName,
                 isFront: true,
                 currentIndex: currentIndex,
                 totalCards: totalCards,
@@ -62,7 +64,8 @@ struct SharedCardDisplayView: View {
 
             CardFace(
                 text: backText,
-                pattern: pattern,
+                pattern: cardName,
+                groupName: groupName,
                 isFront: false,
                 currentIndex: currentIndex,
                 totalCards: totalCards,
@@ -156,6 +159,7 @@ struct SharedProgressBarView: View {
 struct CardFace: View {
     let text: String
     let pattern: String
+    let groupName: String
     let isFront: Bool
     let currentIndex: Int
     let totalCards: Int
@@ -217,7 +221,16 @@ struct CardFace: View {
 
             Spacer()
 
-            if !pattern.isEmpty, !isFront {
+            if isFront && !groupName.isEmpty {
+                Text(groupName)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(theme.colors.highlight)
+                    .lineLimit(1)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(theme.colors.surfaceMedium)
+                    .clipShape(Capsule())
+            } else if !isFront && !pattern.isEmpty {
                 Text(pattern)
                     .font(.subheadline.weight(.semibold))
                     .foregroundColor(theme.colors.highlight)

@@ -43,7 +43,8 @@ struct StudyView: View {
                     SharedCardDisplayView(
                         frontText: currentCard?.front ?? "No front",
                         backText: (currentCard?.back ?? "No back").replacingOccurrences(of: "<br>", with: "\n"),
-                        pattern: currentCard?.groupName ?? "",
+                        groupName: currentCard?.groupName ?? "",
+                        cardName: currentCard?.cardName ?? "",
                         isFlipped: isFlipped,
                         currentIndex: sessionManager.currentIndex,
                         totalCards: sessionManager.getCards().count,
