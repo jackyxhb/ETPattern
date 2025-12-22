@@ -3,9 +3,10 @@
 English Thought (abbreviated **ET**) is a native SwiftUI iOS app that helps learners master **300 English expression patterns** through spaced repetition, full-screen cards, and natural text-to-speech audio. The bundled master deck is always named **ETPattern 300** to emphasize the complete pattern collection.
 
 ![iOS](https://img.shields.io/badge/iOS-16.0+-blue.svg)
-![Swift](https://img.shields.io/badge/Swift-5.0+-orange.svg)
+![Swift](https://img.shields.io/badge/Swift-6.0+-orange.svg)
 ![SwiftUI](https://img.shields.io/badge/SwiftUI-5.0+-green.svg)
 ![Xcode](https://img.shields.io/badge/Xcode-15+-red.svg)
+![SPM](https://img.shields.io/badge/SPM-Supported-brightgreen.svg)
 
 ## Highlights
 
@@ -39,7 +40,7 @@ English Thought (abbreviated **ET**) is a native SwiftUI iOS app that helps lear
 
 - iOS 16.0+ (optimized for iPhone 16 and later)
 - Xcode 15+
-- Swift 5+
+- Swift 6.0+ (with modern concurrency features)
 - iPhone 16 simulator or device recommended for optimal experience
 
 ## Project Structure
@@ -55,6 +56,38 @@ ETPattern/
 ├── Utilities/                // Constants + Extensions + Theme
 ├── Resources/                // Group1–12 CSV bundles feeding the ETPattern 300 deck
 └── Assets.xcassets           // Colors + icons
+```
+
+## Swift Package Manager
+
+This project includes Swift Package Manager (SPM) support for modular development, testing, and dependency management.
+
+### Package Structure
+
+- `ETPatternCore`: Core data models and business logic (SPM-compatible)
+- Test targets for unit testing core functionality
+
+### Building with SPM
+
+```bash
+# Build the package
+swift build
+
+# Run tests
+swift test
+
+# Generate Xcode project from package
+swift package generate-xcodeproj
+```
+
+### Adding External Dependencies
+
+To add external dependencies, edit `Package.swift`:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/example/package", from: "1.0.0"),
+],
 ```
 
 ## Getting Started

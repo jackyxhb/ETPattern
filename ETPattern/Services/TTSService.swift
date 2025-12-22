@@ -9,6 +9,7 @@ import Foundation
 import AVFoundation
 import Combine
 
+@MainActor
 class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unchecked Sendable {
     let objectWillChange = PassthroughSubject<Void, Never>()
     private let synthesizer = AVSpeechSynthesizer()
@@ -210,28 +211,34 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
     }
 
     // MARK: - AVSpeechSynthesizerDelegate
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        // Check state synchronously to prevent race conditions
-        guard !isManuallyStopped, let handler = completionHandler, completionSequence == currentUtteranceSequence else {
-            return
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        Task { @MainActor in
+            // Check state synchronously to prevent race conditions
+            guard !self.isManuallyStopped, let handler = self.completionHandler, self.completionSequence == self.currentUtteranceSequence else {
+                return
+            }
+
+            // Clear the handler before calling it to prevent double calls
+            self.completionHandler = nil
+
+            // Update speaking state
+            self.isSpeaking = false
+
+            // Call the completion handler
+            handler()
         }
-
-        // Clear the handler before calling it to prevent double calls
-        completionHandler = nil
-
-        // Update speaking state
-        isSpeaking = false
-
-        // Call the completion handler
-        handler()
     }
 
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
-        isSpeaking = false
-        completionHandler = nil
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
+        Task { @MainActor in
+            self.isSpeaking = false
+            self.completionHandler = nil
+        }
     }
 
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
-        isSpeaking = true
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
+        Task { @MainActor in
+            self.isSpeaking = true
+        }
     }
 }

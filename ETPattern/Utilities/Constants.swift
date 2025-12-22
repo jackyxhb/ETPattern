@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 
+@MainActor
 struct Constants {
     struct TTS {
         static let defaultVoice = "en-US"
