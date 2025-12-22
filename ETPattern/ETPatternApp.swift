@@ -9,6 +9,7 @@ import SwiftUI
 import CoreData
 
 @main
+@available(iOS 18.0, *)
 struct ETPatternApp: App {
     let persistenceController = PersistenceController.shared
 

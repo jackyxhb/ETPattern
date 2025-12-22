@@ -8,6 +8,7 @@
 import SwiftUI
 import CoreData
 import UIKit
+import os.log
 
 struct StudyView: View {
     let cardSet: CardSet
@@ -17,6 +18,9 @@ struct StudyView: View {
     @EnvironmentObject private var ttsService: TTSService
 
     @StateObject private var sessionManager: SessionManager
+    
+    private let logger = Logger(subsystem: "com.jack.ETPattern", category: "StudyView")
+    
     @State private var currentCard: Card?
     @State private var isFlipped = false
     @State private var showSwipeFeedback = false
@@ -40,6 +44,9 @@ struct StudyView: View {
                 if sessionManager.getCards().isEmpty {
                     emptyState
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .onAppear {
+                            print("StudyView: No cards available")
+                        }
                 } else {
                     SharedCardDisplayView(
                         frontText: currentCard?.front ?? "No front",
@@ -54,6 +61,9 @@ struct StudyView: View {
                         swipeDirection: swipeDirection,
                         theme: theme
                     )
+                    .onAppear {
+                        logger.info("StudyView: Rendering SharedCardDisplayView with front: \((currentCard?.front?.prefix(50)) ?? "nil"), back: \((currentCard?.back?.prefix(50)) ?? "nil")")
+                    }
                     .gesture(
                         DragGesture(minimumDistance: 50)
                             .onChanged { value in
@@ -101,6 +111,9 @@ struct StudyView: View {
                         handleSwipe(.left)
                     }
                 }
+            }
+            .onAppear {
+                print("StudyView: Card count = \(sessionManager.getCards().count)")
             }
             .padding(.horizontal, theme.metrics.studyViewHorizontalPadding)
             .safeAreaInset(edge: .bottom) {

@@ -85,7 +85,9 @@ struct PersistenceController {
 
             // Seed bundled decks only after the persistent store is ready.
             DispatchQueue.main.async {
-                PersistenceController.seedBundledCardSets(viewContext: containerRef.viewContext)
+                Task { @MainActor in
+                    PersistenceController.seedBundledCardSets(viewContext: containerRef.viewContext)
+                }
             }
         })
         container.viewContext.automaticallyMergesChangesFromParent = true

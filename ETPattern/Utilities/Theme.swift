@@ -286,7 +286,7 @@ struct Theme {
         // Animation and timing metrics
         let splashFadeOutDuration: TimeInterval = 0.3
         let splashTransitionDuration: TimeInterval = 0.4
-        let splashDisplayDuration: TimeInterval = 1.2
+        let splashDisplayDuration: TimeInterval = 0.1
         
         // Preview spacing metrics
         let previewSpacing: CGFloat = 20.0

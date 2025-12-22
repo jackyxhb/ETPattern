@@ -8,12 +8,15 @@
 import SwiftUI
 import CoreData
 import UniformTypeIdentifiers
+import os.log
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.theme) var theme
 
     @StateObject private var viewModel: ContentViewModel
+    
+    private let logger = Logger(subsystem: "com.jack.ETPattern", category: "ContentView")
 
     // MARK: - Onboarding State
     @State private var hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
@@ -36,7 +39,9 @@ struct ContentView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        let onboardingStatus = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
+        logger.info("ContentView: body called, hasSeenOnboarding = \(onboardingStatus)")
+        return NavigationStack {
             ZStack {
                 theme.gradients.background
                     .ignoresSafeArea()
@@ -156,14 +161,26 @@ struct ContentView: View {
                 if viewModel.isLoadingCardSets && viewModel.cardSets.isEmpty {
                     loadingStateView
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .onAppear {
+                            logger.info("ContentView: Showing loading state")
+                        }
                 } else if let error = viewModel.cardSetsError {
                     errorStateView(error: error)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .onAppear {
+                            logger.info("ContentView: Showing error state - \(error.localizedDescription)")
+                        }
                 } else if viewModel.cardSets.isEmpty && !viewModel.isLoadingCardSets {
                     emptyStateView
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .onAppear {
+                            logger.info("ContentView: Showing empty state - no card sets loaded")
+                        }
                 } else {
                     DeckListView(viewModel: viewModel, cardSets: viewModel.cardSets)
+                        .onAppear {
+                            logger.info("ContentView: Showing DeckListView with \(viewModel.cardSets.count) card sets")
+                        }
                 }
             }
         }

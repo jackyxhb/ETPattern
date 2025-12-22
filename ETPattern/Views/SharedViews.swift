@@ -6,6 +6,47 @@
 //
 
 import SwiftUI
+import Translation
+import os
+import Combine
+
+@MainActor
+final class CardFaceViewModel: ObservableObject {
+    @Published var translations: [String: String] = [:]
+    @Published var sentences: [String] = []
+
+    private let logger = Logger(subsystem: "com.jack.ETPattern", category: "CardFaceViewModel")
+
+    @MainActor
+    func setup(text: String, isFront: Bool) {
+        if isFront {
+            let separators = CharacterSet(charactersIn: ".!?\n")
+            let components = text.components(separatedBy: separators)
+            self.sentences = components.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
+        } else {
+            self.sentences = text.components(separatedBy: "\n").filter { !$0.isEmpty }
+        }
+    }
+
+    func performTranslation(session: TranslationSession) {
+        Task {
+            do {
+                var newTranslations: [String: String] = [:]
+                for sentence in sentences {
+                    logger.info("Translating: \(sentence)")
+                    let response = try await session.translate(sentence)
+                    newTranslations[sentence] = response.targetText
+                }
+                await MainActor.run {
+                    self.translations = newTranslations
+                    logger.info("Translations updated: \(self.translations)")
+                }
+            } catch {
+                logger.error("Translation error: \(error)")
+            }
+        }
+    }
+}
 
 enum SwipeDirection {
     case left, right
@@ -29,6 +70,13 @@ struct SharedHeaderView: View {
             Spacer()
         }
         .padding(.horizontal, theme.metrics.sharedHeaderHorizontalPadding)
+    }
+
+    private func splitIntoSentences(_ text: String) -> [String] {
+        // Simple sentence splitting
+        let separators = CharacterSet(charactersIn: ".!?\n")
+        let components = text.components(separatedBy: separators)
+        return components.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
     }
 }
 
@@ -56,6 +104,7 @@ struct SharedCardDisplayView: View {
                 totalCards: totalCards,
                 cardId: cardId.map { Int32($0) }
             )
+            .id(frontText)
             .opacity(isFlipped ? 0 : 1)
             .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
             .accessibilityHidden(isFlipped) // Hide front when flipped
@@ -71,6 +120,7 @@ struct SharedCardDisplayView: View {
                 totalCards: totalCards,
                 cardId: cardId.map { Int32($0) }
             )
+            .id(backText)
             .opacity(isFlipped ? 1 : 0)
             .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
             .accessibilityHidden(!isFlipped) // Hide back when not flipped
@@ -168,37 +218,83 @@ struct CardFace: View {
 
     @Environment(\.theme) var theme
 
+    // ViewModel is the Single Source of Truth
+    @StateObject private var viewModel = CardFaceViewModel()
+
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
-                .fill(theme.gradients.card)
-                .overlay(
-                    RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
-                        .stroke(theme.colors.surfaceLight, lineWidth: 1.5)
-                )
-                .shadow(color: theme.colors.shadow, radius: theme.metrics.cardFaceShadowRadius, x: 0, y: theme.metrics.cardFaceShadowY)
+            cardBackground
 
             VStack(alignment: .leading, spacing: theme.metrics.cardFaceContentSpacing) {
                 header
                 Spacer(minLength: 0)
+
                 if isFront {
-                    Text(text.isEmpty ? "No content" : text)
-                        .font(theme.metrics.largeTitle.weight(.bold))
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(theme.colors.textPrimary)
-                        .frame(maxWidth: .infinity)
-                        .minimumScaleFactor(0.5)
-                        .lineLimit(3)
-                        .dynamicTypeSize(.large ... .accessibility5) // Support dynamic type
+                    frontContentView
                 } else {
                     backContent
                 }
+
                 Spacer(minLength: 0)
             }
             .padding(theme.metrics.cardFacePadding)
         }
         .padding(theme.metrics.cardFaceOuterPadding)
+        .onAppear {
+            viewModel.setup(text: text, isFront: isFront)
+        }
+        .translationTask(
+            TranslationSession.Configuration(
+                source: Locale.Language(identifier: "en"),
+                target: Locale.Language(identifier: "zh")
+            )
+        ) { session in
+            viewModel.performTranslation(session: session)
+        }
     }
+
+    // MARK: - Subviews
+
+    private var frontContentView: some View {
+        Group {
+            if viewModel.sentences.isEmpty {
+                Text("No content")
+                    .font(theme.metrics.largeTitle.weight(.bold))
+                    .foregroundColor(theme.colors.textPrimary)
+                    .frame(maxWidth: .infinity)
+            } else {
+                VStack(alignment: .center, spacing: 8) {
+                    ForEach(viewModel.sentences, id: \.self) { sentence in
+                        VStack(alignment: .center, spacing: 4) {
+                            Text(sentence)
+                                .font(theme.metrics.largeTitle.weight(.bold))
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(theme.colors.textPrimary)
+
+                            if let translation = viewModel.translations[sentence] {
+                                Text(translation)
+                                    .font(theme.metrics.body.weight(.medium))
+                                    .multilineTextAlignment(.center)
+                                    .foregroundColor(theme.colors.textSecondary)
+                            }
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+    }
+
+    private var cardBackground: some View {
+        RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
+            .fill(theme.gradients.card)
+            .overlay(
+                RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
+                    .stroke(theme.colors.surfaceLight, lineWidth: 1.5)
+            )
+            .shadow(color: theme.colors.shadow, radius: theme.metrics.cardFaceShadowRadius, x: 0, y: theme.metrics.cardFaceShadowY)
+    }
+
 
     private var header: some View {
         HStack {
@@ -254,21 +350,32 @@ struct CardFace: View {
 
         VStack(alignment: .leading, spacing: theme.metrics.cardBackContentSpacing) {
             ForEach(Array(examples.enumerated()), id: \.offset) { index, example in
-                HStack(alignment: .top, spacing: theme.metrics.cardBackItemSpacing) {
-                    Text(String(format: "%02d", index + 1))
-                        .font(.caption.bold())
-                        .foregroundColor(theme.colors.textSecondary)
-                        .padding(theme.metrics.cardBackNumberPadding)
-                        .background(theme.colors.surfaceLight)
-                        .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cardBackNumberCornerRadius, style: .continuous))
-                        .dynamicTypeSize(.large ... .accessibility5)
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(alignment: .top, spacing: theme.metrics.cardBackItemSpacing) {
+                        Text(String(format: "%02d", index + 1))
+                            .font(.caption.bold())
+                            .foregroundColor(theme.colors.textSecondary)
+                            .padding(theme.metrics.cardBackNumberPadding)
+                            .background(theme.colors.surfaceLight)
+                            .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cardBackNumberCornerRadius, style: .continuous))
+                            .dynamicTypeSize(.large ... .accessibility5)
 
-                    Text(example)
-                        .font(theme.metrics.body.weight(.medium))
-                        .foregroundColor(theme.colors.textPrimary)
-                        .lineSpacing(theme.metrics.cardBackLineSpacing)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .dynamicTypeSize(.large ... .accessibility5) // Support dynamic type
+                        Text(example)
+                            .font(theme.metrics.body.weight(.medium))
+                            .foregroundColor(theme.colors.textPrimary)
+                            .lineSpacing(theme.metrics.cardBackLineSpacing)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .dynamicTypeSize(.large ... .accessibility5) // Support dynamic type
+                    }
+
+                    if let translation = viewModel.translations[example] {
+                        Text(translation)
+                            .font(theme.metrics.body.weight(.medium))
+                            .foregroundColor(theme.colors.textSecondary)
+                            .lineSpacing(theme.metrics.cardBackLineSpacing)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .dynamicTypeSize(.large ... .accessibility5)
+                    }
                 }
                 .padding(.horizontal, theme.metrics.cardBackHorizontalPadding)
             }

@@ -6,8 +6,8 @@ import PackageDescription
 let package = Package(
     name: "ETPattern",
     platforms: [
-        .iOS(.v16),
-        .macOS(.v13)
+        .iOS(.v18),
+        .macOS(.v15)
     ],
     products: [
         .library(
