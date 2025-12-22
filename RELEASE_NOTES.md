@@ -1,9 +1,9 @@
-# English Thought v1.6.0 - English Pattern Flashcard App
+# English Thought v1.7.0 - English Pattern Flashcard App
 
 ## 🎉 Release Notes
 
-**Release Date:** December 21, 2025
-**Version:** 1.6.0
+**Release Date:** December 22, 2025
+**Version:** 1.7.0
 **Platform:** iOS 16.0+
 **Device:** iPhone 16 and later
 
@@ -40,8 +40,8 @@
 ## 📋 System Requirements
 
 - **iOS Version:** 16.0 or later
-- **Xcode:** 15.0+
-- **Swift:** 5.0+
+- **Xcode:** 16.0+
+- **Swift:** 6.0+
 - **Device:** iPhone 16 or later (optimized for iPhone 16)
 - **Storage:** ~50MB for app + bundled CSV data
 
