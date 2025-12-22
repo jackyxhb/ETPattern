@@ -7,6 +7,7 @@ English Thought (abbreviated **ET**) is a native SwiftUI iOS app that helps lear
 ![SwiftUI](https://img.shields.io/badge/SwiftUI-5.0+-green.svg)
 ![Xcode](https://img.shields.io/badge/Xcode-16+-red.svg)
 ![SPM](https://img.shields.io/badge/SPM-Supported-brightgreen.svg)
+![Version](https://img.shields.io/badge/version-1.7.0-blue.svg)
 
 ## Highlights
 
