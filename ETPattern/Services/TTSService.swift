@@ -7,7 +7,7 @@
 
 import Foundation
 import AVFoundation
-import Combine
+@preconcurrency import Combine
 
 @MainActor
 class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unchecked Sendable {
@@ -26,6 +26,9 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
     private var currentUtteranceSequence: Int = 0
     private var isManuallyStopped = false
     private var lastError: AppError?
+    
+    // MARK: - Cancellable Storage
+    private var cancellables = Set<AnyCancellable>()
 
     @Published var isSpeaking = false
     @Published var errorMessage: String?
@@ -49,6 +52,18 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
 
         // Resolve initial voice preference to a concrete installed voice identifier.
         resolveVoicePreferenceAndPersistIfNeeded()
+        
+        setupSubscriptions()
+    }
+    
+    deinit {
+        cancellables.forEach { $0.cancel() }
+    }
+    
+    // MARK: - Private Setup Methods
+    private func setupSubscriptions() {
+        // Setup any future Combine subscriptions here
+        // Currently no subscriptions, but infrastructure is ready
     }
 
     func speak(_ text: String, completion: (() -> Void)? = nil) {

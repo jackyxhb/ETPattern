@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import Combine
+@preconcurrency import Combine
 
 @MainActor
 class ContentViewModel: ObservableObject {
@@ -17,6 +17,9 @@ class ContentViewModel: ObservableObject {
     private let cardSetRepository: CardSetRepositoryProtocol
     private let csvService: CSVServiceProtocol
     private let shareService: ShareServiceProtocol
+    
+    // MARK: - Cancellable Storage
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Initialization
     init(
@@ -27,6 +30,28 @@ class ContentViewModel: ObservableObject {
         self.cardSetRepository = cardSetRepository
         self.csvService = csvService
         self.shareService = shareService
+        
+        setupSubscriptions()
+    }
+    
+    deinit {
+        cancellables.forEach { $0.cancel() }
+    }
+    
+    // MARK: - Private Setup Methods
+    private func setupSubscriptions() {
+        // Example of proper Combine subscription with memory management:
+        // subscribeWeak(to: somePublisher, storeIn: &cancellables) { strongSelf, value in
+        //     // Handle value with guaranteed strong self reference
+        //     strongSelf.handleValue(value)
+        // }
+        
+        // Or for publishers that don't need weak self:
+        // subscribe(to: somePublisher, storeIn: &cancellables) { value in
+        //     // Handle value (self is guaranteed to exist)
+        // }
+        
+        // Currently no subscriptions, but infrastructure is ready
     }
 
     func addCardSet() {

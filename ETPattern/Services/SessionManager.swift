@@ -7,7 +7,7 @@
 
 import Foundation
 import CoreData
-import Combine
+@preconcurrency import Combine
 
 class SessionManager: ObservableObject {
     // MARK: - Published Properties
@@ -24,6 +24,7 @@ class SessionManager: ObservableObject {
 
     // MARK: - Private Properties
     private let cardSet: CardSet
+    private var cancellables = Set<AnyCancellable>()
     private var progressKey: String {
         let id = cardSet.objectID.uriRepresentation().absoluteString
         return "studyProgress-\(id)"
@@ -40,6 +41,17 @@ class SessionManager: ObservableObject {
     init(cardSet: CardSet) {
         self.cardSet = cardSet
         loadOrderMode()
+        setupSubscriptions()
+    }
+    
+    deinit {
+        cancellables.forEach { $0.cancel() }
+    }
+    
+    // MARK: - Private Setup Methods
+    private func setupSubscriptions() {
+        // Setup any future Combine subscriptions here
+        // Currently no subscriptions, but infrastructure is ready
     }
 
     // MARK: - Session Management

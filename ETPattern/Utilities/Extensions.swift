@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 import SwiftUI
+import Combine
 
 extension String {
     func htmlToAttributedString() -> AttributedString? {
@@ -128,5 +129,49 @@ extension Animation {
 
     static var snappy: Animation {
         .spring(response: 0.2, dampingFraction: 0.8)
+    }
+}
+
+// MARK: - Combine Memory Management Helpers
+extension ObservableObject where Self: AnyObject {
+    /// Safely subscribe to a publisher with automatic cancellable storage
+    /// - Parameters:
+    ///   - publisher: The publisher to subscribe to
+    ///   - cancellables: The set to store the cancellable in
+    ///   - receiveValue: The closure to execute when receiving values
+    /// - Returns: The cancellable (automatically stored)
+    @discardableResult
+    func subscribe<P: Publisher>(
+        to publisher: P,
+        storeIn cancellables: inout Set<AnyCancellable>,
+        receiveValue: @escaping (P.Output) -> Void
+    ) -> AnyCancellable where P.Failure == Never {
+        let cancellable = publisher
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: receiveValue)
+        cancellables.insert(cancellable)
+        return cancellable
+    }
+    
+    /// Safely subscribe to a publisher with weak self capture
+    /// - Parameters:
+    ///   - publisher: The publisher to subscribe to
+    ///   - cancellables: The set to store the cancellable in
+    ///   - receiveValue: The closure to execute when receiving values (with weak self)
+    /// - Returns: The cancellable (automatically stored)
+    @discardableResult
+    func subscribeWeak<P: Publisher>(
+        to publisher: P,
+        storeIn cancellables: inout Set<AnyCancellable>,
+        receiveValue: @escaping (Self, P.Output) -> Void
+    ) -> AnyCancellable where P.Failure == Never {
+        let cancellable = publisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] value in
+                guard let self = self else { return }
+                receiveValue(self, value)
+            }
+        cancellables.insert(cancellable)
+        return cancellable
     }
 }
