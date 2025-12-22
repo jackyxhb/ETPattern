@@ -279,6 +279,32 @@ struct Theme {
         // DeckListView additional metrics
         let deckCardInnerSpacing: CGFloat = 10.0
         let deckCardTextSpacing: CGFloat = 4.0
+        
+        // ImportView metrics
+        let importHeaderVerticalPadding: CGFloat = 12.0
+        
+        // Animation and timing metrics
+        let splashFadeOutDuration: TimeInterval = 0.3
+        let splashTransitionDuration: TimeInterval = 0.4
+        let splashDisplayDuration: TimeInterval = 1.2
+        
+        // Preview spacing metrics
+        let previewSpacing: CGFloat = 20.0
+        
+        // SharedEmptyStateView default metrics
+        let emptyStateDefaultCircleSize: CGFloat = 160.0
+        let emptyStateDefaultCircleOpacity: Double = 0.3
+        let emptyStateDefaultIconSize: CGFloat = 60.0
+        let emptyStateDefaultVerticalSpacing: CGFloat = 32.0
+        let emptyStateDefaultTextSpacing: CGFloat = 16.0
+        let emptyStateDefaultHorizontalPadding: CGFloat = 24.0
+        
+        // Card metrics (from Constants)
+        let cardCornerRadius: CGFloat = 12.0
+        let cardPadding: CGFloat = 20.0
+        
+        // General animation duration
+        let animationDuration: TimeInterval = 0.6
 
         let headline = Font.headline
         let subheadline = Font.subheadline

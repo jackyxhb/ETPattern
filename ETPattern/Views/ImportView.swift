@@ -47,7 +47,7 @@ struct ImportView: View {
                     }
                 }
                 .padding(.horizontal)
-                .padding(.vertical, 12)
+                .padding(.vertical, theme.metrics.importHeaderVerticalPadding)
                 .background(.ultraThinMaterial)
                 
                 ScrollView {

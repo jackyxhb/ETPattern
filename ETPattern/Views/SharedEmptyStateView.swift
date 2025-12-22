@@ -26,12 +26,12 @@ struct SharedEmptyStateView<IconContent: View, AdditionalContent: View>: View {
         subtitle: String? = nil,
         description: String,
         theme: Theme,
-        circleSize: CGFloat = 160,
-        circleOpacity: Double = 0.3,
-        iconSize: CGFloat = 60,
-        verticalSpacing: CGFloat = 32,
-        textSpacing: CGFloat = 16,
-        horizontalPadding: CGFloat = 24,
+        circleSize: CGFloat = Theme.default.metrics.emptyStateDefaultCircleSize,
+        circleOpacity: Double = Theme.default.metrics.emptyStateDefaultCircleOpacity,
+        iconSize: CGFloat = Theme.default.metrics.emptyStateDefaultIconSize,
+        verticalSpacing: CGFloat = Theme.default.metrics.emptyStateDefaultVerticalSpacing,
+        textSpacing: CGFloat = Theme.default.metrics.emptyStateDefaultTextSpacing,
+        horizontalPadding: CGFloat = Theme.default.metrics.emptyStateDefaultHorizontalPadding,
         @ViewBuilder iconContent: @escaping () -> IconContent,
         @ViewBuilder additionalContent: @escaping () -> AdditionalContent = { EmptyView() }
     ) {
@@ -57,12 +57,12 @@ struct SharedEmptyStateView<IconContent: View, AdditionalContent: View>: View {
         icon: String,
         iconColor: Color,
         theme: Theme,
-        circleSize: CGFloat = 160,
-        circleOpacity: Double = 0.3,
-        iconSize: CGFloat = 60,
-        verticalSpacing: CGFloat = 32,
-        textSpacing: CGFloat = 16,
-        horizontalPadding: CGFloat = 24
+        circleSize: CGFloat = Theme.default.metrics.emptyStateDefaultCircleSize,
+        circleOpacity: Double = Theme.default.metrics.emptyStateDefaultCircleOpacity,
+        iconSize: CGFloat = Theme.default.metrics.emptyStateDefaultIconSize,
+        verticalSpacing: CGFloat = Theme.default.metrics.emptyStateDefaultVerticalSpacing,
+        textSpacing: CGFloat = Theme.default.metrics.emptyStateDefaultTextSpacing,
+        horizontalPadding: CGFloat = Theme.default.metrics.emptyStateDefaultHorizontalPadding
     ) where IconContent == AnyView, AdditionalContent == AnyView {
         self.title = title
         self.subtitle = subtitle

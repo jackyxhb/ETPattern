@@ -5,6 +5,7 @@ import Foundation
 struct SplashHostView<Content: View>: View {
     private let content: () -> Content
     @State private var showSplash = true
+    @Environment(\.theme) var theme
 
     init(@ViewBuilder content: @escaping () -> Content) {
         self.content = content
@@ -14,7 +15,7 @@ struct SplashHostView<Content: View>: View {
         ZStack {
             content()
                 .opacity(showSplash ? 0 : 1)
-                .animation(.easeOut(duration: 0.3), value: showSplash)
+                .animation(.easeOut(duration: theme.metrics.splashFadeOutDuration), value: showSplash)
 
             if showSplash {
                 SplashView()
@@ -23,8 +24,8 @@ struct SplashHostView<Content: View>: View {
         }
         .task {
             guard showSplash else { return }
-            try? await Task.sleep(nanoseconds: 1_200_000_000)
-            withAnimation(.easeInOut(duration: 0.4)) {
+            try? await Task.sleep(nanoseconds: UInt64(theme.metrics.splashDisplayDuration * 1_000_000_000))
+            withAnimation(.easeInOut(duration: theme.metrics.splashTransitionDuration)) {
                 showSplash = false
             }
         }

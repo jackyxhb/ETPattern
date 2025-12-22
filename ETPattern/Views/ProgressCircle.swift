@@ -45,7 +45,7 @@ struct ProgressCircle: View {
 }
 
 #Preview {
-    VStack(spacing: 20) {
+    VStack(spacing: Theme.default.metrics.previewSpacing) {
         ProgressCircle(progress: 0.0)
         ProgressCircle(progress: 0.5)
         ProgressCircle(progress: 0.8)
