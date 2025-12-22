@@ -29,6 +29,7 @@ struct SessionStatsView: View {
                     Text(NSLocalizedString("session_stats", comment: "Session statistics screen title"))
                         .font(.headline)
                         .foregroundColor(theme.colors.textPrimary)
+                        .dynamicTypeSize(.large ... .accessibility5)
                     Spacer()
                     Button(action: {
                         dismiss()
@@ -45,10 +46,11 @@ struct SessionStatsView: View {
                 Form {
                     // Historical Sessions Section
                     Section(header: Text("Study History")
-                        .foregroundColor(theme.colors.textPrimary)) {
+                        .foregroundColor(theme.colors.textPrimary).dynamicTypeSize(.large ... .accessibility5)) {
                     if studySessions.isEmpty {
                         Text("No study sessions yet")
-                            .foregroundColor(theme.colors.highlight.opacity(0.7))
+                            .foregroundColor(theme.colors.textSecondary)
+                            .dynamicTypeSize(.large ... .accessibility5)
                             .padding(theme.metrics.buttonPadding)
                     } else {
                         ForEach(studySessions) { session in
@@ -57,10 +59,12 @@ struct SessionStatsView: View {
                                     Text(session.date ?? Date(), style: .date)
                                         .font(theme.metrics.headline)
                                         .foregroundColor(theme.colors.textPrimary)
+                                        .dynamicTypeSize(.large ... .accessibility5)
                                     Spacer()
                                     Text(session.date ?? Date(), style: .time)
                                         .font(theme.metrics.subheadline)
                                         .foregroundColor(theme.colors.textSecondary)
+                                        .dynamicTypeSize(.large ... .accessibility5)
                                 }
 
                                 HStack(spacing: theme.metrics.largeSpacing) {
@@ -68,27 +72,33 @@ struct SessionStatsView: View {
                                         Text("Cards Reviewed")
                                             .font(theme.metrics.caption)
                                             .foregroundColor(theme.colors.textSecondary)
+                                            .dynamicTypeSize(.large ... .accessibility5)
                                         Text("\(session.cardsReviewed)")
                                             .font(theme.metrics.title3.weight(.semibold))
                                             .foregroundColor(theme.colors.textPrimary)
+                                            .dynamicTypeSize(.large ... .accessibility5)
                                     }
 
                                     VStack(alignment: .leading) {
                                         Text("Correct")
                                             .font(theme.metrics.caption)
                                             .foregroundColor(theme.colors.textSecondary)
+                                            .dynamicTypeSize(.large ... .accessibility5)
                                         Text("\(session.correctCount)")
                                             .font(theme.metrics.title3.weight(.semibold))
                                             .foregroundColor(theme.colors.success)
+                                            .dynamicTypeSize(.large ... .accessibility5)
                                     }
 
                                     VStack(alignment: .leading) {
                                         Text("Accuracy")
                                             .font(theme.metrics.caption)
                                             .foregroundColor(theme.colors.highlight.opacity(0.7))
+                                            .dynamicTypeSize(.large ... .accessibility5)
                                         Text(accuracyText(for: session))
                                             .font(theme.metrics.title3.weight(.semibold))
                                             .foregroundColor(accuracyColor(for: session))
+                                            .dynamicTypeSize(.large ... .accessibility5)
                                     }
                                 }
                             }

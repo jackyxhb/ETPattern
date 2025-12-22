@@ -36,6 +36,7 @@ struct ImportView: View {
                     Text(NSLocalizedString("import", comment: "Import screen title"))
                         .font(.headline)
                         .foregroundColor(theme.colors.textPrimary)
+                        .dynamicTypeSize(.large ... .accessibility5)
                     Spacer()
                     Button(action: {
                         dismiss()
@@ -55,20 +56,26 @@ struct ImportView: View {
                             .font(theme.metrics.title)
                             .fontWeight(.bold)
                             .foregroundColor(theme.colors.textPrimary)
+                            .dynamicTypeSize(.large ... .accessibility5)
 
                         Text("Select a CSV file to import flashcards. The file should have the format:")
                             .multilineTextAlignment(.center)
                             .foregroundColor(theme.colors.highlight.opacity(0.8))
+                            .dynamicTypeSize(.large ... .accessibility5)
 
                 VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
                     Text("• First row: Front;;Back;;Tags")
                         .foregroundColor(theme.colors.highlight.opacity(0.8))
+                        .dynamicTypeSize(.large ... .accessibility5)
                     Text("• Subsequent rows: Pattern;;Examples<br>More examples;;tag1,tag2")
                         .foregroundColor(theme.colors.highlight.opacity(0.8))
+                        .dynamicTypeSize(.large ... .accessibility5)
                     Text("• Separator: ;; (double semicolon)")
                         .foregroundColor(theme.colors.highlight.opacity(0.8))
+                        .dynamicTypeSize(.large ... .accessibility5)
                     Text("• Line breaks in examples: <br>")
                         .foregroundColor(theme.colors.highlight.opacity(0.8))
+                        .dynamicTypeSize(.large ... .accessibility5)
                 }
                 .font(theme.metrics.caption)
                 .padding(.horizontal, theme.metrics.mediumSpacing)
@@ -87,6 +94,7 @@ struct ImportView: View {
                     .background(theme.gradients.accent)
                     .foregroundColor(theme.colors.textPrimary)
                     .cornerRadius(theme.metrics.cornerRadius)
+                    .dynamicTypeSize(.large ... .accessibility5)
                 }
                 .padding(.horizontal, theme.metrics.mediumSpacing)
                 .disabled(isImporting)
@@ -95,6 +103,7 @@ struct ImportView: View {
                     ProgressView("Importing...")
                         .padding(theme.metrics.mediumSpacing)
                         .foregroundColor(theme.colors.textPrimary)
+                        .dynamicTypeSize(.large ... .accessibility5)
                 }
 
                 Spacer()
@@ -114,6 +123,7 @@ struct ImportView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text(importError ?? "Unknown error occurred")
+                .dynamicTypeSize(.large ... .accessibility5)
         }
     }
 

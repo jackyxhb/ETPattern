@@ -29,6 +29,7 @@ struct DeckDetailView: View {
                     Text(cardSet.name ?? NSLocalizedString("unnamed_deck", comment: "Fallback name for decks without a name"))
                         .font(.headline)
                         .foregroundColor(theme.colors.textPrimary)
+                        .dynamicTypeSize(.large ... .accessibility5)
                     Spacer()
                     Button(action: {
                         dismiss()
@@ -46,6 +47,7 @@ struct DeckDetailView: View {
                     Text("No cards in this deck")
                         .font(.headline)
                         .foregroundColor(theme.colors.textSecondary)
+                        .dynamicTypeSize(.large ... .accessibility5)
                 } else {
                 ScrollView {
                     LazyVStack(spacing: theme.metrics.deckDetailGroupSpacing) {
@@ -74,10 +76,12 @@ struct DeckDetailView: View {
                                     Text(groupName)
                                         .font(.headline)
                                         .foregroundColor(theme.colors.textPrimary)
+                                        .dynamicTypeSize(.large ... .accessibility5)
                                     Spacer()
                                     Text("\(groupedCards[groupName]?.count ?? 0) cards")
                                         .font(.subheadline)
                                         .foregroundColor(theme.colors.textSecondary)
+                                        .dynamicTypeSize(.large ... .accessibility5)
                                 }
                                 .padding(theme.metrics.deckDetailGroupPadding)
                                 .background(
@@ -131,10 +135,12 @@ private struct CardRow: View {
             Text(card.front ?? "No front")
                 .font(.headline)
                 .foregroundColor(theme.colors.textPrimary)
+                .dynamicTypeSize(.large ... .accessibility5)
             Text(formattedBack)
                 .font(.subheadline)
                 .foregroundColor(theme.colors.textSecondary)
                 .lineLimit(2)
+                .dynamicTypeSize(.large ... .accessibility5)
         }
         .padding(theme.metrics.deckDetailCardRowPadding)
         .frame(maxWidth: .infinity, alignment: .leading)

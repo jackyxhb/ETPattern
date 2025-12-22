@@ -41,6 +41,7 @@ struct SettingsView: View {
                     Text(NSLocalizedString("settings", comment: "Settings screen title"))
                         .font(.headline)
                         .foregroundColor(theme.colors.textPrimary)
+                        .dynamicTypeSize(.large ... .accessibility5)
                     Spacer()
                     Button(action: {
                         dismiss()
@@ -93,7 +94,7 @@ struct SettingsView: View {
     }
 
     private var ttsSection: some View {
-        Section(header: Text(NSLocalizedString("text_to_speech", comment: "Text-to-speech section header")).foregroundColor(theme.colors.textPrimary)) {
+        Section(header: Text(NSLocalizedString("text_to_speech", comment: "Text-to-speech section header")).foregroundColor(theme.colors.textPrimary).dynamicTypeSize(.large ... .accessibility5)) {
             SharedSettingsPickerSection(
                 header: "",
                 label: NSLocalizedString("voice", comment: "Voice selection label"),
@@ -108,19 +109,23 @@ struct SettingsView: View {
                 Text(String(format: NSLocalizedString("speech_speed_value", comment: "Speech speed display with percentage"), Int(ttsPercentage)))
                     .font(theme.metrics.subheadline)
                     .foregroundColor(theme.colors.textPrimary)
+                    .dynamicTypeSize(.large ... .accessibility5)
 
                 GeometryReader { geometry in
                     Slider(value: $ttsPercentage, in: Constants.TTS.minPercentage...Constants.TTS.maxPercentage, step: 10) {
                         Text(NSLocalizedString("speech_speed", comment: "Speech speed slider label"))
                             .foregroundColor(theme.colors.textPrimary)
+                            .dynamicTypeSize(.large ... .accessibility5)
                     } minimumValueLabel: {
                         Text("50%")
                             .font(theme.metrics.caption)
                             .foregroundColor(theme.colors.textSecondary)
+                            .dynamicTypeSize(.large ... .accessibility5)
                     } maximumValueLabel: {
                         Text("120%")
                             .font(theme.metrics.caption)
                             .foregroundColor(theme.colors.textSecondary)
+                            .dynamicTypeSize(.large ... .accessibility5)
                     }
                     .tint(theme.colors.highlight)
                     .gesture(
@@ -201,15 +206,18 @@ struct SettingsView: View {
     }
 
     private var aboutSection: some View {
-        Section(header: Text("About").foregroundColor(theme.colors.textPrimary)) {
+        Section(header: Text("About").foregroundColor(theme.colors.textPrimary).dynamicTypeSize(.large ... .accessibility5)) {
             Text("English Thought")
                 .font(theme.metrics.headline)
                 .foregroundColor(theme.colors.textPrimary)
+                .dynamicTypeSize(.large ... .accessibility5)
             Text("Version 1.6.0")
                 .foregroundColor(theme.colors.textSecondary)
+                .dynamicTypeSize(.large ... .accessibility5)
             Text("Learn English patterns with spaced repetition")
                 .foregroundColor(theme.colors.textSecondary)
                 .font(theme.metrics.caption)
+                .dynamicTypeSize(.large ... .accessibility5)
         }
         .listRowBackground(theme.colors.surfaceLight)
     }

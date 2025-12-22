@@ -77,7 +77,8 @@ struct SharedEmptyStateView<IconContent: View, AdditionalContent: View>: View {
         self.iconContent = {
             AnyView(
                 Image(systemName: icon)
-                    .font(.system(size: iconSize))
+                    .font(.system(size: 60, weight: .regular, design: .default))
+                    .imageScale(.large)
                     .foregroundColor(iconColor)
             )
         }
@@ -101,12 +102,14 @@ struct SharedEmptyStateView<IconContent: View, AdditionalContent: View>: View {
                     .font(theme.metrics.title.weight(.bold))
                     .foregroundColor(theme.colors.textPrimary)
                     .multilineTextAlignment(.center)
+                    .dynamicTypeSize(.large ... .accessibility5)
 
                 if let subtitle = subtitle {
                     Text(subtitle)
                         .font(theme.metrics.title3)
                         .foregroundColor(theme.colors.highlight)
                         .multilineTextAlignment(.center)
+                        .dynamicTypeSize(.large ... .accessibility5)
                 }
 
                 Text(description)
@@ -115,6 +118,7 @@ struct SharedEmptyStateView<IconContent: View, AdditionalContent: View>: View {
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
                     .padding(.horizontal, 32)
+                    .dynamicTypeSize(.large ... .accessibility5)
             }
 
             additionalContent()

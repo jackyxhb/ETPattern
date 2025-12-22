@@ -177,6 +177,7 @@ struct ContentView: View {
             Text("Loading decks...")
                 .font(.headline)
                 .foregroundColor(theme.colors.textPrimary.opacity(0.8))
+                .dynamicTypeSize(.large ... .accessibility5)
         }
     }
 
@@ -207,6 +208,7 @@ struct ContentView: View {
                         .background(theme.gradients.accent)
                         .foregroundColor(theme.colors.textPrimary)
                         .clipShape(RoundedRectangle(cornerRadius: theme.metrics.emptyStateButtonCornerRadius, style: .continuous))
+                        .dynamicTypeSize(.large ... .accessibility5)
                 }
 
                 Button(action: {
@@ -220,6 +222,7 @@ struct ContentView: View {
                         .background(.ultraThinMaterial)
                         .foregroundColor(theme.colors.textPrimary)
                         .clipShape(RoundedRectangle(cornerRadius: theme.metrics.emptyStateButtonCornerRadius, style: .continuous))
+                        .dynamicTypeSize(.large ... .accessibility5)
                 }
             }
             .padding(.horizontal, theme.metrics.emptyStateButtonHorizontalPadding)
@@ -282,6 +285,7 @@ private struct CardSetActionBar: View {
                     .background(gradient)
                     .foregroundColor(theme.colors.textPrimary)
                     .clipShape(RoundedRectangle(cornerRadius: theme.metrics.actionButtonCornerRadius, style: .continuous))
+                    .dynamicTypeSize(.large ... .accessibility5)
             }
             .buttonStyle(.plain)
         }

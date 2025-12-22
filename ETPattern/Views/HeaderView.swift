@@ -16,6 +16,7 @@ struct HeaderView: View {
             Text("English Thought")
                 .font(theme.metrics.title.bold())
                 .foregroundColor(theme.colors.textPrimary)
+                .dynamicTypeSize(.large ... .accessibility5)
             Spacer()
             headerActions
         }

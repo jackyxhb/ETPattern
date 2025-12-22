@@ -95,6 +95,7 @@ struct SharedCardDisplayView: View {
                         Text(direction == .right ? "Easy" : "Again")
                             .font(theme.metrics.title.weight(.bold))
                             .foregroundColor(theme.colors.textPrimary)
+                            .dynamicTypeSize(.large ... .accessibility5)
                     }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cardDisplaySwipeCornerRadius))
@@ -209,6 +210,7 @@ struct CardFace: View {
                     .padding(.vertical, theme.metrics.cardFaceHeaderVerticalPadding)
                     .background(theme.colors.surfaceLight)
                     .clipShape(Capsule())
+                    .dynamicTypeSize(.large ... .accessibility5)
             } else {
                 Text("?/\(max(totalCards, 1))")
                     .font(.caption.monospacedDigit())
@@ -217,6 +219,7 @@ struct CardFace: View {
                     .padding(.vertical, theme.metrics.cardFaceHeaderVerticalPadding)
                     .background(theme.colors.surfaceLight)
                     .clipShape(Capsule())
+                    .dynamicTypeSize(.large ... .accessibility5)
             }
 
             Spacer()
@@ -230,6 +233,7 @@ struct CardFace: View {
                     .padding(.vertical, theme.metrics.cardFaceHeaderVerticalPadding)
                     .background(theme.colors.surfaceMedium)
                     .clipShape(Capsule())
+                    .dynamicTypeSize(.large ... .accessibility5)
             } else if !isFront && !pattern.isEmpty {
                 Text(pattern)
                     .font(.subheadline.weight(.semibold))
@@ -239,6 +243,7 @@ struct CardFace: View {
                     .padding(.vertical, theme.metrics.cardFaceHeaderVerticalPadding)
                     .background(theme.colors.surfaceMedium)
                     .clipShape(Capsule())
+                    .dynamicTypeSize(.large ... .accessibility5)
             }
         }
     }
@@ -256,6 +261,7 @@ struct CardFace: View {
                         .padding(theme.metrics.cardBackNumberPadding)
                         .background(theme.colors.surfaceLight)
                         .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cardBackNumberCornerRadius, style: .continuous))
+                        .dynamicTypeSize(.large ... .accessibility5)
 
                     Text(example)
                         .font(theme.metrics.body.weight(.medium))
@@ -363,16 +369,18 @@ struct SharedSettingsPickerSection: View {
     }
 
     var body: some View {
-        Section(header: Text(header).foregroundColor(theme.colors.textPrimary)) {
+        Section(header: Text(header).foregroundColor(theme.colors.textPrimary).dynamicTypeSize(.large ... .accessibility5)) {
             Picker(selection: $selection) {
                 ForEach(options.keys.sorted(), id: \.self) { key in
                     Text(options[key] ?? key)
                         .foregroundColor(theme.colors.textPrimary)
+                        .dynamicTypeSize(.large ... .accessibility5)
                         .tag(key)
                 }
             } label: {
                 Text(label)
                     .foregroundColor(theme.colors.textPrimary)
+                    .dynamicTypeSize(.large ... .accessibility5)
             }
             .pickerStyle(.menu)
             .onChange(of: selection) { newValue in
@@ -416,6 +424,7 @@ struct SharedSettingsSliderSection<T: BinaryFloatingPoint>: View {
             Text("\(label): \(valueFormatter(value))")
                 .font(theme.metrics.subheadline)
                 .foregroundColor(theme.colors.textPrimary)
+                .dynamicTypeSize(.large ... .accessibility5)
 
             Slider(value: Binding(
                 get: { Double(value) },
@@ -423,14 +432,17 @@ struct SharedSettingsSliderSection<T: BinaryFloatingPoint>: View {
             ), in: Double(minValue)...Double(maxValue), step: Double(step)) {
                 Text(label)
                     .foregroundColor(theme.colors.textPrimary)
+                    .dynamicTypeSize(.large ... .accessibility5)
             } minimumValueLabel: {
                 Text(minLabel)
                     .font(theme.metrics.caption)
                     .foregroundColor(theme.colors.textSecondary)
+                    .dynamicTypeSize(.large ... .accessibility5)
             } maximumValueLabel: {
                 Text(maxLabel)
                     .font(theme.metrics.caption)
                     .foregroundColor(theme.colors.textSecondary)
+                    .dynamicTypeSize(.large ... .accessibility5)
             }
             .tint(theme.colors.highlight)
             .onChange(of: value) { newValue in
@@ -459,6 +471,7 @@ struct SharedConfirmationAlert: ViewModifier {
                 Button(actionTitle, action: action)
             } message: {
                 Text(message)
+                    .dynamicTypeSize(.large ... .accessibility5)
             }
     }
 }
@@ -475,6 +488,7 @@ struct SharedErrorAlert: ViewModifier {
                 Button("OK") { }
             } message: {
                 Text(message)
+                    .dynamicTypeSize(.large ... .accessibility5)
             }
     }
 }
@@ -549,11 +563,13 @@ struct SharedOnboardingPageView: View {
                     .font(.title.bold())
                     .foregroundColor(theme.colors.textPrimary)
                     .multilineTextAlignment(.center)
+                    .dynamicTypeSize(.large ... .accessibility5)
 
                 Text(subtitle)
                     .font(.title3)
                     .foregroundColor(theme.colors.highlight)
                     .multilineTextAlignment(.center)
+                    .dynamicTypeSize(.large ... .accessibility5)
 
                 Text(description)
                     .font(.body)
@@ -561,6 +577,7 @@ struct SharedOnboardingPageView: View {
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
                     .padding(.horizontal, theme.metrics.onboardingDescriptionHorizontalPadding)
+                    .dynamicTypeSize(.large ... .accessibility5)
             }
 
             Spacer()
@@ -619,6 +636,7 @@ struct SharedOnboardingContainer<Content: View>: View {
                                 .font(.headline)
                                 .foregroundColor(.white.opacity(0.8))
                                 .frame(width: theme.metrics.onboardingBackButtonWidth, height: theme.metrics.onboardingButtonHeight)
+                                .dynamicTypeSize(.large ... .accessibility5)
                         }
                     }
 
@@ -637,6 +655,7 @@ struct SharedOnboardingContainer<Content: View>: View {
                                 .frame(width: theme.metrics.onboardingNextButtonWidth, height: theme.metrics.onboardingButtonHeight)
                                 .background(theme.gradients.accent)
                                 .clipShape(RoundedRectangle(cornerRadius: theme.metrics.onboardingButtonCornerRadius, style: .continuous))
+                                .dynamicTypeSize(.large ... .accessibility5)
                         }
                     } else {
                         Button(action: {
@@ -651,6 +670,7 @@ struct SharedOnboardingContainer<Content: View>: View {
                                 .frame(width: theme.metrics.onboardingGetStartedButtonWidth, height: theme.metrics.onboardingButtonHeight)
                                 .background(theme.gradients.success)
                                 .clipShape(RoundedRectangle(cornerRadius: theme.metrics.onboardingButtonCornerRadius, style: .continuous))
+                                .dynamicTypeSize(.large ... .accessibility5)
                         }
                     }
                 }
