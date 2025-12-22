@@ -77,7 +77,7 @@ struct DeckDetailView: View {
                 }
             }
         }
-        .navigationTitle(cardSet.name ?? "Unnamed Deck")
+        .navigationTitle(cardSet.name ?? NSLocalizedString("unnamed_deck", comment: "Fallback name for decks without a name"))
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $previewCard) { card in
             let allCards = sortedGroupNames.flatMap { groupedCards[$0] ?? [] }

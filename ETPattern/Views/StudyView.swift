@@ -141,9 +141,9 @@ struct StudyView: View {
 
     private var emptyState: some View {
         SharedEmptyStateView(
-            title: "No Cards to Study",
-            subtitle: "This deck doesn't have any cards yet",
-            description: "Add some cards to this deck or import a CSV file to start studying your patterns.",
+            title: NSLocalizedString("no_cards_title", comment: "Title for empty cards state"),
+            subtitle: NSLocalizedString("no_cards_subtitle", comment: "Subtitle for empty cards state"),
+            description: NSLocalizedString("no_cards_description", comment: "Description for empty cards state"),
             icon: "waveform",
             iconColor: theme.colors.textSecondary,
             theme: theme

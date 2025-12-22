@@ -20,13 +20,13 @@ struct SettingsView: View {
     @State private var ttsPause: TimeInterval = 0
 
     private let voiceOptions = [
-        "en-US": "American English (en-US)",
-        "en-GB": "British English (en-GB)"
+        "en-US": NSLocalizedString("american_english", comment: "American English voice option"),
+        "en-GB": NSLocalizedString("british_english", comment: "British English voice option")
     ]
 
     private let orderOptions = [
-        "random": "Random Order",
-        "sequential": "Import Order"
+        "random": NSLocalizedString("random_order", comment: "Random card order option"),
+        "sequential": NSLocalizedString("import_order", comment: "Sequential/Import card order option")
     ]
 
     var body: some View {
@@ -40,7 +40,7 @@ struct SettingsView: View {
             }
             .scrollContentBackground(.hidden)
         }
-        .navigationTitle("Settings")
+        .navigationTitle(NSLocalizedString("settings", comment: "Settings screen title"))
         .onAppear {
             let stored = UserDefaults.standard.string(forKey: "selectedVoice") ?? Constants.TTS.defaultVoice
             selectedVoice = canonicalVoiceLanguage(from: stored)
@@ -54,16 +54,16 @@ struct SettingsView: View {
     private var studyModeSection: some View {
         Group {
             SharedSettingsPickerSection(
-                header: "Study Mode",
-                label: "Card Order",
+                header: NSLocalizedString("study_mode", comment: "Study mode section header"),
+                label: NSLocalizedString("card_order", comment: "Card order label"),
                 options: orderOptions,
                 selection: $cardOrderMode,
                 userDefaultsKey: "cardOrderMode"
             )
 
             SharedSettingsPickerSection(
-                header: "Auto Play Mode",
-                label: "Card Order",
+                header: NSLocalizedString("auto_play_mode", comment: "Auto play mode section header"),
+                label: NSLocalizedString("card_order", comment: "Card order label"),
                 options: orderOptions,
                 selection: $autoPlayOrderMode,
                 userDefaultsKey: "autoPlayOrderMode"
@@ -72,10 +72,10 @@ struct SettingsView: View {
     }
 
     private var ttsSection: some View {
-        Section(header: Text("Text-to-Speech").foregroundColor(theme.colors.textPrimary)) {
+        Section(header: Text(NSLocalizedString("text_to_speech", comment: "Text-to-speech section header")).foregroundColor(theme.colors.textPrimary)) {
             SharedSettingsPickerSection(
                 header: "",
-                label: "Voice",
+                label: NSLocalizedString("voice", comment: "Voice selection label"),
                 options: voiceOptions,
                 selection: $selectedVoice,
                 onChange: { newValue in
@@ -84,13 +84,13 @@ struct SettingsView: View {
             )
 
             VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
-                Text("Speech Speed: \(Int(ttsPercentage))%")
+                Text(String(format: NSLocalizedString("speech_speed_value", comment: "Speech speed display with percentage"), Int(ttsPercentage)))
                     .font(theme.metrics.subheadline)
                     .foregroundColor(theme.colors.textPrimary)
 
                 GeometryReader { geometry in
                     Slider(value: $ttsPercentage, in: Constants.TTS.minPercentage...Constants.TTS.maxPercentage, step: 10) {
-                        Text("Speech Speed")
+                        Text(NSLocalizedString("speech_speed", comment: "Speech speed slider label"))
                             .foregroundColor(theme.colors.textPrimary)
                     } minimumValueLabel: {
                         Text("50%")

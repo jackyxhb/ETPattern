@@ -25,7 +25,7 @@ struct ProgressCircle: View {
                 .rotationEffect(.degrees(-90))
                 .animation(.bouncy, value: progress)
 
-            Text("\(Int(progress * 100))%")
+            Text(String(format: NSLocalizedString("progress_percentage", comment: "Progress percentage display"), Int(progress * 100)))
                 .font(.system(size: theme.metrics.progressCircleFontSize, weight: .semibold, design: .rounded))
                 .foregroundColor(theme.colors.textPrimary)
         }

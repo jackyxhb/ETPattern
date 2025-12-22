@@ -1,0 +1,88 @@
+/* English Localizable.strings */
+
+/* Navigation Titles */
+"flashcard_decks" = "Flashcard Decks";
+"session_stats" = "Session Stats";
+"import" = "Import";
+"settings" = "Settings";
+"deck_details" = "Deck Details";
+"unnamed_deck" = "Unnamed Deck";
+
+/* Buttons */
+"done" = "Done";
+"close" = "Close";
+"cancel" = "Cancel";
+"save" = "Save";
+"delete" = "Delete";
+"export" = "Export";
+"re_import" = "Re-import";
+"ok" = "OK";
+
+/* Alerts and Messages */
+"delete_deck_confirmation" = "Are you sure you want to delete this deck? This action cannot be undone.";
+"export_deck_message" = "Export this deck as a CSV file?";
+"reimport_warning" = "This will replace all cards in the deck with the source CSV.";
+
+/* Settings */
+"study_mode" = "Study Mode";
+"auto_play_mode" = "Auto Play Mode";
+"card_order" = "Card Order";
+"text_to_speech" = "Text-to-Speech";
+"voice" = "Voice";
+"speech_speed" = "Speech Speed";
+"speech_speed_value" = "Speech Speed: %d%%";
+
+/* Voice Options */
+"american_english" = "American English (en-US)";
+"british_english" = "British English (en-GB)";
+
+/* Order Options */
+"random_order" = "Random Order";
+"import_order" = "Import Order";
+
+/* Onboarding */
+"welcome_title" = "Welcome to English Thought";
+"welcome_subtitle" = "Master 300 English expression patterns";
+"welcome_description" = "Learn natural English expressions with our comprehensive flashcard system featuring automatic text-to-speech.";
+
+"smart_learning_title" = "Smart Learning";
+"smart_learning_subtitle" = "Spaced repetition made simple";
+"smart_learning_description" = "Our algorithm helps you review cards at optimal intervals, ensuring you remember patterns long-term.";
+
+"auto_play_title" = "Auto-Play Mode";
+"auto_play_subtitle" = "Hands-free learning experience";
+"auto_play_description" = "Let the app automatically play through your cards with natural speech. Perfect for passive learning.";
+
+"ready_begin_title" = "Ready to Begin";
+"ready_begin_subtitle" = "Your English journey starts now";
+"ready_begin_description" = "Import your CSV files or start with our built-in 300 pattern deck. Happy learning!";
+
+/* Splash Screen */
+"english_thought" = "English Thought";
+"300_expression_patterns" = "300 Expression Patterns";
+
+/* Deck List */
+"cards_count" = "(%d)%@";
+"created_text" = "Created %@";
+
+/* Progress */
+"progress_percentage" = "%d%%";
+
+/* Empty States */
+"no_decks_title" = "No Decks Yet";
+"no_decks_subtitle" = "Create your first flashcard deck";
+"no_decks_description" = "Import a CSV file or start with our built-in English patterns.";
+
+"no_cards_title" = "No Cards in Deck";
+"no_cards_subtitle" = "This deck is empty";
+"no_cards_description" = "Add cards by importing a CSV file or re-importing the source data.";
+
+/* Study Actions */
+"study" = "Study";
+"auto_play" = "Auto Play";
+"browse" = "Browse";
+
+/* Error Messages */
+"import_error" = "Import Error";
+"export_error" = "Export Error";
+"tts_error" = "Text-to-Speech Error";

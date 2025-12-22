@@ -81,7 +81,7 @@ struct SessionStatsView: View {
             }
             .scrollContentBackground(.hidden)
         }
-        .navigationTitle("Session Stats")
+        .navigationTitle(NSLocalizedString("session_stats", comment: "Session statistics screen title"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {

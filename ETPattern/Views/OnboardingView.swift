@@ -16,30 +16,30 @@ struct OnboardingView: View {
     var body: some View {
         let pages = [
             SharedOnboardingPageView(
-                title: "Welcome to English Thought",
-                subtitle: "Master 300 English expression patterns",
-                description: "Learn natural English expressions with our comprehensive flashcard system featuring automatic text-to-speech.",
+                title: NSLocalizedString("welcome_title", comment: "Welcome page title"),
+                subtitle: NSLocalizedString("welcome_subtitle", comment: "Welcome page subtitle"),
+                description: NSLocalizedString("welcome_description", comment: "Welcome page description"),
                 systemImage: "sparkles",
                 gradient: theme.gradients.accent
             ),
             SharedOnboardingPageView(
-                title: "Smart Learning",
-                subtitle: "Spaced repetition made simple",
-                description: "Our algorithm helps you review cards at optimal intervals, ensuring you remember patterns long-term.",
+                title: NSLocalizedString("smart_learning_title", comment: "Smart learning page title"),
+                subtitle: NSLocalizedString("smart_learning_subtitle", comment: "Smart learning page subtitle"),
+                description: NSLocalizedString("smart_learning_description", comment: "Smart learning page description"),
                 systemImage: "brain.head.profile",
                 gradient: theme.gradients.success
             ),
             SharedOnboardingPageView(
-                title: "Auto-Play Mode",
-                subtitle: "Hands-free learning experience",
-                description: "Let the app automatically play through your cards with natural speech. Perfect for passive learning.",
+                title: NSLocalizedString("auto_play_title", comment: "Auto play page title"),
+                subtitle: NSLocalizedString("auto_play_subtitle", comment: "Auto play page subtitle"),
+                description: NSLocalizedString("auto_play_description", comment: "Auto play page description"),
                 systemImage: "waveform",
                 gradient: theme.gradients.card
             ),
             SharedOnboardingPageView(
-                title: "Ready to Begin",
-                subtitle: "Your English journey starts now",
-                description: "Import your CSV files or start with our built-in 300 pattern deck. Happy learning!",
+                title: NSLocalizedString("ready_begin_title", comment: "Ready to begin page title"),
+                subtitle: NSLocalizedString("ready_begin_subtitle", comment: "Ready to begin page subtitle"),
+                description: NSLocalizedString("ready_begin_description", comment: "Ready to begin page description"),
                 systemImage: "checkmark.circle.fill",
                 gradient: theme.gradients.accent
             )

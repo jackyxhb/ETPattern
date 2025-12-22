@@ -66,10 +66,10 @@ struct DeckListView: View {
             VStack(alignment: .leading, spacing: theme.metrics.deckCardInnerSpacing) {
                 HStack {
                     VStack(alignment: .leading, spacing: theme.metrics.deckCardTextSpacing) {
-                        Text("(\(cardCount))\(cardSet.name ?? "Unnamed Deck")")
+                        Text(String(format: NSLocalizedString("cards_count", comment: "Card count display format"), cardCount, cardSet.name ?? NSLocalizedString("unnamed_deck", comment: "Fallback name for decks without a name")))
                             .font(.headline)
                             .foregroundColor(theme.colors.textPrimary)
-                        Text("Created \(createdText)")
+                        Text(String(format: NSLocalizedString("created_text", comment: "Created date display format"), createdText))
                             .font(.caption)
                             .foregroundColor(theme.colors.textSecondary)
                     }

@@ -37,7 +37,7 @@ struct ContentView: View {
 
                 mainContent
             }
-            .navigationTitle("Flashcard Decks")
+            .navigationTitle(NSLocalizedString("flashcard_decks", comment: "Main screen title"))
             .navigationBarHidden(true) // Custom header
         }
         .safeAreaInset(edge: .bottom) {
@@ -64,11 +64,11 @@ struct ContentView: View {
         .sheet(isPresented: $viewModel.uiState.showingSessionStats) {
             NavigationView {
                 SessionStatsView()
-                    .navigationTitle("Session Stats")
+                    .navigationTitle(NSLocalizedString("session_stats", comment: "Session statistics screen title"))
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button("Done") { viewModel.uiState.showingSessionStats = false }
+                            Button(NSLocalizedString("done", comment: "Done button")) { viewModel.uiState.showingSessionStats = false }
                         }
                     }
                     .toolbarBackground(.ultraThinMaterial.opacity(0.8), for: .navigationBar)
@@ -79,11 +79,11 @@ struct ContentView: View {
         .sheet(isPresented: $viewModel.uiState.showingImport) {
             NavigationView {
                 ImportView()
-                    .navigationTitle("Import")
+                    .navigationTitle(NSLocalizedString("import", comment: "Import screen title"))
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button("Done") { viewModel.uiState.showingImport = false }
+                            Button(NSLocalizedString("done", comment: "Done button")) { viewModel.uiState.showingImport = false }
                         }
                     }
                     .toolbarBackground(.ultraThinMaterial.opacity(0.8), for: .navigationBar)
@@ -94,11 +94,11 @@ struct ContentView: View {
         .sheet(isPresented: $viewModel.uiState.showingSettings) {
             NavigationView {
                 SettingsView()
-                    .navigationTitle("Settings")
+                    .navigationTitle(NSLocalizedString("settings", comment: "Settings screen title"))
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button("Done") { viewModel.uiState.showingSettings = false }
+                            Button(NSLocalizedString("done", comment: "Done button")) { viewModel.uiState.showingSettings = false }
                         }
                     }
                     .toolbarBackground(.ultraThinMaterial.opacity(0.8), for: .navigationBar)
@@ -109,11 +109,11 @@ struct ContentView: View {
         .sheet(item: $viewModel.uiState.browseCardSet) { deck in
             NavigationView {
                 DeckDetailView(cardSet: deck)
-                    .navigationTitle(deck.name ?? "Deck Details")
+                    .navigationTitle(deck.name ?? NSLocalizedString("unnamed_deck", comment: "Fallback name for decks without a name"))
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button("Close") { viewModel.uiState.browseCardSet = nil }
+                            Button(NSLocalizedString("close", comment: "Close button")) { viewModel.uiState.browseCardSet = nil }
                         }
                     }
                     .toolbarBackground(.ultraThinMaterial.opacity(0.8), for: .navigationBar)
@@ -123,36 +123,36 @@ struct ContentView: View {
         }
         .alert("Rename Deck", isPresented: $viewModel.uiState.showingRenameAlert) {
             TextField("Deck Name", text: $viewModel.uiState.newName)
-            Button("Cancel", role: .cancel) {}
-            Button("Save") {
+            Button(NSLocalizedString("cancel", comment: "Cancel button"), role: .cancel) {}
+            Button(NSLocalizedString("save", comment: "Save button")) {
                 viewModel.performRename()
             }
         }
         .alert("Delete Deck", isPresented: $viewModel.uiState.showingDeleteAlert) {
-            Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive) {
+            Button(NSLocalizedString("cancel", comment: "Cancel button"), role: .cancel) {}
+            Button(NSLocalizedString("delete", comment: "Delete button"), role: .destructive) {
                 viewModel.performDelete()
             }
         } message: {
-            Text("Are you sure you want to delete this deck? This action cannot be undone.")
+            Text(NSLocalizedString("delete_deck_confirmation", comment: "Confirmation message for deleting a deck"))
         }
         .alert("Export Deck", isPresented: $viewModel.uiState.showingExportAlert) {
-            Button("Cancel", role: .cancel) {}
-            Button("Export") {
+            Button(NSLocalizedString("cancel", comment: "Cancel button"), role: .cancel) {}
+            Button(NSLocalizedString("export", comment: "Export button")) {
                 if let cardSet = viewModel.uiState.selectedCardSet {
                     viewModel.exportDeck(cardSet)
                 }
             }
         } message: {
-            Text("Export this deck as a CSV file?")
+            Text(NSLocalizedString("export_deck_message", comment: "Message asking if user wants to export deck"))
         }
         .alert("Re-import Deck", isPresented: $viewModel.uiState.showingReimportAlert) {
-            Button("Cancel", role: .cancel) {}
-            Button("Re-import", role: .destructive) {
+            Button(NSLocalizedString("cancel", comment: "Cancel button"), role: .cancel) {}
+            Button(NSLocalizedString("re_import", comment: "Re-import button"), role: .destructive) {
                 viewModel.performReimport()
             }
         } message: {
-            Text("This will replace all cards in the deck with the source CSV.")
+            Text(NSLocalizedString("reimport_warning", comment: "Warning about reimport replacing cards"))
         }
         .fileImporter(
             isPresented: $viewModel.uiState.showingReimportFilePicker,
@@ -162,7 +162,7 @@ struct ContentView: View {
             viewModel.handleReimportFileSelection(result)
         }
         .alert(viewModel.uiState.errorTitle, isPresented: $viewModel.uiState.showErrorAlert) {
-            Button("OK", role: .cancel) {}
+            Button(NSLocalizedString("ok", comment: "OK button"), role: .cancel) {}
         } message: {
             Text(viewModel.uiState.errorMessage)
         }
@@ -200,8 +200,8 @@ struct ContentView: View {
 
     private var emptyStateView: some View {
         SharedEmptyStateView(
-            title: "No Decks Yet",
-            description: "Create your first flashcard deck or import CSV files to get started with learning English patterns.",
+            title: NSLocalizedString("no_decks_title", comment: "Title for empty decks state"),
+            description: NSLocalizedString("no_decks_description", comment: "Description for empty decks state"),
             theme: theme,
             circleSize: theme.metrics.emptyStateCircleSize,
             circleOpacity: theme.metrics.emptyStateCircleOpacity,
@@ -260,13 +260,16 @@ private struct CardSetActionBar: View {
         VStack(spacing: 0) {
             HStack(spacing: theme.metrics.actionBarButtonSpacing) {
                 ActionButton(
-                    title: "Study", systemImage: "book", gradient: theme.gradients.accent,
+                    title: NSLocalizedString("study", comment: "Study action button"),
+                    systemImage: "book", gradient: theme.gradients.accent,
                     action: onStudy)
                 ActionButton(
-                    title: "Auto", systemImage: "waveform", gradient: theme.gradients.success,
+                    title: NSLocalizedString("auto_play", comment: "Auto play action button"),
+                    systemImage: "waveform", gradient: theme.gradients.success,
                     action: onAuto)
                 ActionButton(
-                    title: "Browse", systemImage: "list.bullet", gradient: theme.gradients.neutral,
+                    title: NSLocalizedString("browse", comment: "Browse action button"),
+                    systemImage: "list.bullet", gradient: theme.gradients.neutral,
                     action: onBrowse)
             }
             .padding(.horizontal, theme.metrics.actionBarHorizontalPadding)

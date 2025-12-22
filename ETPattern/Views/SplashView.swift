@@ -46,11 +46,11 @@ struct SplashView: View {
                     .frame(width: theme.metrics.splashLogoSize, height: theme.metrics.splashLogoSize)
                     .shadow(color: theme.colors.shadow, radius: theme.metrics.splashShadowRadius, y: theme.metrics.splashShadowY)
 
-                Text("English Thought")
+                Text(NSLocalizedString("english_thought", comment: "App name on splash screen"))
                     .font(.title2.bold())
                     .foregroundStyle(.white)
 
-                Text("300 Expression Patterns")
+                Text(NSLocalizedString("300_expression_patterns", comment: "App tagline on splash screen"))
                     .font(.subheadline)
                     .foregroundStyle(.white.opacity(0.7))
                     .tracking(0.5)

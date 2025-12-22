@@ -1,0 +1,88 @@
+/* Spanish Localizable.strings */
+
+/* Navigation Titles */
+"flashcard_decks" = "Barajas de Tarjetas";
+"session_stats" = "Estadísticas de Sesión";
+"import" = "Importar";
+"settings" = "Configuración";
+"deck_details" = "Detalles de Baraja";
+"unnamed_deck" = "Baraja Sin Nombre";
+
+/* Buttons */
+"done" = "Hecho";
+"close" = "Cerrar";
+"cancel" = "Cancelar";
+"save" = "Guardar";
+"delete" = "Eliminar";
+"export" = "Exportar";
+"re_import" = "Re-importar";
+"ok" = "OK";
+
+/* Alerts and Messages */
+"delete_deck_confirmation" = "¿Estás seguro de que quieres eliminar esta baraja? Esta acción no se puede deshacer.";
+"export_deck_message" = "¿Exportar esta baraja como archivo CSV?";
+"reimport_warning" = "Esto reemplazará todas las tarjetas de la baraja con el CSV fuente.";
+
+/* Settings */
+"study_mode" = "Modo de Estudio";
+"auto_play_mode" = "Modo Reproducción Automática";
+"card_order" = "Orden de Tarjetas";
+"text_to_speech" = "Texto a Voz";
+"voice" = "Voz";
+"speech_speed" = "Velocidad de Habla";
+"speech_speed_value" = "Velocidad de Habla: %d%%";
+
+/* Voice Options */
+"american_english" = "Inglés Americano (en-US)";
+"british_english" = "Inglés Británico (en-GB)";
+
+/* Order Options */
+"random_order" = "Orden Aleatorio";
+"import_order" = "Orden de Importación";
+
+/* Onboarding */
+"welcome_title" = "Bienvenido a English Thought";
+"welcome_subtitle" = "Domina 300 patrones de expresión en inglés";
+"welcome_description" = "Aprende expresiones naturales en inglés con nuestro sistema completo de tarjetas con conversión automática de texto a voz.";
+
+"smart_learning_title" = "Aprendizaje Inteligente";
+"smart_learning_subtitle" = "Repetición espaciada simplificada";
+"smart_learning_description" = "Nuestro algoritmo te ayuda a revisar tarjetas en intervalos óptimos, asegurando que recuerdes los patrones a largo plazo.";
+
+"auto_play_title" = "Modo Reproducción Automática";
+"auto_play_subtitle" = "Experiencia de aprendizaje sin manos";
+"auto_play_description" = "Deja que la app reproduzca automáticamente tus tarjetas con habla natural. Perfecto para aprendizaje pasivo.";
+
+"ready_begin_title" = "Listo para Comenzar";
+"ready_begin_subtitle" = "Tu viaje de inglés comienza ahora";
+"ready_begin_description" = "Importa tus archivos CSV o comienza con nuestra baraja integrada de 300 patrones. ¡Feliz aprendizaje!";
+
+/* Splash Screen */
+"english_thought" = "English Thought";
+"300_expression_patterns" = "300 Patrones de Expresión";
+
+/* Deck List */
+"cards_count" = "(%d)%@";
+"created_text" = "Creado %@";
+
+/* Progress */
+"progress_percentage" = "%d%%";
+
+/* Empty States */
+"no_decks_title" = "Aún No Hay Barajas";
+"no_decks_subtitle" = "Crea tu primera baraja de tarjetas";
+"no_decks_description" = "Importa un archivo CSV o comienza con nuestros patrones integrados de inglés.";
+
+"no_cards_title" = "No Hay Tarjetas en la Baraja";
+"no_cards_subtitle" = "Esta baraja está vacía";
+"no_cards_description" = "Agrega tarjetas importando un archivo CSV o reimportando los datos fuente.";
+
+/* Study Actions */
+"study" = "Estudiar";
+"auto_play" = "Reproducción Automática";
+"browse" = "Explorar";
+
+/* Error Messages */
+"import_error" = "Error de Importación";
+"export_error" = "Error de Exportación";
+"tts_error" = "Error de Texto a Voz";
