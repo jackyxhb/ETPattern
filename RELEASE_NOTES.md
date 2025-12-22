@@ -1,15 +1,39 @@
-# English Thought v1.7.0 - English Pattern Flashcard App
+# English Thought v1.8.0 - English Pattern Flashcard App
 
 ## 🎉 Release Notes
 
-**Release Date:** December 22, 2025
-**Version:** 1.7.0
+**Release Date:** December 23, 2025
+**Version:** 1.8.0
 **Platform:** iOS 16.0+
 **Device:** iPhone 16 and later
 
 ---
 
 ## ✨ What's New
+
+### What's New (v1.8.0)
+
+### 🔁 Sync & Stability
+- Fixed intermittent audio overlap in Auto Play and improved quick-deck switching reliability.
+
+### 🈶 Chinese Translations
+- Added Chinese translations for each pattern and its five example sentences using the native Apple translation framework. Translations are fetched on demand, cached locally for offline access, and can be toggled on or off in the app settings.
+
+### 🧩 Import & Parsing
+- CSV importer now trims whitespace, tolerates minor tag formatting, and recovers gracefully from small malformed rows.
+
+### ⚙️ Installer & CI
+- `install.sh` improved for newer macOS releases; CI scripts updated for faster simulator selection.
+
+### ♿ Accessibility & Localization
+- Enhanced VoiceOver labels and improved localized strings in `es.lproj` and `en.lproj`.
+
+### 🚀 Performance & Fixes
+- Reduced main-thread work during deck load; several crash fixes and UI responsiveness improvements.
+
+---
+
+## Previous Release — v1.7.0
 
 ### 🆔 Global Unique Card IDs
 - **Unique Identifier System**: Implemented globally unique card identifiers across all imported decks to prevent content duplication issues.

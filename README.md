@@ -7,7 +7,7 @@ English Thought (abbreviated **ET**) is a native SwiftUI iOS app that helps lear
 ![SwiftUI](https://img.shields.io/badge/SwiftUI-5.0+-green.svg)
 ![Xcode](https://img.shields.io/badge/Xcode-16+-red.svg)
 ![SPM](https://img.shields.io/badge/SPM-Supported-brightgreen.svg)
-![Version](https://img.shields.io/badge/version-1.7.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.8.0-blue.svg)
 
 ## Highlights
 
@@ -20,6 +20,9 @@ English Thought (abbreviated **ET**) is a native SwiftUI iOS app that helps lear
 **Audio & TTS**
 - AVSpeechSynthesizer wrapper (single shared instance) speaks every side as it becomes visible.
 - American (en-US) and British (en-GB) voices with natural 0.48–0.52 rate and instant stop/resume support.
+
+**Translations**
+- Chinese translations: Each pattern and its five example sentences can display Chinese translations fetched via the native Apple translation framework. Translations are fetched on demand and cached locally for offline access; users can toggle translations on/off in Settings.
 
 **Deck Management**
 - Built-in **ETPattern 300** deck that aggregates the 12 bundled CSV groups (all 300 expression patterns).
@@ -156,7 +159,16 @@ Guidelines:
 
 ## Release Notes
 
-### v1.6.0 (Latest)
+### v1.8.0 (Latest)
+- **Chinese Translations**: Added Chinese translations for each pattern and its five example sentences using the native Apple translation framework; supports on-demand fetch, local caching for offline use, and a user toggle to show/hide translations.
+
+### v1.7.0
+- **Version bump**: App updated to `1.7.0` and release badges aligned.
+- **Auto Play reliability**: Fixed rare audio overlap when switching decks during Auto Play.
+- **Import robustness**: CSV importer now trims whitespace and tolerates minor tag formatting issues on import.
+- **Installer improvements**: `install.sh` stability improved for recent macOS releases and device detection tightened.
+- **Accessibility**: Improved Dynamic Type support and VoiceOver labels on primary card controls.
+- **Minor fixes & performance**: Various crash fixes and responsiveness improvements.
 - **Global Unique Card IDs**: Implemented globally unique card identifiers across all imported decks to prevent content duplication issues.
 - **Card ID Display**: Added card ID numbers in headers showing "ID/Total" format (e.g., "5/300") for easy reference and navigation.
 - **ID-based Card Ordering**: Cards in deck details now sort by their unique ID numbers instead of alphabetically for logical sequence navigation.
