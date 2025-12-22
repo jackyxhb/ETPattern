@@ -24,6 +24,7 @@ struct DeckListView: View {
                         } label: {
                             Label("Delete", systemImage: "trash")
                         }
+                        .disabled(viewModel.uiState.isReimporting || viewModel.uiState.isDeletingDeck)
                     }
             }
             
@@ -47,22 +48,29 @@ struct DeckListView: View {
         } label: {
             Label("Rename", systemImage: "pencil")
         }
+        .disabled(viewModel.uiState.isReimporting || viewModel.uiState.isDeletingDeck)
+        
         Button {
             viewModel.promptReimport(for: cardSet)
         } label: {
             Label("Re-import", systemImage: "arrow.clockwise")
         }
+        .disabled(viewModel.uiState.isReimporting || viewModel.uiState.isDeletingDeck)
+        
         Button {
             viewModel.uiState.selectedCardSet = cardSet
             viewModel.uiState.showingExportAlert = true
         } label: {
             Label("Export", systemImage: "square.and.arrow.up")
         }
+        .disabled(viewModel.uiState.isReimporting || viewModel.uiState.isDeletingDeck)
+        
         Button(role: .destructive) {
             viewModel.promptDelete(for: cardSet)
         } label: {
             Label("Delete", systemImage: "trash")
         }
+        .disabled(viewModel.uiState.isReimporting || viewModel.uiState.isDeletingDeck)
     }
 
     private func deckCard(for cardSet: CardSet) -> some View {

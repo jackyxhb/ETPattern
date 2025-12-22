@@ -107,6 +107,7 @@ class ContentViewModel: ObservableObject {
     }
 
     func addCardSet() {
+        uiState.isCreatingDeck = true
         Task {
             do {
                 let _ = try await cardSetRepository.createCardSet(name: NSLocalizedString("new_deck", comment: "Default name for new decks"))
@@ -116,10 +117,12 @@ class ContentViewModel: ObservableObject {
                 showError(title: NSLocalizedString("create_deck_failed", comment: "Error title for failed deck creation"),
                          message: error.localizedDescription)
             }
+            uiState.isCreatingDeck = false
         }
     }
 
     func deleteCardSet(_ cardSet: CardSet) {
+        uiState.isDeletingDeck = true
         Task {
             do {
                 try await cardSetRepository.deleteCardSet(cardSet)
@@ -132,6 +135,7 @@ class ContentViewModel: ObservableObject {
                 showError(title: NSLocalizedString("delete_deck_failed", comment: "Error title for failed deck deletion"),
                          message: error.localizedDescription)
             }
+            uiState.isDeletingDeck = false
         }
     }
 
@@ -251,6 +255,7 @@ class ContentViewModel: ObservableObject {
 
 
     private func reimportBundledDeck(_ cardSet: CardSet, kind: CSVService.BundledDeckKind) {
+        uiState.isReimporting = true
         Task {
             do {
                 let (importedCount, failures) = try await csvService.reimportBundledDeck(cardSet, kind: kind)
@@ -263,10 +268,12 @@ class ContentViewModel: ObservableObject {
                 showError(title: NSLocalizedString("reimport_failed", comment: "Error title for failed reimport"),
                          message: error.localizedDescription)
             }
+            uiState.isReimporting = false
         }
     }
 
     private func reimportCustomDeck(_ cardSet: CardSet, from url: URL) {
+        uiState.isReimporting = true
         Task {
             do {
                 let importedCount = try await csvService.reimportCustomDeck(cardSet, from: url)
@@ -274,6 +281,7 @@ class ContentViewModel: ObservableObject {
                 showError(title: NSLocalizedString("reimport_failed", comment: "Error title for failed reimport"),
                          message: error.localizedDescription)
             }
+            uiState.isReimporting = false
         }
     }
 }
@@ -298,6 +306,9 @@ struct UIState {
     var showingSettings = false
     var showingHeaderMenu = false
     var showingOnboarding = false
+    var isReimporting = false
+    var isCreatingDeck = false
+    var isDeletingDeck = false
 
     mutating func clearSelection() {
         selectedCardSet = nil

@@ -156,6 +156,9 @@ struct ContentView: View {
                 if viewModel.isLoadingCardSets && viewModel.cardSets.isEmpty {
                     loadingStateView
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if let error = viewModel.cardSetsError {
+                    errorStateView(error: error)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if viewModel.cardSets.isEmpty && !viewModel.isLoadingCardSets {
                     emptyStateView
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -181,6 +184,42 @@ struct ContentView: View {
         }
     }
 
+    private func errorStateView(error: AppError) -> some View {
+        VStack(spacing: theme.metrics.emptyStateVerticalSpacing) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: theme.metrics.emptyStateIconSize))
+                .foregroundColor(theme.colors.danger)
+            
+            Text("Failed to Load Decks")
+                .font(.headline)
+                .foregroundColor(theme.colors.textPrimary)
+                .dynamicTypeSize(.large ... .accessibility5)
+            
+            Text(error.localizedDescription)
+                .font(.subheadline)
+                .foregroundColor(theme.colors.textSecondary)
+                .multilineTextAlignment(.center)
+                .dynamicTypeSize(.large ... .accessibility5)
+                .padding(.horizontal)
+            
+            Button {
+                Task {
+                    await viewModel.refreshCardSets()
+                }
+            } label: {
+                Text("Try Again")
+                    .font(.headline)
+                    .foregroundColor(theme.colors.textPrimary)
+                    .padding(.horizontal, theme.metrics.emptyStateButtonHorizontalPadding)
+                    .padding(.vertical, theme.metrics.emptyStateButtonVerticalPadding)
+                    .background(theme.gradients.accent)
+                    .clipShape(RoundedRectangle(cornerRadius: theme.metrics.emptyStateButtonCornerRadius))
+                    .dynamicTypeSize(.large ... .accessibility5)
+            }
+        }
+        .padding(.horizontal, theme.metrics.emptyStateHorizontalPadding)
+    }
+
     private var emptyStateView: some View {
         SharedEmptyStateView(
             title: NSLocalizedString("no_decks_title", comment: "Title for empty decks state"),
@@ -201,7 +240,7 @@ struct ContentView: View {
                     UIImpactFeedbackGenerator.mediumImpact()
                     viewModel.addCardSet()
                 }) {
-                    Label("Create New Deck", systemImage: "plus")
+                    Label(viewModel.uiState.isCreatingDeck ? "Creating..." : "Create New Deck", systemImage: "plus")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, theme.metrics.emptyStateButtonVerticalPadding)
@@ -210,6 +249,7 @@ struct ContentView: View {
                         .clipShape(RoundedRectangle(cornerRadius: theme.metrics.emptyStateButtonCornerRadius, style: .continuous))
                         .dynamicTypeSize(.large ... .accessibility5)
                 }
+                .disabled(viewModel.uiState.isCreatingDeck || viewModel.uiState.isReimporting)
 
                 Button(action: {
                     UIImpactFeedbackGenerator.lightImpact()

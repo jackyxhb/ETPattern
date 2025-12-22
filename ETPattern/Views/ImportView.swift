@@ -106,6 +106,44 @@ struct ImportView: View {
                         .dynamicTypeSize(.large ... .accessibility5)
                 }
 
+                if let errorMessage = importError, !isImporting {
+                    VStack(spacing: theme.metrics.smallSpacing) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(theme.colors.danger)
+                            .font(.title2)
+                        
+                        Text("Import Failed")
+                            .font(.headline)
+                            .foregroundColor(theme.colors.danger)
+                            .dynamicTypeSize(.large ... .accessibility5)
+                        
+                        Text(errorMessage)
+                            .font(.subheadline)
+                            .foregroundColor(theme.colors.textSecondary)
+                            .multilineTextAlignment(.center)
+                            .dynamicTypeSize(.large ... .accessibility5)
+                            .padding(.horizontal)
+                        
+                        Button(role: .cancel, action: {
+                            importError = nil
+                            showErrorAlert = false
+                        }) {
+                            Text("Dismiss")
+                                .font(.subheadline)
+                                .foregroundColor(theme.colors.textPrimary)
+                                .padding(.horizontal, theme.metrics.emptyStateButtonHorizontalPadding)
+                                .padding(.vertical, theme.metrics.emptyStateButtonVerticalPadding / 2)
+                                .background(theme.colors.surfaceLight.opacity(0.5))
+                                .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cornerRadius / 2))
+                                .dynamicTypeSize(.large ... .accessibility5)
+                        }
+                    }
+                    .padding(.vertical, theme.metrics.mediumSpacing)
+                    .padding(.horizontal, theme.metrics.mediumSpacing)
+                    .background(theme.colors.danger.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cornerRadius))
+                }
+
                 Spacer()
                     }
                     .padding(theme.metrics.largeSpacing)
