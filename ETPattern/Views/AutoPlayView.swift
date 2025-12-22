@@ -20,7 +20,7 @@ struct AutoPlayView: View {
     @State private var currentCard: Card?
     @State private var isFlipped = false
     @State private var isPlaying = true
-    @State private var scheduledTask: DispatchWorkItem?
+    @State private var currentTask: Task<Void, Never>?
     @State private var resumePhase: AutoPlayPhase = .front
     @State private var speechToken = UUID()
     @State private var cardToken = UUID()
@@ -205,7 +205,7 @@ struct AutoPlayView: View {
 
         // Completely stop current speech and reset all state
         ttsService.stop()
-        scheduledTask?.cancel()
+        currentTask?.cancel()
 
         // Generate new token to invalidate any pending operations
         let newToken = UUID()
@@ -226,10 +226,17 @@ struct AutoPlayView: View {
         // If playing, start fresh auto-play sequence for the new card
         // Use a small delay to ensure TTS state is fully reset
         if isPlaying {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                // Double-check we're still in the same state
-                guard self.isPlaying, self.speechToken == newToken else { return }
-                self.playFrontSide()
+            currentTask = Task {
+                do {
+                    try await Task.sleep(for: .milliseconds(100))
+                    // Double-check we're still in the same state
+                    guard !Task.isCancelled, isPlaying, speechToken == newToken else { return }
+                    await MainActor.run {
+                        playFrontSide()
+                    }
+                } catch {
+                    // Task was cancelled, ignore
+                }
             }
         }
     }
@@ -239,7 +246,7 @@ struct AutoPlayView: View {
 
         // Completely stop current speech and reset all state
         ttsService.stop()
-        scheduledTask?.cancel()
+        currentTask?.cancel()
 
         // Generate new token to invalidate any pending operations
         let newToken = UUID()
@@ -260,10 +267,17 @@ struct AutoPlayView: View {
         // If playing, start fresh auto-play sequence for the new card
         // Use a small delay to ensure TTS state is fully reset
         if isPlaying {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                // Double-check we're still in the same state
-                guard self.isPlaying, self.speechToken == newToken else { return }
-                self.playFrontSide()
+            currentTask = Task {
+                do {
+                    try await Task.sleep(for: .milliseconds(100))
+                    // Double-check we're still in the same state
+                    guard !Task.isCancelled, isPlaying, speechToken == newToken else { return }
+                    await MainActor.run {
+                        playFrontSide()
+                    }
+                } catch {
+                    // Task was cancelled, ignore
+                }
             }
         }
 
@@ -302,17 +316,22 @@ struct AutoPlayView: View {
     }
 
     private func schedule(after interval: TimeInterval, token: UUID, action: @escaping () -> Void) {
-        scheduledTask?.cancel()
-        let workItem = DispatchWorkItem {
-            guard speechToken == token else { return }
-            action()
+        currentTask?.cancel()
+        currentTask = Task {
+            do {
+                try await Task.sleep(for: .seconds(interval))
+                guard !Task.isCancelled, speechToken == token else { return }
+                await MainActor.run {
+                    action()
+                }
+            } catch {
+                // Task was cancelled, ignore
+            }
         }
-        scheduledTask = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + interval, execute: workItem)
     }
 
     private func resetSpeechFlow() {
-        scheduledTask?.cancel()
+        currentTask?.cancel()
         speechToken = UUID()
         cardToken = UUID()
         activePhase = .front
@@ -320,7 +339,7 @@ struct AutoPlayView: View {
     }
 
     private func beginCard() -> UUID {
-        scheduledTask?.cancel()
+        currentTask?.cancel()
         activePhase = .front
         let token = UUID()
         cardToken = token
@@ -348,7 +367,7 @@ struct AutoPlayView: View {
 
         ttsService.speak(text) {
             // Triple-check token and state are still valid before advancing
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 guard self.isPlaying, self.cardToken == currentCardToken, self.activePhase == phase else { return }
                 self.advance(from: phase)
             }
@@ -365,13 +384,18 @@ struct AutoPlayView: View {
     }
 
     private func enqueueNextCard() {
-        scheduledTask?.cancel()
-        let workItem = DispatchWorkItem {
-            guard self.isPlaying else { return }
-            self.moveToNextCard()
+        currentTask?.cancel()
+        currentTask = Task {
+            do {
+                try await Task.sleep(for: .seconds(interCardDelay))
+                guard !Task.isCancelled, isPlaying else { return }
+                await MainActor.run {
+                    moveToNextCard()
+                }
+            } catch {
+                // Task was cancelled, ignore
+            }
         }
-        scheduledTask = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + interCardDelay, execute: workItem)
     }
 
     private func fallbackDelay(for phase: AutoPlayPhase) -> TimeInterval {

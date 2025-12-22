@@ -11,7 +11,6 @@ import CoreData
 @main
 struct ETPatternApp: App {
     let persistenceController = PersistenceController.shared
-    @StateObject private var ttsService = TTSService()
 
     init() {
         // Initialize default settings if not already set
@@ -24,7 +23,7 @@ struct ETPatternApp: App {
                 ContentView()
             }
             .environment(\.managedObjectContext, persistenceController.container.viewContext)
-            .environmentObject(ttsService)
+            .environmentObject(TTSService.shared)
             .environment(\.theme, Theme.default)
         }
     }

@@ -10,7 +10,10 @@ import AVFoundation
 @preconcurrency import Combine
 
 @MainActor
-class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unchecked Sendable {
+class TTSService: NSObject, AVSpeechSynthesizerDelegate, @preconcurrency ObservableObject, @unchecked Sendable {
+    // MARK: - Singleton
+    static let shared = TTSService()
+    
     let objectWillChange = PassthroughSubject<Void, Never>()
     private let synthesizer = AVSpeechSynthesizer()
     // Stores the user selection (either language like "en-US" or a concrete voice identifier).
@@ -33,7 +36,7 @@ class TTSService: NSObject, AVSpeechSynthesizerDelegate, ObservableObject, @unch
     @Published var isSpeaking = false
     @Published var errorMessage: String?
 
-    override init() {
+    override private init() {
         let storedPreference = UserDefaults.standard.string(forKey: "selectedVoice") ?? Constants.TTS.defaultVoice
         self.voicePreference = storedPreference
         self.resolvedVoiceIdentifier = nil

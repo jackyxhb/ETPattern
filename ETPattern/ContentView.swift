@@ -205,11 +205,6 @@ struct ContentView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     DeckListView(viewModel: viewModel, cardSets: viewModel.cardSets)
-                        .onAppear {
-                            Task {
-                                await viewModel.loadInitialCardSets()
-                            }
-                        }
                 }
             }
         }
@@ -340,5 +335,5 @@ private struct CardSetActionBar: View {
 #Preview {
     ContentView()
         .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
-        .environmentObject(TTSService())
+        .environmentObject(TTSService.shared)
 }

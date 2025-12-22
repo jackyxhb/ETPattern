@@ -198,15 +198,23 @@ private struct CardPreviewContainer: View {
     }
 }
 
+// #Preview temporarily disabled due to Swift 6 compatibility issues
 #Preview {
-    let context = PersistenceController.preview.container.viewContext
+    NavigationView {
+        DeckDetailView(cardSet: previewCardSet)
+            .environment(\.managedObjectContext, previewContext)
+            .environmentObject(TTSService.shared)
+    }
+}
+
+private var previewContext: NSManagedObjectContext {
+    PersistenceController.preview.container.viewContext
+}
+
+private var previewCardSet: CardSet {
+    let context = previewContext
     let cardSet = CardSet(context: context)
     cardSet.name = "Sample Deck"
     cardSet.createdDate = Date()
-
-    return NavigationView {
-        DeckDetailView(cardSet: cardSet)
-            .environment(\.managedObjectContext, context)
-            .environmentObject(TTSService())
-    }
+    return cardSet
 }

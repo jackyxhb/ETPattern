@@ -22,6 +22,7 @@ struct StudyView: View {
     @State private var showSwipeFeedback = false
     @State private var swipeDirection: SwipeDirection?
     @State private var isSwipeInProgress = false
+    @State private var swipeTask: Task<Void, Never>?
 
     init(cardSet: CardSet) {
         self.cardSet = cardSet
@@ -223,6 +224,9 @@ struct StudyView: View {
     private func handleSwipe(_ direction: SwipeDirection) {
         guard let currentCard = currentCard else { return }
 
+        // Cancel any existing swipe task
+        swipeTask?.cancel()
+
         // Update spaced repetition data
         let spacedRepetitionService = SpacedRepetitionService()
         let rating: DifficultyRating = direction == .right ? .easy : .again
@@ -240,23 +244,45 @@ struct StudyView: View {
         generator.impactOccurred()
 
         // Move to next card after a brief delay to show feedback
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            withAnimation {
-                sessionManager.moveToNext()
-                updateCurrentCard()
-                sessionManager.saveProgress()
-                // Reset to front side for new card
-                isFlipped = false
-                // Stop any ongoing speech
-                ttsService.stop()
-                // Auto-read the new card
-                speakCurrentText()
+        swipeTask = Task {
+            do {
+                try await Task.sleep(for: .milliseconds(500))
+                guard !Task.isCancelled else { return }
+                await MainActor.run {
+                    withAnimation {
+                        sessionManager.moveToNext()
+                        updateCurrentCard()
+                        sessionManager.saveProgress()
+                        // Reset to front side for new card
+                        isFlipped = false
+                        // Stop any ongoing speech
+                        ttsService.stop()
+                        // Auto-read the new card
+                        speakCurrentText()
+                    }
+                }
+            } catch {
+                // Task was cancelled, ignore
             }
         }
     }
 }
+
+// #Preview temporarily disabled due to Swift 6 compatibility issues
 #Preview {
-    let context = PersistenceController.preview.container.viewContext
+    NavigationView {
+        StudyView(cardSet: previewCardSet)
+            .environment(\.managedObjectContext, previewContext)
+            .environmentObject(TTSService.shared)
+    }
+}
+
+private var previewContext: NSManagedObjectContext {
+    PersistenceController.preview.container.viewContext
+}
+
+private var previewCardSet: CardSet {
+    let context = previewContext
     let cardSet = CardSet(context: context)
     cardSet.name = "Sample Deck"
 
@@ -264,10 +290,6 @@ struct StudyView: View {
     card.front = "I think..."
     card.back = "Example 1<br>Example 2<br>Example 3<br>Example 4<br>Example 5"
     card.cardSet = cardSet
-
-    return NavigationView {
-        StudyView(cardSet: cardSet)
-            .environment(\.managedObjectContext, context)
-            .environmentObject(TTSService())
-    }
+    
+    return cardSet
 }
