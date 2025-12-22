@@ -15,11 +15,11 @@ struct ThemeUsageExample: View {
             // Using theme colors
             Text("Primary Text")
                 .foregroundColor(theme.colors.textPrimary)
-                .font(theme.typography.title)
+                .font(theme.metrics.title)
 
             Text("Secondary Text")
                 .foregroundColor(theme.colors.textSecondary)
-                .font(theme.typography.body)
+                .font(theme.metrics.body)
 
             // Using theme gradients
             RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
@@ -28,7 +28,7 @@ struct ThemeUsageExample: View {
                 .overlay(
                     Text("Accent Button")
                         .foregroundColor(theme.colors.textPrimary)
-                        .font(theme.typography.headline)
+                        .font(theme.metrics.headline)
                 )
 
             // Using theme spacing and metrics

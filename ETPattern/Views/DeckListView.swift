@@ -14,7 +14,7 @@ struct DeckListView: View {
     @Environment(\.theme) var theme
 
     var body: some View {
-        LazyVStack(spacing: 14) {
+        LazyVStack(spacing: theme.metrics.deckListSpacing) {
             ForEach(cardSets) { cardSet in
                 deckCard(for: cardSet)
                     .contextMenu { contextMenu(for: cardSet) }
@@ -27,7 +27,7 @@ struct DeckListView: View {
                     }
             }
         }
-        .padding(.bottom, 120)
+        .padding(.bottom, theme.metrics.deckCardBottomPadding)
     }
 
     @ViewBuilder
@@ -63,9 +63,9 @@ struct DeckListView: View {
             UIImpactFeedbackGenerator.lightImpact()
             viewModel.toggleSelection(for: cardSet)
         } label: {
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: theme.metrics.deckCardInnerSpacing) {
                 HStack {
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: theme.metrics.deckCardTextSpacing) {
                         Text("(\(cardCount))\(cardSet.name ?? "Unnamed Deck")")
                             .font(.headline)
                             .foregroundColor(theme.colors.textPrimary)
@@ -81,8 +81,8 @@ struct DeckListView: View {
                     }
                 }
             }
-            .padding(.vertical, 16)
-            .padding(.horizontal, 18)
+            .padding(.vertical, theme.metrics.deckCardVerticalPadding)
+            .padding(.horizontal, theme.metrics.deckCardHorizontalPadding)
             .background(
                 theme.gradients.card
                     .opacity(viewModel.isSelected(cardSet) ? 1 : 0.85)
@@ -94,8 +94,8 @@ struct DeckListView: View {
                             ? theme.colors.highlight.opacity(0.8) : theme.colors.surfaceLight,
                         lineWidth: 1.5)
             )
-            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .shadow(color: theme.colors.shadow.opacity(0.3), radius: 14, x: 0, y: 10)
+            .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cornerRadius, style: .continuous))
+            .shadow(color: theme.colors.shadow.opacity(0.3), radius: theme.metrics.shadowRadius, x: 0, y: theme.metrics.shadowY)
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("deckCard")

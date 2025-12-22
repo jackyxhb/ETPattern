@@ -18,17 +18,17 @@ struct SharedHeaderView: View {
 
     var body: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: theme.metrics.sharedHeaderSpacing) {
                 Text(title)
-                    .font(theme.typography.title.weight(.bold))
+                    .font(theme.metrics.title.weight(.bold))
                     .foregroundColor(theme.colors.textPrimary)
                 Text(subtitle)
-                    .font(theme.typography.subheadline)
+                    .font(theme.metrics.subheadline)
                     .foregroundColor(theme.colors.textSecondary)
             }
             Spacer()
         }
-        .padding(.horizontal, 4)
+        .padding(.horizontal, theme.metrics.sharedHeaderHorizontalPadding)
     }
 }
 
@@ -87,24 +87,24 @@ struct SharedCardDisplayView: View {
                                 ? "checkmark.circle.fill"
                                 : "arrow.counterclockwise.circle.fill"
                         )
-                        .font(.system(size: 60))
+                        .font(.system(size: theme.metrics.cardDisplaySwipeIconSize))
                         .foregroundColor(
                             direction == .right ? theme.colors.success : theme.colors.danger
                         )
                         .accessibilityHidden(true) // Decorative
                         Text(direction == .right ? "Easy" : "Again")
-                            .font(theme.typography.title.weight(.bold))
+                            .font(theme.metrics.title.weight(.bold))
                             .foregroundColor(theme.colors.textPrimary)
                     }
                 }
-                .clipShape(RoundedRectangle(cornerRadius: 24))
+                .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cardDisplaySwipeCornerRadius))
                 .transition(.opacity)
                 .accessibilityLabel(direction == .right ? "Marked as easy" : "Marked as again")
                 .accessibilityHint("Card will be rated and next card will appear")
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(.vertical, 4)
+        .padding(.vertical, theme.metrics.cardDisplayVerticalPadding)
         .accessibilityElement(children: .contain) // Group card elements together
         .accessibilityLabel("Flashcard \(currentIndex + 1) of \(totalCards)")
         .accessibilityValue(isFlipped ? "Showing back" : "Showing front")
@@ -117,23 +117,23 @@ struct SharedProgressBarView: View {
     let theme: Theme
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: theme.metrics.progressBarSpacing) {
             Text("\(currentPosition)/\(totalCards)")
-                .font(theme.typography.caption.weight(.bold))
+                .font(theme.metrics.caption.weight(.bold))
                 .foregroundColor(theme.colors.textSecondary)
                 .dynamicTypeSize(.large ... .accessibility5)
 
             ProgressView(value: Double(currentPosition), total: Double(totalCards))
                 .tint(theme.colors.highlight)
-                .frame(height: 4)
+                .frame(height: theme.metrics.progressBarHeight)
                 .accessibilityLabel("Study Progress")
                 .accessibilityValue("\(currentPosition) of \(totalCards) cards completed")
 
             percentageText
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 16)
-        .padding(.bottom, 8)
+        .padding(.horizontal, theme.metrics.progressBarHorizontalPadding)
+        .padding(.top, theme.metrics.progressBarTopPadding)
+        .padding(.bottom, theme.metrics.progressBarBottomPadding)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Study Session Progress")
         .accessibilityValue("Card \(currentPosition) of \(totalCards), \(percentage)% complete")
@@ -141,10 +141,10 @@ struct SharedProgressBarView: View {
 
     private var percentageText: some View {
         Text(totalCards > 0 ? "\(Int((Double(currentPosition) / Double(totalCards)) * 100))%" : "0%")
-            .font(theme.typography.caption2)
+            .font(theme.metrics.caption2)
             .foregroundColor(theme.colors.textSecondary)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
+            .padding(.horizontal, theme.metrics.progressPercentageHorizontalPadding)
+            .padding(.vertical, theme.metrics.progressPercentageVerticalPadding)
             .background(theme.colors.surfaceMedium)
             .clipShape(Capsule())
             .dynamicTypeSize(.large ... .accessibility5)
@@ -175,14 +175,14 @@ struct CardFace: View {
                     RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
                         .stroke(theme.colors.surfaceLight, lineWidth: 1.5)
                 )
-                .shadow(color: theme.colors.shadow, radius: 30, x: 0, y: 30)
+                .shadow(color: theme.colors.shadow, radius: theme.metrics.cardFaceShadowRadius, x: 0, y: theme.metrics.cardFaceShadowY)
 
-            VStack(alignment: .leading, spacing: 28) {
+            VStack(alignment: .leading, spacing: theme.metrics.cardFaceContentSpacing) {
                 header
                 Spacer(minLength: 0)
                 if isFront {
                     Text(text.isEmpty ? "No content" : text)
-                        .font(theme.typography.largeTitle.weight(.bold))
+                        .font(theme.metrics.largeTitle.weight(.bold))
                         .multilineTextAlignment(.center)
                         .foregroundColor(theme.colors.textPrimary)
                         .frame(maxWidth: .infinity)
@@ -194,9 +194,9 @@ struct CardFace: View {
                 }
                 Spacer(minLength: 0)
             }
-            .padding(20)
+            .padding(theme.metrics.cardFacePadding)
         }
-        .padding(8)
+        .padding(theme.metrics.cardFaceOuterPadding)
     }
 
     private var header: some View {
@@ -205,16 +205,16 @@ struct CardFace: View {
                 Text("\(cardId)/\(max(totalCards, 1))")
                     .font(.caption.monospacedDigit())
                     .foregroundColor(theme.colors.textSecondary)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
+                    .padding(.horizontal, theme.metrics.cardFaceHeaderHorizontalPadding)
+                    .padding(.vertical, theme.metrics.cardFaceHeaderVerticalPadding)
                     .background(theme.colors.surfaceLight)
                     .clipShape(Capsule())
             } else {
                 Text("?/\(max(totalCards, 1))")
                     .font(.caption.monospacedDigit())
                     .foregroundColor(theme.colors.textSecondary)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
+                    .padding(.horizontal, theme.metrics.cardFaceHeaderHorizontalPadding)
+                    .padding(.vertical, theme.metrics.cardFaceHeaderVerticalPadding)
                     .background(theme.colors.surfaceLight)
                     .clipShape(Capsule())
             }
@@ -226,8 +226,8 @@ struct CardFace: View {
                     .font(.subheadline.weight(.semibold))
                     .foregroundColor(theme.colors.highlight)
                     .lineLimit(1)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
+                    .padding(.horizontal, theme.metrics.cardFaceHeaderHorizontalPadding)
+                    .padding(.vertical, theme.metrics.cardFaceHeaderVerticalPadding)
                     .background(theme.colors.surfaceMedium)
                     .clipShape(Capsule())
             } else if !isFront && !pattern.isEmpty {
@@ -235,8 +235,8 @@ struct CardFace: View {
                     .font(.subheadline.weight(.semibold))
                     .foregroundColor(theme.colors.highlight)
                     .lineLimit(1)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
+                    .padding(.horizontal, theme.metrics.cardFaceHeaderHorizontalPadding)
+                    .padding(.vertical, theme.metrics.cardFaceHeaderVerticalPadding)
                     .background(theme.colors.surfaceMedium)
                     .clipShape(Capsule())
             }
@@ -247,24 +247,24 @@ struct CardFace: View {
     private var backContent: some View {
         let examples = text.components(separatedBy: "\n").filter { !$0.isEmpty }
 
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: theme.metrics.cardBackContentSpacing) {
             ForEach(Array(examples.enumerated()), id: \.offset) { index, example in
-                HStack(alignment: .top, spacing: 12) {
+                HStack(alignment: .top, spacing: theme.metrics.cardBackItemSpacing) {
                     Text(String(format: "%02d", index + 1))
                         .font(.caption.bold())
                         .foregroundColor(theme.colors.textSecondary)
-                        .padding(8)
+                        .padding(theme.metrics.cardBackNumberPadding)
                         .background(theme.colors.surfaceLight)
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cardBackNumberCornerRadius, style: .continuous))
 
                     Text(example)
-                        .font(theme.typography.body.weight(.medium))
+                        .font(theme.metrics.body.weight(.medium))
                         .foregroundColor(theme.colors.textPrimary)
-                        .lineSpacing(6)
+                        .lineSpacing(theme.metrics.cardBackLineSpacing)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .dynamicTypeSize(.large ... .accessibility5) // Support dynamic type
                 }
-                .padding(.horizontal, 6)
+                .padding(.horizontal, theme.metrics.cardBackHorizontalPadding)
             }
         }
     }
@@ -278,9 +278,9 @@ struct SharedOrderToggleButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: isRandomOrder ? "shuffle" : "arrow.up.arrow.down")
-                .font(theme.typography.title3)
+                .font(theme.metrics.title3)
                 .foregroundColor(theme.colors.textPrimary)
-                .frame(width: 44, height: 44)
+                .frame(width: theme.metrics.sharedButtonSize, height: theme.metrics.sharedButtonSize)
                 .background(theme.colors.surfaceLight)
                 .clipShape(Circle())
         }
@@ -295,9 +295,9 @@ struct SharedCloseButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: "xmark")
-                .font(theme.typography.title3)
+                .font(theme.metrics.title3)
                 .foregroundColor(theme.colors.textPrimary)
-                .frame(width: 44, height: 44)
+                .frame(width: theme.metrics.sharedButtonSize, height: theme.metrics.sharedButtonSize)
                 .background(theme.colors.surfaceLight)
                 .clipShape(Circle())
         }
@@ -326,7 +326,7 @@ struct SharedModalContainer<Content: View>: View {
                 Image(systemName: "xmark")
                     .font(.headline)
                     .foregroundColor(theme.colors.textPrimary)
-                    .padding(10)
+                    .padding(theme.metrics.modalCloseButtonPadding)
                     .background(theme.colors.textPrimary.opacity(0.2), in: Circle())
                     .padding()
             }
@@ -414,7 +414,7 @@ struct SharedSettingsSliderSection<T: BinaryFloatingPoint>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
             Text("\(label): \(valueFormatter(value))")
-                .font(theme.typography.subheadline)
+                .font(theme.metrics.subheadline)
                 .foregroundColor(theme.colors.textPrimary)
 
             Slider(value: Binding(
@@ -425,11 +425,11 @@ struct SharedSettingsSliderSection<T: BinaryFloatingPoint>: View {
                     .foregroundColor(theme.colors.textPrimary)
             } minimumValueLabel: {
                 Text(minLabel)
-                    .font(theme.typography.caption)
+                    .font(theme.metrics.caption)
                     .foregroundColor(theme.colors.textSecondary)
             } maximumValueLabel: {
                 Text(maxLabel)
-                    .font(theme.typography.caption)
+                    .font(theme.metrics.caption)
                     .foregroundColor(theme.colors.textSecondary)
             }
             .tint(theme.colors.highlight)
@@ -530,21 +530,21 @@ struct SharedOnboardingPageView: View {
     }
 
     var body: some View {
-        VStack(spacing: 32) {
+        VStack(spacing: theme.metrics.onboardingPageSpacing) {
             Spacer()
 
             ZStack {
                 Circle()
                     .fill(gradient.opacity(0.2))
-                    .frame(width: 200, height: 200)
+                    .frame(width: theme.metrics.onboardingCircleSize, height: theme.metrics.onboardingCircleSize)
 
                 Image(systemName: systemImage)
-                    .font(.system(size: 80))
+                    .font(.system(size: theme.metrics.onboardingIconSize))
                     .foregroundColor(theme.colors.textPrimary)
             }
-            .padding(.bottom, 20)
+            .padding(.bottom, theme.metrics.onboardingCircleBottomPadding)
 
-            VStack(spacing: 16) {
+            VStack(spacing: theme.metrics.onboardingContentSpacing) {
                 Text(title)
                     .font(.title.bold())
                     .foregroundColor(theme.colors.textPrimary)
@@ -560,12 +560,12 @@ struct SharedOnboardingPageView: View {
                     .foregroundColor(theme.colors.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
-                    .padding(.horizontal, 32)
+                    .padding(.horizontal, theme.metrics.onboardingDescriptionHorizontalPadding)
             }
 
             Spacer()
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, theme.metrics.onboardingPageHorizontalPadding)
     }
 }
 
@@ -596,18 +596,18 @@ struct SharedOnboardingContainer<Content: View>: View {
                 .tabViewStyle(.page(indexDisplayMode: .never))
 
                 // Custom page indicators
-                HStack(spacing: 8) {
+                HStack(spacing: theme.metrics.onboardingIndicatorSpacing) {
                     ForEach(pages.indices, id: \.self) { index in
                         Circle()
                             .fill(currentPage.wrappedValue == index ? theme.colors.highlight : theme.colors.surfaceMedium)
-                            .frame(width: 8, height: 8)
+                            .frame(width: theme.metrics.onboardingIndicatorSize, height: theme.metrics.onboardingIndicatorSize)
                             .animation(.smooth, value: currentPage.wrappedValue)
                     }
                 }
-                .padding(.vertical, 20)
+                .padding(.vertical, theme.metrics.onboardingIndicatorVerticalPadding)
 
                 // Navigation buttons
-                HStack(spacing: 16) {
+                HStack(spacing: theme.metrics.onboardingButtonSpacing) {
                     if currentPage.wrappedValue > 0 {
                         Button(action: {
                             UIImpactFeedbackGenerator.lightImpact()
@@ -618,7 +618,7 @@ struct SharedOnboardingContainer<Content: View>: View {
                             Text("Back")
                                 .font(.headline)
                                 .foregroundColor(.white.opacity(0.8))
-                                .frame(width: 80, height: 50)
+                                .frame(width: theme.metrics.onboardingBackButtonWidth, height: theme.metrics.onboardingButtonHeight)
                         }
                     }
 
@@ -634,9 +634,9 @@ struct SharedOnboardingContainer<Content: View>: View {
                             Text("Next")
                                 .font(.headline.bold())
                                 .foregroundColor(theme.colors.textPrimary)
-                                .frame(width: 80, height: 50)
+                                .frame(width: theme.metrics.onboardingNextButtonWidth, height: theme.metrics.onboardingButtonHeight)
                                 .background(theme.gradients.accent)
-                                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                .clipShape(RoundedRectangle(cornerRadius: theme.metrics.onboardingButtonCornerRadius, style: .continuous))
                         }
                     } else {
                         Button(action: {
@@ -648,14 +648,14 @@ struct SharedOnboardingContainer<Content: View>: View {
                             Text("Get Started")
                                 .font(.headline.bold())
                                 .foregroundColor(theme.colors.textPrimary)
-                                .frame(width: 140, height: 50)
+                                .frame(width: theme.metrics.onboardingGetStartedButtonWidth, height: theme.metrics.onboardingButtonHeight)
                                 .background(theme.gradients.success)
-                                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                .clipShape(RoundedRectangle(cornerRadius: theme.metrics.onboardingButtonCornerRadius, style: .continuous))
                         }
                     }
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 40)
+                .padding(.horizontal, theme.metrics.onboardingContainerHorizontalPadding)
+                .padding(.bottom, theme.metrics.onboardingContainerBottomPadding)
             }
         }
     }

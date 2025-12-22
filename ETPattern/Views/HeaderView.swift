@@ -12,9 +12,9 @@ struct HeaderView: View {
     @Environment(\.theme) var theme
 
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
+        HStack(alignment: .center, spacing: theme.metrics.headerMainSpacing) {
             Text("English Thought")
-                .font(theme.typography.title.bold())
+                .font(theme.metrics.title.bold())
                 .foregroundColor(theme.colors.textPrimary)
             Spacer()
             headerActions
@@ -88,7 +88,7 @@ struct HeaderView: View {
         Image(systemName: systemName)
             .imageScale(.medium)
             .foregroundColor(theme.colors.textPrimary)
-            .padding(10)
+            .padding(theme.metrics.headerIconPadding)
             .background(theme.colors.surfaceLight)
             .clipShape(Circle())
     }

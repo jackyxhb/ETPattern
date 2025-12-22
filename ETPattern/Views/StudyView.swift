@@ -33,7 +33,7 @@ struct StudyView: View {
             theme.gradients.background
                 .ignoresSafeArea()
 
-            VStack(spacing: 8) {
+            VStack(spacing: theme.metrics.studyViewSpacing) {
                 header
 
                 if sessionManager.getCards().isEmpty {
@@ -101,7 +101,7 @@ struct StudyView: View {
                     }
                 }
             }
-            .padding(.horizontal, 4)
+            .padding(.horizontal, theme.metrics.studyViewHorizontalPadding)
             .safeAreaInset(edge: .bottom) {
                 bottomControlBar
             }
@@ -190,9 +190,9 @@ struct StudyView: View {
             speakCurrentText()
         }) {
             Image(systemName: ttsService.isSpeaking ? "speaker.wave.2.fill" : "speaker.wave.2")
-                .font(theme.typography.title3)
+                .font(theme.metrics.title3)
                 .foregroundColor(theme.colors.textPrimary)
-                .frame(width: 60, height: 60)
+                .frame(width: theme.metrics.studySpeakButtonSize, height: theme.metrics.studySpeakButtonSize)
                 .background(ttsService.isSpeaking ? theme.gradients.danger : theme.gradients.success)
                 .clipShape(Circle())
         }

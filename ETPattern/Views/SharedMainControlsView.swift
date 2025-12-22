@@ -44,7 +44,7 @@ struct SharedMainControlsView<MiddleContent: View>: View {
     }
 
     var body: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: theme.metrics.sharedControlsSpacing) {
             SharedOrderToggleButton(
                 isRandomOrder: isRandomOrder,
                 theme: theme,
@@ -60,17 +60,17 @@ struct SharedMainControlsView<MiddleContent: View>: View {
                 action: closeAction
             )
         }
-        .padding(.horizontal, 20)
-        .padding(.bottom, 8)
-        .padding(.top, 8)
+        .padding(.horizontal, theme.metrics.sharedControlsHorizontalPadding)
+        .padding(.bottom, theme.metrics.sharedControlsBottomPadding)
+        .padding(.top, theme.metrics.sharedControlsTopPadding)
     }
 
     private var previousButton: some View {
         Button(action: previousAction) {
             Image(systemName: "backward.end.fill")
-                .font(theme.typography.title3)
+                .font(theme.metrics.title3)
                 .foregroundColor(theme.colors.textSecondary)
-                .frame(width: 44, height: 44)
+                .frame(width: theme.metrics.sharedControlsButtonSize, height: theme.metrics.sharedControlsButtonSize)
                 .background(theme.colors.surfaceMedium)
                 .clipShape(Circle())
         }
@@ -83,9 +83,9 @@ struct SharedMainControlsView<MiddleContent: View>: View {
     private var nextButton: some View {
         Button(action: nextAction) {
             Image(systemName: "forward.end.fill")
-                .font(theme.typography.title3)
+                .font(theme.metrics.title3)
                 .foregroundColor(theme.colors.textPrimary)
-                .frame(width: 44, height: 44)
+                .frame(width: theme.metrics.sharedControlsButtonSize, height: theme.metrics.sharedControlsButtonSize)
                 .background(theme.gradients.success)
                 .clipShape(Circle())
         }

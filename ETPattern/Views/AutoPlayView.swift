@@ -26,9 +26,9 @@ struct AutoPlayView: View {
     @State private var cardToken = UUID()
     @State private var activePhase: AutoPlayPhase = .front
 
-    private let fallbackFrontDelay: TimeInterval = 1.0
-    private let fallbackBackDelay: TimeInterval = 1.5
-    private let interCardDelay: TimeInterval = 1.0
+    private var fallbackFrontDelay: TimeInterval { theme.metrics.autoPlayFallbackFrontDelay }
+    private var fallbackBackDelay: TimeInterval { theme.metrics.autoPlayFallbackBackDelay }
+    private var interCardDelay: TimeInterval { theme.metrics.autoPlayInterCardDelay }
 
     init(cardSet: CardSet) {
         self.cardSet = cardSet
@@ -40,7 +40,7 @@ struct AutoPlayView: View {
             theme.gradients.background
                 .ignoresSafeArea()
 
-            VStack(spacing: 8) {
+            VStack(spacing: theme.metrics.autoPlayViewSpacing) {
                 header
 
                 if sessionManager.getCards().isEmpty {
@@ -62,7 +62,7 @@ struct AutoPlayView: View {
                     )
                 }
             }
-            .padding(.horizontal, 4)
+            .padding(.horizontal, theme.metrics.autoPlayViewHorizontalPadding)
             .safeAreaInset(edge: .bottom) {
                 bottomControlBar
             }
@@ -140,12 +140,12 @@ struct AutoPlayView: View {
             togglePlayback()
         }) {
             Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                .font(theme.typography.title)
+                .font(theme.metrics.title)
                 .foregroundColor(theme.colors.textPrimary)
-                .frame(width: 60, height: 60)
+                .frame(width: theme.metrics.autoPlayButtonSize, height: theme.metrics.autoPlayButtonSize)
                 .background(theme.gradients.accent)
                 .clipShape(Circle())
-                .shadow(color: theme.colors.highlight.opacity(0.3), radius: 8, x: 0, y: 4)
+                .shadow(color: theme.colors.highlight.opacity(0.3), radius: theme.metrics.autoPlayButtonShadowRadius, x: 0, y: theme.metrics.autoPlayButtonShadowY)
         }
         .accessibilityLabel(isPlaying ? "Pause" : "Play")
     }

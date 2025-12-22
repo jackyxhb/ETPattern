@@ -85,7 +85,7 @@ struct SettingsView: View {
 
             VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
                 Text("Speech Speed: \(Int(ttsPercentage))%")
-                    .font(theme.typography.subheadline)
+                    .font(theme.metrics.subheadline)
                     .foregroundColor(theme.colors.textPrimary)
 
                 GeometryReader { geometry in
@@ -94,11 +94,11 @@ struct SettingsView: View {
                             .foregroundColor(theme.colors.textPrimary)
                     } minimumValueLabel: {
                         Text("50%")
-                            .font(theme.typography.caption)
+                            .font(theme.metrics.caption)
                             .foregroundColor(theme.colors.textSecondary)
                     } maximumValueLabel: {
                         Text("120%")
-                            .font(theme.typography.caption)
+                            .font(theme.metrics.caption)
                             .foregroundColor(theme.colors.textSecondary)
                     }
                     .tint(theme.colors.highlight)
@@ -182,13 +182,13 @@ struct SettingsView: View {
     private var aboutSection: some View {
         Section(header: Text("About").foregroundColor(theme.colors.textPrimary)) {
             Text("English Thought")
-                .font(theme.typography.headline)
+                .font(theme.metrics.headline)
                 .foregroundColor(theme.colors.textPrimary)
             Text("Version 1.6.0")
                 .foregroundColor(theme.colors.textSecondary)
             Text("Learn English patterns with spaced repetition")
                 .foregroundColor(theme.colors.textSecondary)
-                .font(theme.typography.caption)
+                .font(theme.metrics.caption)
         }
         .listRowBackground(theme.colors.surfaceLight)
     }

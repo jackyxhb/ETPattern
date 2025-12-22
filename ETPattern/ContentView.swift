@@ -291,7 +291,7 @@ private struct CardSetActionBar: View {
                 action()
             }) {
                 Label(title, systemImage: systemImage)
-                    .font(theme.typography.subheadline.bold())
+                    .font(theme.metrics.subheadline.bold())
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, theme.metrics.actionButtonVerticalPadding)
                     .background(gradient)

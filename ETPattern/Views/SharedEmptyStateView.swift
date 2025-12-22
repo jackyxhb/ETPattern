@@ -98,19 +98,19 @@ struct SharedEmptyStateView<IconContent: View, AdditionalContent: View>: View {
 
             VStack(spacing: textSpacing) {
                 Text(title)
-                    .font(theme.typography.title.weight(.bold))
+                    .font(theme.metrics.title.weight(.bold))
                     .foregroundColor(theme.colors.textPrimary)
                     .multilineTextAlignment(.center)
 
                 if let subtitle = subtitle {
                     Text(subtitle)
-                        .font(theme.typography.title3)
+                        .font(theme.metrics.title3)
                         .foregroundColor(theme.colors.highlight)
                         .multilineTextAlignment(.center)
                 }
 
                 Text(description)
-                    .font(theme.typography.body)
+                    .font(theme.metrics.body)
                     .foregroundColor(theme.colors.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)

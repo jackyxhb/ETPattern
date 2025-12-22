@@ -10,28 +10,26 @@ import SwiftUI
 struct ProgressCircle: View {
     @Environment(\.theme) var theme
     let progress: Double
-    let lineWidth: CGFloat = 8
-    let size: CGFloat = 60
 
     var body: some View {
         ZStack {
             Circle()
-                .stroke(theme.colors.surfaceLight, lineWidth: lineWidth)
+                .stroke(theme.colors.surfaceLight, lineWidth: theme.metrics.progressCircleLineWidth)
 
             Circle()
                 .trim(from: 0, to: progress)
                 .stroke(
                     progressGradient,
-                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
+                    style: StrokeStyle(lineWidth: theme.metrics.progressCircleLineWidth, lineCap: .round)
                 )
                 .rotationEffect(.degrees(-90))
                 .animation(.bouncy, value: progress)
 
             Text("\(Int(progress * 100))%")
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .font(.system(size: theme.metrics.progressCircleFontSize, weight: .semibold, design: .rounded))
                 .foregroundColor(theme.colors.textPrimary)
         }
-        .frame(width: size, height: size)
+        .frame(width: theme.metrics.progressCircleSize, height: theme.metrics.progressCircleSize)
     }
 
     private var progressGradient: LinearGradient {

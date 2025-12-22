@@ -31,7 +31,7 @@ struct ImportView: View {
                 .ignoresSafeArea()
             VStack(spacing: theme.metrics.largeSpacing) {
                 Text("Import CSV File")
-                    .font(theme.typography.title)
+                    .font(theme.metrics.title)
                     .fontWeight(.bold)
                     .foregroundColor(theme.colors.textPrimary)
 
@@ -49,7 +49,7 @@ struct ImportView: View {
                     Text("• Line breaks in examples: <br>")
                         .foregroundColor(theme.colors.highlight.opacity(0.8))
                 }
-                .font(theme.typography.caption)
+                .font(theme.metrics.caption)
                 .padding(.horizontal, theme.metrics.mediumSpacing)
 
                 Spacer()

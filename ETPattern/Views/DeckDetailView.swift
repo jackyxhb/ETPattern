@@ -29,10 +29,10 @@ struct DeckDetailView: View {
                     .foregroundColor(theme.colors.textSecondary)
             } else {
                 ScrollView {
-                    LazyVStack(spacing: 4) {
+                    LazyVStack(spacing: theme.metrics.deckDetailGroupSpacing) {
                         ForEach(sortedGroupNames, id: \.self) { groupName in
                             DisclosureGroup {
-                                LazyVStack(spacing: 12) {
+                                LazyVStack(spacing: theme.metrics.deckDetailCardSpacing) {
                                     ForEach(groupedCards[groupName] ?? []) { card in
                                         Button {
                                             previewCard = card
@@ -49,7 +49,7 @@ struct DeckDetailView: View {
                                         }
                                     }
                                 }
-                                .padding(.leading, 16)
+                                .padding(.leading, theme.metrics.deckDetailLeadingPadding)
                             } label: {
                                 HStack {
                                     Text(groupName)
@@ -60,7 +60,7 @@ struct DeckDetailView: View {
                                         .font(.subheadline)
                                         .foregroundColor(theme.colors.textSecondary)
                                 }
-                                .padding()
+                                .padding(theme.metrics.deckDetailGroupPadding)
                                 .background(
                                     RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
                                         .fill(theme.gradients.card.opacity(0.9))
@@ -73,7 +73,7 @@ struct DeckDetailView: View {
                             .tint(.white)
                         }
                     }
-                    .padding()
+                    .padding(theme.metrics.deckDetailScrollPadding)
                 }
             }
         }
@@ -109,7 +109,7 @@ private struct CardRow: View {
     @Environment(\.theme) var theme
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: theme.metrics.deckDetailCardRowSpacing) {
             Text(card.front ?? "No front")
                 .font(.headline)
                 .foregroundColor(theme.colors.textPrimary)
@@ -118,7 +118,7 @@ private struct CardRow: View {
                 .foregroundColor(theme.colors.textSecondary)
                 .lineLimit(2)
         }
-        .padding()
+        .padding(theme.metrics.deckDetailCardRowPadding)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
@@ -128,7 +128,7 @@ private struct CardRow: View {
             RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
                 .stroke(theme.colors.surfaceLight, lineWidth: 1)
         )
-        .shadow(color: theme.colors.shadow.opacity(0.4), radius: 12, x: 0, y: 8)
+        .shadow(color: theme.colors.shadow.opacity(0.4), radius: theme.metrics.deckDetailCardShadowRadius, x: 0, y: theme.metrics.deckDetailCardShadowY)
     }
 
     private var formattedBack: String {
@@ -162,7 +162,7 @@ private struct CardPreviewContainer: View {
                 swipeDirection: nil,
                 theme: theme
             )
-            .padding(.horizontal)
+            .padding(.horizontal, theme.metrics.deckDetailPreviewHorizontalPadding)
             .onTapGesture {
                 UIImpactFeedbackGenerator.lightImpact()
                 withAnimation(.bouncy) {

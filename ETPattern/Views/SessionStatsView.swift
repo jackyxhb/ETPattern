@@ -35,39 +35,39 @@ struct SessionStatsView: View {
                             VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
                                 HStack {
                                     Text(session.date ?? Date(), style: .date)
-                                        .font(theme.typography.headline)
+                                        .font(theme.metrics.headline)
                                         .foregroundColor(theme.colors.textPrimary)
                                     Spacer()
                                     Text(session.date ?? Date(), style: .time)
-                                        .font(theme.typography.subheadline)
+                                        .font(theme.metrics.subheadline)
                                         .foregroundColor(theme.colors.textSecondary)
                                 }
 
                                 HStack(spacing: theme.metrics.largeSpacing) {
                                     VStack(alignment: .leading) {
                                         Text("Cards Reviewed")
-                                            .font(theme.typography.caption)
+                                            .font(theme.metrics.caption)
                                             .foregroundColor(theme.colors.textSecondary)
                                         Text("\(session.cardsReviewed)")
-                                            .font(theme.typography.title3.weight(.semibold))
+                                            .font(theme.metrics.title3.weight(.semibold))
                                             .foregroundColor(theme.colors.textPrimary)
                                     }
 
                                     VStack(alignment: .leading) {
                                         Text("Correct")
-                                            .font(theme.typography.caption)
+                                            .font(theme.metrics.caption)
                                             .foregroundColor(theme.colors.textSecondary)
                                         Text("\(session.correctCount)")
-                                            .font(theme.typography.title3.weight(.semibold))
+                                            .font(theme.metrics.title3.weight(.semibold))
                                             .foregroundColor(theme.colors.success)
                                     }
 
                                     VStack(alignment: .leading) {
                                         Text("Accuracy")
-                                            .font(theme.typography.caption)
+                                            .font(theme.metrics.caption)
                                             .foregroundColor(theme.colors.highlight.opacity(0.7))
                                         Text(accuracyText(for: session))
-                                            .font(theme.typography.title3.weight(.semibold))
+                                            .font(theme.metrics.title3.weight(.semibold))
                                             .foregroundColor(accuracyColor(for: session))
                                     }
                                 }

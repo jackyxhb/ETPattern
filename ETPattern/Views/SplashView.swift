@@ -39,12 +39,12 @@ struct SplashView: View {
             theme.gradients.background
                 .ignoresSafeArea()
 
-            VStack(spacing: 18) {
+            VStack(spacing: theme.metrics.splashSpacing) {
                 Image("logo")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 180, height: 180)
-                    .shadow(color: theme.colors.shadow, radius: 30, y: 16)
+                    .frame(width: theme.metrics.splashLogoSize, height: theme.metrics.splashLogoSize)
+                    .shadow(color: theme.colors.shadow, radius: theme.metrics.splashShadowRadius, y: theme.metrics.splashShadowY)
 
                 Text("English Thought")
                     .font(.title2.bold())
@@ -55,7 +55,7 @@ struct SplashView: View {
                     .foregroundStyle(.white.opacity(0.7))
                     .tracking(0.5)
             }
-            .padding(32)
+            .padding(theme.metrics.splashPadding)
         }
     }
 }
