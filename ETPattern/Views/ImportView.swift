@@ -29,15 +29,36 @@ struct ImportView: View {
         ZStack {
             theme.gradients.background
                 .ignoresSafeArea()
-            VStack(spacing: theme.metrics.largeSpacing) {
-                Text("Import CSV File")
-                    .font(theme.metrics.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(theme.colors.textPrimary)
+            
+            VStack(spacing: 0) {
+                // Custom header for sheet presentation
+                HStack {
+                    Text(NSLocalizedString("import", comment: "Import screen title"))
+                        .font(.headline)
+                        .foregroundColor(theme.colors.textPrimary)
+                    Spacer()
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(theme.colors.textSecondary)
+                            .font(.title2)
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 12)
+                .background(.ultraThinMaterial)
+                
+                ScrollView {
+                    VStack(spacing: theme.metrics.largeSpacing) {
+                        Text("Import CSV File")
+                            .font(theme.metrics.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(theme.colors.textPrimary)
 
-                Text("Select a CSV file to import flashcards. The file should have the format:")
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(theme.colors.highlight.opacity(0.8))
+                        Text("Select a CSV file to import flashcards. The file should have the format:")
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(theme.colors.highlight.opacity(0.8))
 
                 VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
                     Text("• First row: Front;;Back;;Tags")
@@ -77,8 +98,10 @@ struct ImportView: View {
                 }
 
                 Spacer()
+                    }
+                    .padding(theme.metrics.largeSpacing)
+                }
             }
-            .padding(theme.metrics.largeSpacing)
         }
         .fileImporter(
             isPresented: $isShowingFilePicker,

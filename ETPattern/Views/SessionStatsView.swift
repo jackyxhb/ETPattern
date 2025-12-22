@@ -22,10 +22,30 @@ struct SessionStatsView: View {
         ZStack {
             theme.gradients.background
                 .ignoresSafeArea()
-            Form {
-                // Historical Sessions Section
-                Section(header: Text("Study History")
-                    .foregroundColor(theme.colors.textPrimary)) {
+            
+            VStack(spacing: 0) {
+                // Custom header for sheet presentation
+                HStack {
+                    Text(NSLocalizedString("session_stats", comment: "Session statistics screen title"))
+                        .font(.headline)
+                        .foregroundColor(theme.colors.textPrimary)
+                    Spacer()
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(theme.colors.textSecondary)
+                            .font(.title2)
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 12)
+                .background(.ultraThinMaterial)
+                
+                Form {
+                    // Historical Sessions Section
+                    Section(header: Text("Study History")
+                        .foregroundColor(theme.colors.textPrimary)) {
                     if studySessions.isEmpty {
                         Text("No study sessions yet")
                             .foregroundColor(theme.colors.highlight.opacity(0.7))
@@ -80,12 +100,6 @@ struct SessionStatsView: View {
                 .listRowBackground(theme.colors.surfaceLight.opacity(0.5))
             }
             .scrollContentBackground(.hidden)
-        }
-        .navigationTitle(NSLocalizedString("session_stats", comment: "Session statistics screen title"))
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                EditButton()
             }
         }
     }
@@ -124,31 +138,4 @@ struct SessionStatsView: View {
     }
 }
 
-#Preview {
-    let context = PersistenceController.preview.container.viewContext
-
-    // Create some sample sessions
-    let session1 = StudySession(context: context)
-    session1.date = Date()
-    session1.cardsReviewed = 10
-    session1.correctCount = 8
-    session1.isActive = true  // Make this one active to show management UI
-
-    let session2 = StudySession(context: context)
-    session2.date = Date().addingTimeInterval(-86400) // Yesterday
-    session2.cardsReviewed = 15
-    session2.correctCount = 12
-
-    let session3 = StudySession(context: context)
-    session3.date = Date().addingTimeInterval(-172800) // 2 days ago
-    session3.cardsReviewed = 8
-    session3.correctCount = 5
-
-    try? context.save()
-
-    return NavigationView {
-        SessionStatsView()
-            .environment(\.managedObjectContext, context)
-            .environment(\.theme, Theme.default)
-    }
-}
+// #Preview temporarily disabled due to Swift 6 compatibility issues

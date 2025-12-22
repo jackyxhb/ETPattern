@@ -10,6 +10,7 @@ import AVFoundation
 
 struct SettingsView: View {
     @Environment(\.theme) var theme
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var ttsService: TTSService
     @State private var selectedVoice: String = Constants.TTS.defaultVoice
     @State private var cardOrderMode: String = UserDefaults.standard.string(forKey: "cardOrderMode") ?? "random"
@@ -33,14 +34,34 @@ struct SettingsView: View {
         ZStack {
             theme.gradients.background
                 .ignoresSafeArea()
-            Form {
-                studyModeSection
-                ttsSection
-                aboutSection
+            
+            VStack(spacing: 0) {
+                // Custom header for sheet presentation
+                HStack {
+                    Text(NSLocalizedString("settings", comment: "Settings screen title"))
+                        .font(.headline)
+                        .foregroundColor(theme.colors.textPrimary)
+                    Spacer()
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(theme.colors.textSecondary)
+                            .font(.title2)
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 12)
+                .background(.ultraThinMaterial)
+                
+                Form {
+                    studyModeSection
+                    ttsSection
+                    aboutSection
+                }
+                .scrollContentBackground(.hidden)
             }
-            .scrollContentBackground(.hidden)
         }
-        .navigationTitle(NSLocalizedString("settings", comment: "Settings screen title"))
         .onAppear {
             let stored = UserDefaults.standard.string(forKey: "selectedVoice") ?? Constants.TTS.defaultVoice
             selectedVoice = canonicalVoiceLanguage(from: stored)

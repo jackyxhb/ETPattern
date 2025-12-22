@@ -22,12 +22,31 @@ struct DeckDetailView: View {
         ZStack {
             theme.gradients.background
                 .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Custom header for sheet presentation
+                HStack {
+                    Text(cardSet.name ?? NSLocalizedString("unnamed_deck", comment: "Fallback name for decks without a name"))
+                        .font(.headline)
+                        .foregroundColor(theme.colors.textPrimary)
+                    Spacer()
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(theme.colors.textSecondary)
+                            .font(.title2)
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 12)
+                .background(.ultraThinMaterial)
 
-            if sortedGroupNames.isEmpty {
-                Text("No cards in this deck")
-                    .font(.headline)
-                    .foregroundColor(theme.colors.textSecondary)
-            } else {
+                if sortedGroupNames.isEmpty {
+                    Text("No cards in this deck")
+                        .font(.headline)
+                        .foregroundColor(theme.colors.textSecondary)
+                } else {
                 ScrollView {
                     LazyVStack(spacing: theme.metrics.deckDetailGroupSpacing) {
                         ForEach(sortedGroupNames, id: \.self) { groupName in
@@ -75,10 +94,9 @@ struct DeckDetailView: View {
                     }
                     .padding(theme.metrics.deckDetailScrollPadding)
                 }
+                }
             }
         }
-        .navigationTitle(cardSet.name ?? NSLocalizedString("unnamed_deck", comment: "Fallback name for decks without a name"))
-        .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $previewCard) { card in
             let allCards = sortedGroupNames.flatMap { groupedCards[$0] ?? [] }
             let index = allCards.firstIndex(where: { $0.objectID == card.objectID }) ?? 0

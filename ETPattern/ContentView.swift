@@ -36,7 +36,7 @@ struct ContentView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 theme.gradients.background
                     .ignoresSafeArea()
@@ -73,64 +73,20 @@ struct ContentView: View {
             }
         }
         .sheet(isPresented: $viewModel.uiState.showingSessionStats) {
-            NavigationView {
-                SessionStatsView()
-                    .navigationTitle(NSLocalizedString("session_stats", comment: "Session statistics screen title"))
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button(NSLocalizedString("done", comment: "Done button")) { viewModel.uiState.showingSessionStats = false }
-                        }
-                    }
-                    .toolbarBackground(.ultraThinMaterial.opacity(0.8), for: .navigationBar)
-                    .toolbarBackground(.visible, for: .navigationBar)
-                    .toolbarColorScheme(.dark, for: .navigationBar)
-                }
+            SessionStatsView()
+                .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $viewModel.uiState.showingImport) {
-            NavigationView {
-                ImportView()
-                    .navigationTitle(NSLocalizedString("import", comment: "Import screen title"))
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button(NSLocalizedString("done", comment: "Done button")) { viewModel.uiState.showingImport = false }
-                        }
-                    }
-                    .toolbarBackground(.ultraThinMaterial.opacity(0.8), for: .navigationBar)
-                    .toolbarBackground(.visible, for: .navigationBar)
-                    .toolbarColorScheme(.dark, for: .navigationBar)
-                }
+            ImportView()
+                .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $viewModel.uiState.showingSettings) {
-            NavigationView {
-                SettingsView()
-                    .navigationTitle(NSLocalizedString("settings", comment: "Settings screen title"))
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button(NSLocalizedString("done", comment: "Done button")) { viewModel.uiState.showingSettings = false }
-                        }
-                    }
-                    .toolbarBackground(.ultraThinMaterial.opacity(0.8), for: .navigationBar)
-                    .toolbarBackground(.visible, for: .navigationBar)
-                    .toolbarColorScheme(.dark, for: .navigationBar)
-                }
+            SettingsView()
+                .presentationDetents([.medium, .large])
         }
         .sheet(item: $viewModel.uiState.browseCardSet) { deck in
-            NavigationView {
-                DeckDetailView(cardSet: deck)
-                    .navigationTitle(deck.name ?? NSLocalizedString("unnamed_deck", comment: "Fallback name for decks without a name"))
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button(NSLocalizedString("close", comment: "Close button")) { viewModel.uiState.browseCardSet = nil }
-                        }
-                    }
-                    .toolbarBackground(.ultraThinMaterial.opacity(0.8), for: .navigationBar)
-                    .toolbarBackground(.visible, for: .navigationBar)
-                    .toolbarColorScheme(.dark, for: .navigationBar)
-                }
+            DeckDetailView(cardSet: deck)
+                .presentationDetents([.medium, .large])
         }
         .alert("Rename Deck", isPresented: $viewModel.uiState.showingRenameAlert) {
             TextField("Deck Name", text: $viewModel.uiState.newName)
