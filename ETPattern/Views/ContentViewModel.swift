@@ -171,7 +171,6 @@ class ContentViewModel: ObservableObject {
         Task {
             do {
                 let (importedCount, failures) = try await csvService.reimportBundledDeck(cardSet, kind: kind)
-                try await cardSetRepository.saveContext()
 
                 if !failures.isEmpty {
                     showError(title: NSLocalizedString("reimport_partially_failed", comment: "Title for partial reimport failure"),
@@ -188,7 +187,6 @@ class ContentViewModel: ObservableObject {
         Task {
             do {
                 let importedCount = try await csvService.reimportCustomDeck(cardSet, from: url)
-                try await cardSetRepository.saveContext()
             } catch {
                 showError(title: NSLocalizedString("reimport_failed", comment: "Error title for failed reimport"),
                          message: error.localizedDescription)

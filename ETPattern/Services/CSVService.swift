@@ -10,8 +10,6 @@ import CoreData
 import UniformTypeIdentifiers
 
 // Import project modules
-import class ETPattern.Card
-import class ETPattern.CardSet
 import class ETPattern.CSVImporter
 import class ETPattern.FileManagerService
 import struct ETPattern.Constants
@@ -26,16 +24,18 @@ protocol CSVServiceProtocol {
 /// Service for handling CSV import/export operations
 class CSVService: CSVServiceProtocol {
     private let csvImporter: CSVImporter
-    private let viewContext: NSManagedObjectContext
+    private let mainContext: NSManagedObjectContext
+    private let backgroundContextManager: BackgroundContextManager
 
     enum BundledDeckKind {
         case master
         case group(fileName: String)
     }
 
-    init(viewContext: NSManagedObjectContext, csvImporter: CSVImporter) {
-        self.viewContext = viewContext
+    init(viewContext: NSManagedObjectContext, csvImporter: CSVImporter, backgroundContextManager: BackgroundContextManager) {
+        self.mainContext = viewContext
         self.csvImporter = csvImporter
+        self.backgroundContextManager = backgroundContextManager
     }
 
     func exportCardSet(_ cardSet: CardSet) throws -> String {
@@ -55,70 +55,86 @@ class CSVService: CSVServiceProtocol {
     }
 
     func reimportBundledDeck(_ cardSet: CardSet, kind: BundledDeckKind) async throws -> (importedCount: Int, failures: [String]) {
-        deleteAllCards(in: cardSet)
+        let cardSetObjectID = cardSet.objectID
 
-        var importedCount = 0
-        var failures: [String] = []
+        return try await backgroundContextManager.performBackgroundTask { [self] context in
+            guard let backgroundCardSet = context.object(with: cardSetObjectID) as? CardSet else {
+                throw CSVServiceError.cardSetNotFound
+            }
 
-        switch kind {
-        case .master:
-            cardSet.name = Constants.Decks.bundledMasterName
-            let bundledFiles = FileManagerService.getBundledCSVFiles()
+            deleteAllCards(in: backgroundCardSet, context: context)
 
-            for fileName in bundledFiles {
+            var importedCount = 0
+            var failures: [String] = []
+
+            switch kind {
+            case .master:
+                backgroundCardSet.name = Constants.Decks.bundledMasterName
+                let bundledFiles = FileManagerService.getBundledCSVFiles()
+
+                for fileName in bundledFiles {
+                    guard let content = FileManagerService.loadBundledCSV(named: fileName) else {
+                        failures.append(fileName)
+                        continue
+                    }
+                    let cards = self.csvImporter.parseCSV(content, cardSetName: Constants.Decks.bundledMasterName)
+                    for card in cards {
+                        card.cardSet = backgroundCardSet
+                        backgroundCardSet.addToCards(card)
+                    }
+                    importedCount += cards.count
+                }
+
+            case .group(let fileName):
                 guard let content = FileManagerService.loadBundledCSV(named: fileName) else {
-                    failures.append(fileName)
-                    continue
+                    throw CSVServiceError.bundledFileNotFound(fileName)
                 }
-                let cards = csvImporter.parseCSV(content, cardSetName: Constants.Decks.bundledMasterName)
+                let cards = self.csvImporter.parseCSV(content, cardSetName: backgroundCardSet.name ?? "")
                 for card in cards {
-                    card.cardSet = cardSet
-                    cardSet.addToCards(card)
+                    card.cardSet = backgroundCardSet
+                    backgroundCardSet.addToCards(card)
                 }
-                importedCount += cards.count
+                importedCount = cards.count
             }
 
-        case .group(let fileName):
-            guard let content = FileManagerService.loadBundledCSV(named: fileName) else {
-                throw CSVServiceError.bundledFileNotFound(fileName)
-            }
-            let cards = csvImporter.parseCSV(content, cardSetName: cardSet.name ?? "")
-            for card in cards {
-                card.cardSet = cardSet
-                cardSet.addToCards(card)
-            }
-            importedCount = cards.count
+            return (importedCount, failures)
         }
-
-        return (importedCount, failures)
     }
 
     func reimportCustomDeck(_ cardSet: CardSet, from url: URL) async throws -> Int {
-        guard url.startAccessingSecurityScopedResource() else {
-            throw CSVServiceError.securityScopedAccessFailed
+        let cardSetObjectID = cardSet.objectID
+
+        return try await backgroundContextManager.performBackgroundTask { [self] context in
+            guard let backgroundCardSet = context.object(with: cardSetObjectID) as? CardSet else {
+                throw CSVServiceError.cardSetNotFound
+            }
+
+            guard url.startAccessingSecurityScopedResource() else {
+                throw CSVServiceError.securityScopedAccessFailed
+            }
+            defer { url.stopAccessingSecurityScopedResource() }
+
+            let content = try String(contentsOf: url, encoding: .utf8)
+            let cards = self.csvImporter.parseCSV(content, cardSetName: backgroundCardSet.name ?? "")
+
+            guard !cards.isEmpty else {
+                throw CSVServiceError.noValidCardsFound
+            }
+
+            deleteAllCards(in: backgroundCardSet, context: context)
+            for card in cards {
+                card.cardSet = backgroundCardSet
+                backgroundCardSet.addToCards(card)
+            }
+
+            return cards.count
         }
-        defer { url.stopAccessingSecurityScopedResource() }
-
-        let content = try String(contentsOf: url, encoding: .utf8)
-        let cards = csvImporter.parseCSV(content, cardSetName: cardSet.name ?? "")
-
-        guard !cards.isEmpty else {
-            throw CSVServiceError.noValidCardsFound
-        }
-
-        deleteAllCards(in: cardSet)
-        for card in cards {
-            card.cardSet = cardSet
-            cardSet.addToCards(card)
-        }
-
-        return cards.count
     }
 
-    private func deleteAllCards(in cardSet: CardSet) {
+    private func deleteAllCards(in cardSet: CardSet, context: NSManagedObjectContext) {
         if let cards = cardSet.cards as? Set<Card> {
             for card in cards {
-                viewContext.delete(card)
+                context.delete(card)
             }
         }
     }
@@ -142,6 +158,7 @@ enum CSVServiceError: LocalizedError {
     case bundledFileNotFound(String)
     case securityScopedAccessFailed
     case noValidCardsFound
+    case cardSetNotFound
 
     var errorDescription: String? {
         switch self {
@@ -151,6 +168,8 @@ enum CSVServiceError: LocalizedError {
             return "Cannot access the selected file."
         case .noValidCardsFound:
             return "No valid cards found in the CSV file. Please check the format."
+        case .cardSetNotFound:
+            return "The card set could not be found."
         }
     }
 }

@@ -26,9 +26,10 @@ struct ContentView: View {
 
     init() {
         let viewContext = PersistenceController.shared.container.viewContext
-        let cardSetRepository = CardSetRepository(viewContext: viewContext)
+        let backgroundContextManager = BackgroundContextManager(persistentContainer: PersistenceController.shared.container)
+        let cardSetRepository = CardSetRepository(viewContext: viewContext, backgroundContextManager: backgroundContextManager)
         let csvImporter = CSVImporter(viewContext: viewContext)
-        let csvService = CSVService(viewContext: viewContext, csvImporter: csvImporter)
+        let csvService = CSVService(viewContext: viewContext, csvImporter: csvImporter, backgroundContextManager: backgroundContextManager)
         let shareService = ShareService()
         _viewModel = StateObject(wrappedValue: ContentViewModel(
             cardSetRepository: cardSetRepository,
