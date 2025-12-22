@@ -7,7 +7,6 @@
 
 import SwiftUI
 import CoreData
-import UIKit
 import UniformTypeIdentifiers
 
 struct ContentView: View {
@@ -26,7 +25,16 @@ struct ContentView: View {
     @State private var hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
 
     init() {
-        _viewModel = StateObject(wrappedValue: ContentViewModel(viewContext: PersistenceController.shared.container.viewContext))
+        let viewContext = PersistenceController.shared.container.viewContext
+        let cardSetRepository = CardSetRepository(viewContext: viewContext)
+        let csvImporter = CSVImporter(viewContext: viewContext)
+        let csvService = CSVService(viewContext: viewContext, csvImporter: csvImporter)
+        let shareService = ShareService()
+        _viewModel = StateObject(wrappedValue: ContentViewModel(
+            cardSetRepository: cardSetRepository,
+            csvService: csvService,
+            shareService: shareService
+        ))
     }
 
     var body: some View {

@@ -6,9 +6,6 @@
 //
 
 import SwiftUI
-import CoreData
-import UIKit
-import UniformTypeIdentifiers
 import Combine
 
 @MainActor
@@ -17,41 +14,42 @@ class ContentViewModel: ObservableObject {
     @Published var uiState = UIState()
 
     // MARK: - Private Properties
-    private let viewContext: NSManagedObjectContext
-    private let csvImporter: CSVImporter
+    private let cardSetRepository: CardSetRepositoryProtocol
+    private let csvService: CSVServiceProtocol
+    private let shareService: ShareServiceProtocol
 
     // MARK: - Initialization
-    init(viewContext: NSManagedObjectContext) {
-        self.viewContext = viewContext
-        self.csvImporter = CSVImporter(viewContext: viewContext)
+    init(
+        cardSetRepository: CardSetRepositoryProtocol,
+        csvService: CSVServiceProtocol,
+        shareService: ShareServiceProtocol
+    ) {
+        self.cardSetRepository = cardSetRepository
+        self.csvService = csvService
+        self.shareService = shareService
     }
 
     func addCardSet() {
-        withAnimation {
-            let newCardSet = CardSet(context: viewContext)
-            newCardSet.name = "New Deck"
-            newCardSet.createdDate = Date()
-
+        Task {
             do {
-                try viewContext.save()
+                let _ = try await cardSetRepository.createCardSet(name: NSLocalizedString("new_deck", comment: "Default name for new decks"))
             } catch {
-                showError(title: "Failed to Create Deck", message: error.localizedDescription)
-                viewContext.rollback()
+                showError(title: NSLocalizedString("create_deck_failed", comment: "Error title for failed deck creation"),
+                         message: error.localizedDescription)
             }
         }
     }
 
     func deleteCardSet(_ cardSet: CardSet) {
-        withAnimation {
-            viewContext.delete(cardSet)
-            if uiState.selectedCardSet == cardSet {
-                uiState.clearSelection()
-            }
+        Task {
             do {
-                try viewContext.save()
+                try await cardSetRepository.deleteCardSet(cardSet)
+                if uiState.selectedCardSet == cardSet {
+                    uiState.clearSelection()
+                }
             } catch {
-                showError(title: "Failed to Delete Deck", message: error.localizedDescription)
-                viewContext.rollback()
+                showError(title: NSLocalizedString("delete_deck_failed", comment: "Error title for failed deck deletion"),
+                         message: error.localizedDescription)
             }
         }
     }
@@ -96,11 +94,13 @@ class ContentViewModel: ObservableObject {
 
     func performRename() {
         guard let cardSet = uiState.selectedCardSet else { return }
-        cardSet.name = uiState.newName
-        do {
-            try viewContext.save()
-        } catch {
-            showError(title: "Failed to Rename Deck", message: error.localizedDescription)
+        Task {
+            do {
+                try await cardSetRepository.updateCardSetName(cardSet, newName: uiState.newName)
+            } catch {
+                showError(title: NSLocalizedString("rename_deck_failed", comment: "Error title for failed deck rename"),
+                         message: error.localizedDescription)
+            }
         }
     }
 
@@ -111,6 +111,7 @@ class ContentViewModel: ObservableObject {
 
     func performReimport() {
         guard let cardSet = uiState.selectedCardSet else { return }
+
         if let kind = bundledDeckKind(for: cardSet) {
             reimportBundledDeck(cardSet, kind: kind)
         } else {
@@ -124,36 +125,18 @@ class ContentViewModel: ObservableObject {
             guard let url = urls.first, let cardSet = uiState.selectedCardSet else { return }
             reimportCustomDeck(cardSet, from: url)
         case .failure(let error):
-            showError(title: "Re-import Failed", message: error.localizedDescription)
+            showError(title: NSLocalizedString("reimport_failed", comment: "Error title for failed reimport"),
+                     message: error.localizedDescription)
         }
     }
 
     func exportDeck(_ cardSet: CardSet) {
-        var csvContent = "Front;;Back;;Tags\n"
-
-        if let cards = cardSet.cards as? Set<Card> {
-            for card in cards.sorted(by: { ($0.front ?? "") < ($1.front ?? "") }) {
-                let front = card.front?.replacingOccurrences(of: "\"", with: "\"\"") ?? ""
-                let back = card.back?.replacingOccurrences(of: "\"", with: "\"\"").replacingOccurrences(of: "\n", with: "<br>") ?? ""
-                let tags = card.tags?.replacingOccurrences(of: "\"", with: "\"\"") ?? ""
-
-                csvContent += "\"\(front)\";;\"\(back)\";;\"\(tags)\"\n"
-            }
-        }
-
-        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("\(cardSet.name ?? "deck").csv")
         do {
-            try csvContent.write(to: tempURL, atomically: true, encoding: .utf8)
-
-            let activityVC = UIActivityViewController(activityItems: [tempURL], applicationActivities: nil)
-
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let window = windowScene.windows.first,
-               let rootVC = window.rootViewController {
-                rootVC.present(activityVC, animated: true)
-            }
+            let csvContent = try csvService.exportCardSet(cardSet)
+            try shareService.shareCSVContent(csvContent, fileName: cardSet.name ?? "deck")
         } catch {
-            showError(title: "Export Failed", message: error.localizedDescription)
+            showError(title: NSLocalizedString("export_error", comment: "Error title for export failures"),
+                     message: error.localizedDescription)
         }
     }
 
@@ -169,12 +152,7 @@ class ContentViewModel: ObservableObject {
         uiState.showErrorAlert = true
     }
 
-    private enum BundledDeckKind {
-        case master
-        case group(fileName: String)
-    }
-
-    private func bundledDeckKind(for cardSet: CardSet) -> BundledDeckKind? {
+    private func bundledDeckKind(for cardSet: CardSet) -> CSVService.BundledDeckKind? {
         let name = (cardSet.name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         if name == Constants.Decks.bundledMasterName || name == Constants.Decks.legacyBundledMasterName {
             return .master
@@ -187,91 +165,34 @@ class ContentViewModel: ObservableObject {
         return nil
     }
 
-    private func deleteAllCards(in cardSet: CardSet) {
-        if let cards = cardSet.cards as? Set<Card> {
-            for card in cards {
-                viewContext.delete(card)
-            }
-        }
-    }
 
-    private func reimportBundledDeck(_ cardSet: CardSet, kind: BundledDeckKind) {
-        let bundledFiles = FileManagerService.getBundledCSVFiles()
 
-        deleteAllCards(in: cardSet)
+    private func reimportBundledDeck(_ cardSet: CardSet, kind: CSVService.BundledDeckKind) {
+        Task {
+            do {
+                let (importedCount, failures) = try await csvService.reimportBundledDeck(cardSet, kind: kind)
+                try await cardSetRepository.saveContext()
 
-        var importedCount = 0
-        var failures: [String] = []
-
-        switch kind {
-        case .master:
-            cardSet.name = Constants.Decks.bundledMasterName
-            for fileName in bundledFiles {
-                guard let content = FileManagerService.loadBundledCSV(named: fileName) else {
-                    failures.append(fileName)
-                    continue
+                if !failures.isEmpty {
+                    showError(title: NSLocalizedString("reimport_partially_failed", comment: "Title for partial reimport failure"),
+                             message: String(format: NSLocalizedString("reimport_partial_message", comment: "Message for partial reimport failure"), importedCount, failures.joined(separator: ", ")))
                 }
-                let cards = csvImporter.parseCSV(content, cardSetName: Constants.Decks.bundledMasterName)
-                for card in cards {
-                    card.cardSet = cardSet
-                    cardSet.addToCards(card)
-                }
-                importedCount += cards.count
+            } catch {
+                showError(title: NSLocalizedString("reimport_failed", comment: "Error title for failed reimport"),
+                         message: error.localizedDescription)
             }
-        case .group(let fileName):
-            guard let content = FileManagerService.loadBundledCSV(named: fileName) else {
-                showError(title: "Re-import Failed", message: "Failed to load bundled CSV \(fileName).")
-                viewContext.rollback()
-                return
-            }
-            let cards = csvImporter.parseCSV(content, cardSetName: cardSet.name ?? "")
-            for card in cards {
-                card.cardSet = cardSet
-                cardSet.addToCards(card)
-            }
-            importedCount = cards.count
-        }
-
-        do {
-            try viewContext.save()
-        } catch {
-            showError(title: "Re-import Failed", message: error.localizedDescription)
-            viewContext.rollback()
-            return
-        }
-
-        if !failures.isEmpty {
-            showError(title: "Re-import Partially Failed",
-                     message: "Imported \(importedCount) cards, but failed to load: \(failures.joined(separator: ", ")).")
         }
     }
 
     private func reimportCustomDeck(_ cardSet: CardSet, from url: URL) {
-        guard url.startAccessingSecurityScopedResource() else {
-            showError(title: "Re-import Failed", message: "Cannot access the selected file.")
-            return
-        }
-        defer { url.stopAccessingSecurityScopedResource() }
-
-        do {
-            let content = try String(contentsOf: url, encoding: .utf8)
-            let cards = csvImporter.parseCSV(content, cardSetName: cardSet.name ?? "")
-
-            guard !cards.isEmpty else {
-                showError(title: "Re-import Failed", message: "No valid cards found in the CSV file. Please check the format.")
-                return
+        Task {
+            do {
+                let importedCount = try await csvService.reimportCustomDeck(cardSet, from: url)
+                try await cardSetRepository.saveContext()
+            } catch {
+                showError(title: NSLocalizedString("reimport_failed", comment: "Error title for failed reimport"),
+                         message: error.localizedDescription)
             }
-
-            deleteAllCards(in: cardSet)
-            for card in cards {
-                card.cardSet = cardSet
-                cardSet.addToCards(card)
-            }
-
-            try viewContext.save()
-        } catch {
-            showError(title: "Re-import Failed", message: error.localizedDescription)
-            viewContext.rollback()
         }
     }
 }

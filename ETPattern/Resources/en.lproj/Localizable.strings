@@ -86,3 +86,7 @@
 "import_error" = "Import Error";
 "export_error" = "Export Error";
 "tts_error" = "Text-to-Speech Error";
+"create_deck_failed" = "Failed to Create Deck";
+"delete_deck_failed" = "Failed to Delete Deck";
+"rename_deck_failed" = "Failed to Rename Deck";
+"new_deck" = "New Deck";

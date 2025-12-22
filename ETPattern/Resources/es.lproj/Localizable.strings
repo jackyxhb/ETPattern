@@ -86,3 +86,7 @@
 "import_error" = "Error de Importación";
 "export_error" = "Error de Exportación";
 "tts_error" = "Error de Texto a Voz";
+"create_deck_failed" = "Error al Crear Baraja";
+"delete_deck_failed" = "Error al Eliminar Baraja";
+"rename_deck_failed" = "Error al Renombrar Baraja";
+"new_deck" = "Nueva Baraja";
