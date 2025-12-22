@@ -13,12 +13,6 @@ struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.theme) var theme
 
-    // MARK: - Data Fetching
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \CardSet.createdDate, ascending: false)],
-        animation: .default)
-    private var cardSets: FetchedResults<CardSet>
-
     @StateObject private var viewModel: ContentViewModel
 
     // MARK: - Onboarding State
@@ -31,10 +25,13 @@ struct ContentView: View {
         let csvImporter = CSVImporter(viewContext: viewContext)
         let csvService = CSVService(viewContext: viewContext, csvImporter: csvImporter, backgroundContextManager: backgroundContextManager)
         let shareService = ShareService()
+        let paginatedDataSource = PaginatedCardSetDataSource(viewContext: viewContext)
+        
         _viewModel = StateObject(wrappedValue: ContentViewModel(
             cardSetRepository: cardSetRepository,
             csvService: csvService,
-            shareService: shareService
+            shareService: shareService,
+            paginatedDataSource: paginatedDataSource
         ))
     }
 
@@ -48,6 +45,11 @@ struct ContentView: View {
             }
             .navigationTitle(NSLocalizedString("flashcard_decks", comment: "Main screen title"))
             .navigationBarHidden(true) // Custom header
+            .onAppear {
+                Task {
+                    await viewModel.loadInitialCardSets()
+                }
+            }
         }
         .safeAreaInset(edge: .bottom) {
             if let selectedCardSet = viewModel.uiState.selectedCardSet {
@@ -195,16 +197,36 @@ struct ContentView: View {
             HeaderView(viewModel: viewModel)
 
             ScrollView {
-                if cardSets.isEmpty {
+                if viewModel.isLoadingCardSets && viewModel.cardSets.isEmpty {
+                    loadingStateView
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if viewModel.cardSets.isEmpty && !viewModel.isLoadingCardSets {
                     emptyStateView
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    DeckListView(viewModel: viewModel, cardSets: cardSets)
+                    DeckListView(viewModel: viewModel, cardSets: viewModel.cardSets)
+                        .onAppear {
+                            Task {
+                                await viewModel.loadInitialCardSets()
+                            }
+                        }
                 }
             }
         }
         .padding(.horizontal, theme.metrics.contentHorizontalPadding)
         .padding(.top, theme.metrics.contentTopPadding)
+    }
+
+    private var loadingStateView: some View {
+        VStack(spacing: theme.metrics.emptyStateVerticalSpacing) {
+            ProgressView()
+                .scaleEffect(1.5)
+                .tint(theme.colors.textPrimary)
+            
+            Text("Loading decks...")
+                .font(.headline)
+                .foregroundColor(theme.colors.textPrimary.opacity(0.8))
+        }
     }
 
     private var emptyStateView: some View {

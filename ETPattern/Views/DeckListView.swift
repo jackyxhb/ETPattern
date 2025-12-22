@@ -10,7 +10,7 @@ import CoreData
 
 struct DeckListView: View {
     @ObservedObject var viewModel: ContentViewModel
-    let cardSets: FetchedResults<CardSet>
+    let cardSets: [CardSet]
     @Environment(\.theme) var theme
 
     var body: some View {
@@ -23,6 +23,16 @@ struct DeckListView: View {
                             viewModel.deleteCardSet(cardSet)
                         } label: {
                             Label("Delete", systemImage: "trash")
+                        }
+                    }
+            }
+            
+            // Load more indicator
+            if viewModel.hasMoreCardSets && !viewModel.cardSets.isEmpty {
+                loadMoreIndicator
+                    .onAppear {
+                        Task {
+                            await viewModel.loadMoreCardSets()
                         }
                     }
             }
@@ -99,6 +109,21 @@ struct DeckListView: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("deckCard")
+    }
+    
+    private var loadMoreIndicator: some View {
+        HStack {
+            Spacer()
+            VStack(spacing: 8) {
+                ProgressView()
+                    .tint(theme.colors.textPrimary)
+                Text("Loading more decks...")
+                    .font(.caption)
+                    .foregroundColor(theme.colors.textPrimary.opacity(0.7))
+            }
+            Spacer()
+        }
+        .padding(.vertical, 16)
     }
 }
 

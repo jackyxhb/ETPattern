@@ -17,6 +17,7 @@ class ContentViewModel: ObservableObject {
     private let cardSetRepository: CardSetRepositoryProtocol
     private let csvService: CSVServiceProtocol
     private let shareService: ShareServiceProtocol
+    private let paginatedDataSource: PaginatedCardSetDataSourceProtocol
     
     // MARK: - Cancellable Storage
     private var cancellables = Set<AnyCancellable>()
@@ -25,13 +26,44 @@ class ContentViewModel: ObservableObject {
     init(
         cardSetRepository: CardSetRepositoryProtocol,
         csvService: CSVServiceProtocol,
-        shareService: ShareServiceProtocol
+        shareService: ShareServiceProtocol,
+        paginatedDataSource: PaginatedCardSetDataSourceProtocol
     ) {
         self.cardSetRepository = cardSetRepository
         self.csvService = csvService
         self.shareService = shareService
+        self.paginatedDataSource = paginatedDataSource
         
         setupSubscriptions()
+    }
+    
+    // MARK: - Paginated Data Access
+    var cardSets: [CardSet] {
+        paginatedDataSource.cardSets
+    }
+    
+    var isLoadingCardSets: Bool {
+        paginatedDataSource.isLoading
+    }
+    
+    var hasMoreCardSets: Bool {
+        paginatedDataSource.hasMoreData
+    }
+    
+    var cardSetsError: AppError? {
+        paginatedDataSource.error
+    }
+    
+    func loadInitialCardSets() async {
+        await paginatedDataSource.loadInitialData()
+    }
+    
+    func loadMoreCardSets() async {
+        await paginatedDataSource.loadMoreData()
+    }
+    
+    func refreshCardSets() async {
+        await paginatedDataSource.refreshData()
     }
     
     deinit {
@@ -40,6 +72,26 @@ class ContentViewModel: ObservableObject {
     
     // MARK: - Private Setup Methods
     private func setupSubscriptions() {
+        // Subscribe to paginated data source changes to trigger view updates
+        if let observableDataSource = paginatedDataSource as? PaginatedCardSetDataSource {
+            subscribeWeak(to: observableDataSource.$cardSets, storeIn: &cancellables) { viewModel, _ in
+                // Trigger objectWillChange when cardSets change
+                viewModel.objectWillChange.send()
+            }
+            
+            subscribeWeak(to: observableDataSource.$isLoading, storeIn: &cancellables) { viewModel, _ in
+                viewModel.objectWillChange.send()
+            }
+            
+            subscribeWeak(to: observableDataSource.$hasMoreData, storeIn: &cancellables) { viewModel, _ in
+                viewModel.objectWillChange.send()
+            }
+            
+            subscribeWeak(to: observableDataSource.$error, storeIn: &cancellables) { viewModel, _ in
+                viewModel.objectWillChange.send()
+            }
+        }
+        
         // Example of proper Combine subscription with memory management:
         // subscribeWeak(to: somePublisher, storeIn: &cancellables) { strongSelf, value in
         //     // Handle value with guaranteed strong self reference
@@ -58,6 +110,8 @@ class ContentViewModel: ObservableObject {
         Task {
             do {
                 let _ = try await cardSetRepository.createCardSet(name: NSLocalizedString("new_deck", comment: "Default name for new decks"))
+                // Refresh data after adding
+                await refreshCardSets()
             } catch {
                 showError(title: NSLocalizedString("create_deck_failed", comment: "Error title for failed deck creation"),
                          message: error.localizedDescription)
@@ -69,6 +123,8 @@ class ContentViewModel: ObservableObject {
         Task {
             do {
                 try await cardSetRepository.deleteCardSet(cardSet)
+                // Refresh data after deleting
+                await refreshCardSets()
                 if uiState.selectedCardSet == cardSet {
                     uiState.clearSelection()
                 }
@@ -122,6 +178,8 @@ class ContentViewModel: ObservableObject {
         Task {
             do {
                 try await cardSetRepository.updateCardSetName(cardSet, newName: uiState.newName)
+                // Refresh data after renaming
+                await refreshCardSets()
             } catch {
                 showError(title: NSLocalizedString("rename_deck_failed", comment: "Error title for failed deck rename"),
                          message: error.localizedDescription)
