@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		22419E142EFC2A5F000F8B43 /* ETPatternCore in Frameworks */ = {isa = PBXBuildFile; productRef = 22419E132EFC2A5F000F8B43 /* ETPatternCore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		22EC7D4E2ED5726F00C3DDDA /* ETPattern.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ETPattern.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				22419E142EFC2A5F000F8B43 /* ETPatternCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = ETPattern;
 			packageProductDependencies = (
+				22419E132EFC2A5F000F8B43 /* ETPatternCore */,
 			);
 			productName = ETPattern;
 			productReference = 22EC7D4E2ED5726F00C3DDDA /* ETPattern.app */;
@@ -91,9 +97,13 @@
 			knownRegions = (
 				en,
 				Base,
+				es,
 			);
 			mainGroup = 22EC7D452ED5726E00C3DDDA;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				22419E122EFC2A5F000F8B43 /* XCLocalSwiftPackageReference "../ETPattern" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 22EC7D4F2ED5726F00C3DDDA /* Products */;
 			projectDirPath = "";
@@ -273,8 +283,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.jack.ETPattern;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				STRING_CATALOG_GENERATOR = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATOR = "";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -309,8 +319,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.jack.ETPattern;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				STRING_CATALOG_GENERATOR = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATOR = "";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -342,6 +352,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		22419E122EFC2A5F000F8B43 /* XCLocalSwiftPackageReference "../ETPattern" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../ETPattern;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		22419E132EFC2A5F000F8B43 /* ETPatternCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ETPatternCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 22EC7D462ED5726F00C3DDDA /* Project object */;
 }

@@ -243,12 +243,7 @@ struct CardFace: View {
         .onAppear {
             viewModel.setup(text: text, isFront: isFront)
         }
-        .translationTask(
-            TranslationSession.Configuration(
-                source: Locale.Language(identifier: "en"),
-                target: Locale.Language(identifier: "zh")
-            )
-        ) { session in
+        .safeAppTranslationTask { session in
             viewModel.performTranslation(session: session)
         }
     }
@@ -629,6 +624,22 @@ extension View {
             message: message,
             isPresented: isPresented
         ))
+    }
+
+    @ViewBuilder
+    func safeAppTranslationTask(action: @escaping (TranslationSession) -> Void) -> some View {
+        #if targetEnvironment(simulator)
+        self
+        #else
+        self.translationTask(
+            TranslationSession.Configuration(
+                source: Locale.Language(identifier: "en"),
+                target: Locale.Language(identifier: "zh")
+            )
+        ) { session in
+            action(session)
+        }
+        #endif
     }
 }
 

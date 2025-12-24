@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import ETPatternCore
+import os
 
 enum DifficultyRating {
     case again
@@ -14,15 +16,32 @@ enum DifficultyRating {
 
 class SpacedRepetitionService {
     func updateCardDifficulty(_ card: Card, rating: DifficultyRating) {
+        // Map local rating to Core rating
+        let coreRating: ETPatternCore.DifficultyRating
         switch rating {
-        case .again:
-            card.interval = 1
-            card.easeFactor = max(1.3, card.easeFactor - 0.2)
-        case .easy:
-            card.interval = Int32(max(1, Int(Double(card.interval) * card.easeFactor * 1.5)))
-            card.easeFactor = min(2.5, card.easeFactor + 0.1)
+        case .again: coreRating = .again
+        case .easy: coreRating = .easy
         }
-
+        
+        let result = SpacedRepetitionLogic.calculateNextReview(
+            currentInterval: card.interval,
+            currentEaseFactor: card.easeFactor,
+            rating: coreRating
+        )
+        
+        let logger = Logger(subsystem: "com.jack.ETPattern", category: "SRS")
+        let ratingDesc = String(describing: rating)
+        let msg1 = "[SRS-DEBUG] Updating card '\(card.cardName)' - Rating: \(ratingDesc)"
+        let msg2 = "[SRS-DEBUG] Old Interval: \(card.interval), Ease: \(card.easeFactor)"
+        let msg3 = "[SRS-DEBUG] New Interval: \(result.interval), Ease: \(result.easeFactor)"
+        
+        logger.info("\(msg1)")
+        logger.info("\(msg2)")
+        logger.info("\(msg3)")
+        
+        card.interval = result.interval
+        card.easeFactor = result.easeFactor
+        
         card.nextReviewDate = Date().addingTimeInterval(TimeInterval(card.interval * 86400))
     }
 
