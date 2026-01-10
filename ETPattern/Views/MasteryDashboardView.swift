@@ -50,7 +50,7 @@ struct MasteryDashboardView: View {
             }
         }
         .padding()
-        .background(.ultraThinMaterial)
+        .themedGlassBackground()
     }
 
     private var retentionCard: some View {
@@ -78,7 +78,7 @@ struct MasteryDashboardView: View {
                         y: .value("Count", count)
                     )
                     .foregroundStyle(theme.gradients.success)
-                    .cornerRadius(4)
+                    .cornerRadius(theme.metrics.chartBarCornerRadius)
                 }
             }
             .frame(height: 150)
@@ -87,7 +87,7 @@ struct MasteryDashboardView: View {
 
     private var maturityCard: some View {
         DashboardCard(title: "Deck Maturity", value: "\(viewModel.totalCards) cards") {
-            HStack(spacing: 20) {
+            HStack(spacing: theme.metrics.cardPadding) {
                 MaturityStat(label: "New", count: viewModel.maturity.new, color: theme.colors.textSecondary)
                 MaturityStat(label: "Learning", count: viewModel.maturity.learning, color: theme.colors.highlight)
                 MaturityStat(label: "Mature", count: viewModel.maturity.mature, color: theme.colors.success)
@@ -105,7 +105,7 @@ private struct DashboardCard<Content: View>: View {
     @Environment(\.theme) var theme
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: theme.metrics.deckDetailCardSpacing) {
             HStack {
                 Text(title)
                     .font(theme.metrics.headline)

@@ -81,21 +81,31 @@ struct ContentView: View {
         .sheet(isPresented: $viewModel.uiState.showingSessionStats) {
             SessionStatsView()
                 .presentationDetents([.medium, .large])
+                .presentationBackground(.ultraThinMaterial)
+                .presentationCornerRadius(theme.metrics.cornerRadius)
         }
         .sheet(isPresented: $viewModel.uiState.showingMasteryDashboard) {
             MasteryDashboardView(modelContext: modelContext)
+                .presentationBackground(.ultraThinMaterial)
+                .presentationCornerRadius(theme.metrics.cornerRadius)
         }
         .sheet(isPresented: $viewModel.uiState.showingImport) {
             ImportView(modelContext: modelContext)
                 .presentationDetents([.medium, .large])
+                .presentationBackground(.ultraThinMaterial)
+                .presentationCornerRadius(theme.metrics.cornerRadius)
         }
         .sheet(isPresented: $viewModel.uiState.showingSettings) {
             SettingsView()
                 .presentationDetents([.medium, .large])
+                .presentationBackground(.ultraThinMaterial)
+                .presentationCornerRadius(theme.metrics.cornerRadius)
         }
         .sheet(item: $viewModel.uiState.browseCardSet) { deck in
             DeckDetailView(cardSet: deck)
                 .presentationDetents([.medium, .large])
+                .presentationBackground(.ultraThinMaterial)
+                .presentationCornerRadius(theme.metrics.cornerRadius)
         }
         .alert("Rename Deck", isPresented: $viewModel.uiState.showingRenameAlert) {
             TextField("Deck Name", text: $viewModel.uiState.newName)

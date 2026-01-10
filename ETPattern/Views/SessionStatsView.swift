@@ -52,11 +52,12 @@ struct SessionStatsView: View {
             }
         }
         .padding()
-        .background(.ultraThinMaterial)
+
+        .themedGlassBackground()
     }
 
     private var activitySection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: theme.metrics.deckDetailCardSpacing) {
             Text("Activity (Last 7 Days)")
                 .font(theme.metrics.subheadline.bold())
                 .foregroundColor(theme.colors.textSecondary)
@@ -68,7 +69,7 @@ struct SessionStatsView: View {
                         y: .value("Reviews", count)
                     )
                     .foregroundStyle(theme.gradients.accent)
-                    .cornerRadius(4)
+                    .cornerRadius(theme.metrics.chartBarCornerRadius)
                 }
             }
             .frame(height: 100)
@@ -80,7 +81,7 @@ struct SessionStatsView: View {
     }
 
     private var historySection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: theme.metrics.mediumSpacing) {
             Text("Study History")
                 .font(theme.metrics.subheadline.bold())
                 .foregroundColor(theme.colors.textSecondary)
@@ -99,7 +100,7 @@ struct SessionStatsView: View {
     }
 
     private func sessionCard(_ session: StudySession) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: theme.metrics.deckDetailCardSpacing) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(session.date, style: .date)
@@ -121,7 +122,7 @@ struct SessionStatsView: View {
         }
         .padding()
         .background(theme.colors.surfaceLight)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cornerRadius, style: .continuous))
     }
 
     private func statView(label: String, value: String, color: Color? = nil) -> some View {
@@ -141,8 +142,8 @@ struct SessionStatsView: View {
         
         return Text(text)
             .font(.caption.bold())
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
+            .padding(.horizontal, theme.metrics.standardSpacing)
+            .padding(.vertical, theme.metrics.smallSpacing)
             .background(color.opacity(0.2))
             .foregroundColor(color)
             .clipShape(Capsule())

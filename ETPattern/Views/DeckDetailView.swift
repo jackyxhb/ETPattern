@@ -15,8 +15,7 @@ struct DeckDetailView: View {
 
     var body: some View {
         ZStack {
-            theme.gradients.background
-                .ignoresSafeArea()
+            // Background provided by sheet presentation (.ultraThinMaterial)
             
             VStack(spacing: 0) {
                 // Custom header for sheet presentation
@@ -102,6 +101,8 @@ struct DeckDetailView: View {
             CardPreviewContainer(card: card, index: index, total: allCards.count) {
                 previewCard = nil
             }
+            .presentationBackground(.ultraThinMaterial)
+            .presentationCornerRadius(theme.metrics.cornerRadius)
         }
     }
 

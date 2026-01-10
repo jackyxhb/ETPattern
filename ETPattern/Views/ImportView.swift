@@ -22,8 +22,7 @@ struct ImportView: View {
 
     var body: some View {
         ZStack {
-            theme.gradients.background
-                .ignoresSafeArea()
+            // Background provided by sheet presentation (.ultraThinMaterial)
             
             VStack(spacing: 0) {
                 // Custom header for sheet presentation

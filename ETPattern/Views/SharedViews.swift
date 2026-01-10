@@ -426,8 +426,8 @@ struct SharedModalContainer<Content: View>: View {
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            theme.gradients.background
-                .ignoresSafeArea()
+            // Background removed to allow Liquid Glass sheet presentation
+
 
             content
 
@@ -596,6 +596,15 @@ struct SharedErrorAlert: ViewModifier {
     }
 }
 
+struct ThemedGlassBackground: ViewModifier {
+    @Environment(\.theme) var theme
+    
+    func body(content: Content) -> some View {
+        content
+            .background(.ultraThinMaterial)
+    }
+}
+
 // MARK: - View Extensions for Easy Alert Usage
 
 extension View {
@@ -625,6 +634,10 @@ extension View {
             message: message,
             isPresented: isPresented
         ))
+    }
+
+    func themedGlassBackground() -> some View {
+        modifier(ThemedGlassBackground())
     }
 
     @ViewBuilder

@@ -53,69 +53,37 @@ struct HeaderView: View {
             headerIcon(systemName: "ellipsis")
         }
         .popover(isPresented: $viewModel.uiState.showingHeaderMenu) {
-            ZStack {
-                theme.colors.surfaceElevated
-                    .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cornerRadius))
-                    .shadow(color: theme.colors.shadow.opacity(0.3), radius: 10)
-                VStack(spacing: 0) {
-                    Button {
-                        viewModel.uiState.showingMasteryDashboard = true
-                        viewModel.uiState.showingHeaderMenu = false
-                    } label: {
-                        Label("Mastery Dashboard", systemImage: "sparkles")
-                            .foregroundColor(theme.colors.onSurfaceElevated)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding()
-                    }
-                    .buttonStyle(.plain)
-
-                    Button {
-                        viewModel.uiState.showingSessionStats = true
-                        viewModel.uiState.showingHeaderMenu = false
-                    } label: {
-                        Label("Session Stats", systemImage: "chart.bar")
-                            .foregroundColor(theme.colors.onSurfaceElevated)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding()
-                    }
-                    .buttonStyle(.plain)
-
-                    Button {
-                        viewModel.uiState.showingImport = true
-                        viewModel.uiState.showingHeaderMenu = false
-                    } label: {
-                        Label("Import", systemImage: "square.and.arrow.down")
-                            .foregroundColor(theme.colors.onSurfaceElevated)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding()
-                    }
-                    .buttonStyle(.plain)
-
-                    Button {
-                        viewModel.uiState.showingSettings = true
-                        viewModel.uiState.showingHeaderMenu = false
-                    } label: {
-                        Label("Settings", systemImage: "gear")
-                            .foregroundColor(theme.colors.onSurfaceElevated)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding()
-                    }
-                    .buttonStyle(.plain)
-
-                    Button {
-                        viewModel.uiState.showingOnboarding = true
-                        viewModel.uiState.showingHeaderMenu = false
-                    } label: {
-                        Label("Onboarding", systemImage: "questionmark.circle")
-                            .foregroundColor(theme.colors.onSurfaceElevated)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding()
-                    }
-                    .buttonStyle(.plain)
+            VStack(spacing: theme.metrics.smallSpacing) {
+                menuButton(title: "Mastery Dashboard", icon: "sparkles") {
+                    viewModel.uiState.showingMasteryDashboard = true
+                    viewModel.uiState.showingHeaderMenu = false
                 }
-                .padding()
+
+                menuButton(title: "Session Stats", icon: "chart.bar") {
+                    viewModel.uiState.showingSessionStats = true
+                    viewModel.uiState.showingHeaderMenu = false
+                }
+
+                menuButton(title: "Import", icon: "square.and.arrow.down") {
+                    viewModel.uiState.showingImport = true
+                    viewModel.uiState.showingHeaderMenu = false
+                }
+
+                menuButton(title: "Settings", icon: "gear") {
+                    viewModel.uiState.showingSettings = true
+                    viewModel.uiState.showingHeaderMenu = false
+                }
+
+                menuButton(title: "Onboarding", icon: "questionmark.circle") {
+                    viewModel.uiState.showingOnboarding = true
+                    viewModel.uiState.showingHeaderMenu = false
+                }
             }
-            .presentationDetents([.height(240)])
+            .padding(theme.metrics.largeSpacing)
+            .presentationDetents([.height(320)])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(.ultraThinMaterial)
+            .presentationCornerRadius(theme.metrics.cornerRadius)
         }
     }
 
@@ -126,5 +94,25 @@ struct HeaderView: View {
             .padding(theme.metrics.headerIconPadding)
             .background(theme.colors.surfaceLight)
             .clipShape(Circle())
+    }
+
+    private func menuButton(title: String, icon: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: theme.metrics.standardSpacing) {
+                Image(systemName: icon)
+                    .font(.body)
+                    .frame(width: 24)
+                Text(title)
+                    .font(.body)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(theme.colors.textSecondary.opacity(0.5))
+            }
+            .foregroundColor(theme.colors.textPrimary) // Liquid Glass requirement: textPrimary on glass
+            .padding()
+            .background(theme.colors.surfaceLight) // Subtle card effect for each item
+            .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cornerRadius * 0.6, style: .continuous)) // Slightly smaller radius for inner items
+        }
     }
 }

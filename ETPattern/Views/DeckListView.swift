@@ -133,7 +133,7 @@ struct DeckListView: View {
             }
             Spacer()
         }
-        .padding(.vertical, 16)
+        .padding(.vertical, theme.metrics.mediumSpacing)
     }
 }
 

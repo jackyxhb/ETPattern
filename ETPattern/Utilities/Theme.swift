@@ -306,6 +306,9 @@ struct Theme {
         
         // General animation duration
         let animationDuration: TimeInterval = 0.6
+        
+        // Chart metrics
+        let chartBarCornerRadius: CGFloat = 6.0
 
         let headline = Font.headline
         let subheadline = Font.subheadline

@@ -55,7 +55,7 @@ struct SettingsView: View {
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 12)
-                .background(.ultraThinMaterial)
+                .themedGlassBackground()
                 
                 Form {
                     studyModeSection
