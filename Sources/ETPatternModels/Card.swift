@@ -24,6 +24,7 @@ public final class Card {
     public var timesReviewed: Int32
     public var timesCorrect: Int32
     public var lastReviewedDate: Date?
+    public var lapses: Int32 = 0
     
     public var cardSet: CardSet?
 
@@ -31,6 +32,9 @@ public final class Card {
     public var reviewedSessions: [StudySession] = []
     @Relationship(deleteRule: .nullify, inverse: \StudySession.remainingCards)
     public var remainingSessions: [StudySession] = []
+    
+    @Relationship(deleteRule: .cascade, inverse: \ReviewLog.card)
+    public var reviewLogs: [ReviewLog] = []
 
     public init(id: Int32, front: String, back: String, cardName: String, groupId: Int32, groupName: String, difficulty: Int16 = 0, nextReviewDate: Date = Date(), interval: Int32 = 1, easeFactor: Double = 2.5, timesReviewed: Int32 = 0, timesCorrect: Int32 = 0) {
         self.id = id
@@ -45,6 +49,7 @@ public final class Card {
         self.easeFactor = easeFactor
         self.timesReviewed = timesReviewed
         self.timesCorrect = timesCorrect
+        self.lapses = 0
     }
 }
 

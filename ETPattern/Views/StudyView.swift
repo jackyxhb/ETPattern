@@ -9,11 +9,12 @@ struct StudyView: View {
     let cardSet: CardSet
 
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
+    @Environment(\.modelContext) private var context
     @Environment(\.theme) var theme
     @EnvironmentObject private var ttsService: TTSService
 
     @StateObject private var sessionManager: SessionManager
+    private let modelContext: ModelContext
     
     private let logger = Logger(subsystem: "com.jack.ETPattern", category: "StudyView")
     
@@ -24,9 +25,10 @@ struct StudyView: View {
     @State private var isSwipeInProgress = false
     @State private var swipeTask: Task<Void, Never>?
 
-    init(cardSet: CardSet) {
+    init(cardSet: CardSet, modelContext: ModelContext) {
         self.cardSet = cardSet
-        _sessionManager = StateObject(wrappedValue: SessionManager(cardSet: cardSet))
+        self.modelContext = modelContext
+        _sessionManager = StateObject(wrappedValue: SessionManager(cardSet: cardSet, modelContext: modelContext))
     }
 
     var body: some View {
@@ -101,10 +103,10 @@ struct StudyView: View {
                         }
                     }
                     .accessibilityAction(named: "Mark as Easy") {
-                        handleSwipe(.right)
+                        handleRating(.easy)
                     }
                     .accessibilityAction(named: "Mark as Again") {
-                        handleSwipe(.left)
+                        handleRating(.again)
                     }
                 }
             }
@@ -113,7 +115,13 @@ struct StudyView: View {
             }
             .padding(.horizontal, theme.metrics.studyViewHorizontalPadding)
             .safeAreaInset(edge: .bottom) {
-                bottomControlBar
+                if isFlipped {
+                    ratingToolbar
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                } else {
+                    bottomControlBar
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
         }
         .accessibilityElement(children: .contain)
@@ -228,7 +236,40 @@ struct StudyView: View {
         ttsService.speak(text)
     }
 
-    private func handleSwipe(_ direction: SwipeDirection) {
+    private var ratingToolbar: some View {
+        HStack(spacing: theme.metrics.actionBarButtonSpacing) {
+            RatingButton(title: "Again", color: theme.colors.danger, action: { handleRating(.again) })
+            RatingButton(title: "Hard", color: theme.colors.warning, action: { handleRating(.hard) })
+            RatingButton(title: "Good", color: theme.colors.success, action: { handleRating(.good) })
+            RatingButton(title: "Easy", color: theme.colors.highlight, action: { handleRating(.easy) })
+        }
+        .padding(.horizontal, theme.metrics.actionBarHorizontalPadding)
+        .padding(.vertical, theme.metrics.actionBarVerticalPadding)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: theme.metrics.actionBarCornerRadius, style: .continuous))
+        .padding(.horizontal, theme.metrics.actionBarContainerHorizontalPadding)
+    }
+
+    private struct RatingButton: View {
+        let title: String
+        let color: Color
+        let action: () -> Void
+        @Environment(\.theme) var theme
+
+        var body: some View {
+            Button(action: action) {
+                Text(title)
+                    .font(theme.metrics.subheadline.bold())
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, theme.metrics.actionButtonVerticalPadding)
+                    .background(color.opacity(0.8))
+                    .foregroundColor(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: theme.metrics.actionButtonCornerRadius, style: .continuous))
+            }
+        }
+    }
+
+    private func handleRating(_ rating: DifficultyRating) {
         guard let currentCard = currentCard else { return }
 
         // Cancel any existing swipe task
@@ -236,23 +277,21 @@ struct StudyView: View {
 
         // Update spaced repetition data
         let spacedRepetitionService = SpacedRepetitionService()
-        let rating: DifficultyRating = direction == .right ? .easy : .again
-        spacedRepetitionService.updateCardDifficulty(currentCard, rating: rating)
+        spacedRepetitionService.updateCardDifficulty(currentCard, rating: rating, in: sessionManager.currentSession)
 
         // Provide haptic feedback
-        let generator = UIImpactFeedbackGenerator(style: direction == .right ? .heavy : .rigid)
+        let generator = UIImpactFeedbackGenerator(style: rating == .again ? .heavy : .medium)
         generator.impactOccurred()
 
-        // Move to next card after a brief delay to show feedback
+        // Move to next card after a brief delay
         swipeTask = Task {
             do {
-                try await Task.sleep(for: .milliseconds(500))
+                try await Task.sleep(for: .milliseconds(400))
                 guard !Task.isCancelled else { return }
                 await MainActor.run {
                     withAnimation {
                         sessionManager.moveToNext()
                         updateCurrentCard()
-                        sessionManager.saveProgress()
                         // Reset to front side for new card
                         isFlipped = false
                         // Stop any ongoing speech
@@ -261,8 +300,18 @@ struct StudyView: View {
                         speakCurrentText()
                     }
                 }
-            } catch {
-                // Task was cancelled, ignore
+            } catch {}
+        }
+    }
+
+    private func handleSwipe(_ direction: SwipeDirection) {
+        if isFlipped {
+            handleRating(direction == .right ? .good : .again)
+        } else {
+            // Just flip the card on swipe if not flipped? Or maybe same as tap.
+            withAnimation(.bouncy) {
+                isFlipped = true
+                speakCurrentText()
             }
         }
     }
@@ -270,7 +319,7 @@ struct StudyView: View {
 
 #Preview {
     NavigationView {
-        StudyView(cardSet: previewCardSet)
+        StudyView(cardSet: previewCardSet, modelContext: PersistenceController.preview.container.mainContext)
             .modelContainer(PersistenceController.preview.container)
             .environmentObject(TTSService.shared)
     }

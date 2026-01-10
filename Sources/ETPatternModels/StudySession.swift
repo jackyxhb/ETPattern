@@ -22,6 +22,9 @@ public final class StudySession {
     
     public var reviewedCards: [Card] = []
     public var remainingCards: [Card] = []
+    
+    @Relationship(deleteRule: .cascade, inverse: \ReviewLog.studySession)
+    public var reviewLogs: [ReviewLog] = []
 
     public init(date: Date = Date(), cardsReviewed: Int32 = 0, correctCount: Int32 = 0, isActive: Bool = false, currentCardIndex: Int32 = 0, totalCards: Int32 = 0) {
         self.date = date

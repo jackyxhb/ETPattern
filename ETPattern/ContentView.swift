@@ -70,12 +70,12 @@ struct ContentView: View {
         }
         .fullScreenCover(isPresented: $viewModel.uiState.showingStudyView) {
             if let cardSet = viewModel.uiState.selectedCardSet {
-                StudyView(cardSet: cardSet)
+                StudyView(cardSet: cardSet, modelContext: modelContext)
             }
         }
         .fullScreenCover(isPresented: $viewModel.uiState.showingAutoView) {
             if let cardSet = viewModel.uiState.selectedCardSet {
-                AutoPlayView(cardSet: cardSet)
+                AutoPlayView(cardSet: cardSet, modelContext: modelContext)
             }
         }
         .sheet(isPresented: $viewModel.uiState.showingSessionStats) {

@@ -10,42 +10,55 @@ import ETPatternCore
 import ETPatternModels
 import os
 
-public enum DifficultyRating {
-    case again
-    case easy
-}
-
 public class SpacedRepetitionService {
     public init() {}
 
-    public func updateCardDifficulty(_ card: Card, rating: DifficultyRating) {
-        // Map local rating to Core rating
-        let coreRating: ETPatternCore.DifficultyRating
-        switch rating {
-        case .again: coreRating = .again
-        case .easy: coreRating = .easy
-        }
+    public func updateCardDifficulty(_ card: Card, rating: DifficultyRating, in session: StudySession? = nil) {
+        let previousInterval = card.interval
+        let previousEaseFactor = card.easeFactor
         
         let result = SpacedRepetitionLogic.calculateNextReview(
             currentInterval: card.interval,
             currentEaseFactor: card.easeFactor,
-            rating: coreRating
+            rating: rating
         )
         
         let logger = Logger(subsystem: "com.jack.ETPattern", category: "SRS")
-        let ratingDesc = String(describing: rating)
-        let msg1 = "[SRS-DEBUG] Updating card '\(card.cardName)' - Rating: \(ratingDesc)"
-        let msg2 = "[SRS-DEBUG] Old Interval: \(card.interval), Ease: \(card.easeFactor)"
-        let msg3 = "[SRS-DEBUG] New Interval: \(result.interval), Ease: \(result.easeFactor)"
+        logger.info("[SRS] Card: \(card.cardName) | Rating: \(String(describing: rating)) | Interval: \(card.interval) -> \(result.interval)")
         
-        logger.info("\(msg1)")
-        logger.info("\(msg2)")
-        logger.info("\(msg3)")
+        // Update card stats
+        card.timesReviewed += 1
+        if rating != .again {
+            card.timesCorrect += 1
+        } else {
+            card.lapses += 1
+        }
+        card.lastReviewedDate = Date()
         
+        // Apply SRS results
         card.interval = result.interval
         card.easeFactor = result.easeFactor
         
-        card.nextReviewDate = Date().addingTimeInterval(TimeInterval(card.interval * 86400))
+        // Calculate next review date using Calendar for accuracy
+        if let nextDate = Calendar.current.date(byAdding: .day, value: Int(card.interval), to: Date()) {
+            card.nextReviewDate = nextDate
+        } else {
+            card.nextReviewDate = Date().addingTimeInterval(TimeInterval(card.interval * 86400))
+        }
+        
+        // Create ReviewLog
+        let reviewLog = ReviewLog(
+            date: Date(),
+            rating: rating,
+            interval: result.interval,
+            easeFactor: result.easeFactor,
+            previousInterval: previousInterval,
+            previousEaseFactor: previousEaseFactor
+        )
+        reviewLog.card = card
+        reviewLog.studySession = session
+        card.reviewLogs.append(reviewLog)
+        session?.reviewLogs.append(reviewLog)
     }
 
     public func getCardsDueForReview(from cardSet: CardSet) -> [Card] {

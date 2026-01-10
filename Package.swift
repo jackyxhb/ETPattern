@@ -21,7 +21,7 @@ let package = Package(
         ),
         .target(
             name: "ETPatternCore",
-            dependencies: [],
+            dependencies: ["ETPatternModels"],
             path: "Sources/ETPatternCore"
         ),
         .target(

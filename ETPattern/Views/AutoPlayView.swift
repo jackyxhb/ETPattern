@@ -26,9 +26,9 @@ struct AutoPlayView: View {
     private var fallbackBackDelay: TimeInterval { theme.metrics.autoPlayFallbackBackDelay }
     private var interCardDelay: TimeInterval { theme.metrics.autoPlayInterCardDelay }
 
-    init(cardSet: CardSet) {
+    init(cardSet: CardSet, modelContext: ModelContext) {
         self.cardSet = cardSet
-        _sessionManager = StateObject(wrappedValue: SessionManager(cardSet: cardSet))
+        _sessionManager = StateObject(wrappedValue: SessionManager(cardSet: cardSet, modelContext: modelContext))
     }
 
     var body: some View {
@@ -426,7 +426,7 @@ private enum AutoPlayPhase: String, Codable {
 
 #Preview {
     NavigationView {
-        AutoPlayView(cardSet: previewCardSet)
+        AutoPlayView(cardSet: previewCardSet, modelContext: PersistenceController.preview.container.mainContext)
             .modelContainer(PersistenceController.preview.container)
             .environmentObject(TTSService.shared)
     }
