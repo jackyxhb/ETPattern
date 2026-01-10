@@ -29,11 +29,11 @@ public final class ReviewLog {
     
     public init(
         date: Date = Date(),
-        rating: DifficultyRating,
-        interval: Int32,
-        easeFactor: Double,
-        previousInterval: Int32,
-        previousEaseFactor: Double
+        rating: DifficultyRating = .good,
+        interval: Int32 = 0,
+        easeFactor: Double = 2.5,
+        previousInterval: Int32 = 0,
+        previousEaseFactor: Double = 2.5
     ) {
         self.date = date
         self.ratingValue = rating.rawValue

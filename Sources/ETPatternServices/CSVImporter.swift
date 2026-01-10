@@ -19,8 +19,13 @@ public class CSVImporter {
 
     public func parseCSV(_ content: String, cardSetName: String) -> [Card] {
         let lines = content.components(separatedBy: .newlines)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { line in
+                !line.isEmpty && !line.trimmingCharacters(in: CharacterSet(charactersIn: "; ")).isEmpty
+            }
+            
         var cards: [Card] = []
-        var lineNumber = 1 // Start from 1 since we skip the header
+        var lineNumber = 1 
 
         for line in lines.dropFirst() { // Skip header
             let components = line.components(separatedBy: ";;")

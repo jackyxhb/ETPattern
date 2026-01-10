@@ -298,6 +298,7 @@ struct UIState {
     var showingImport = false
     var showingSettings = false
     var showingHeaderMenu = false
+    var showingMasteryDashboard = false
     var showingOnboarding = false
     var isReimporting = false
     var isCreatingDeck = false

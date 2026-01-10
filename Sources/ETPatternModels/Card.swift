@@ -36,7 +36,20 @@ public final class Card {
     @Relationship(deleteRule: .cascade, inverse: \ReviewLog.card)
     public var reviewLogs: [ReviewLog] = []
 
-    public init(id: Int32, front: String, back: String, cardName: String, groupId: Int32, groupName: String, difficulty: Int16 = 0, nextReviewDate: Date = Date(), interval: Int32 = 1, easeFactor: Double = 2.5, timesReviewed: Int32 = 0, timesCorrect: Int32 = 0) {
+    public init(
+        id: Int32 = 0,
+        front: String = "",
+        back: String = "",
+        cardName: String = "",
+        groupId: Int32 = 0,
+        groupName: String = "",
+        difficulty: Int16 = 0,
+        nextReviewDate: Date = Date(),
+        interval: Int32 = 1,
+        easeFactor: Double = 2.5,
+        timesReviewed: Int32 = 0,
+        timesCorrect: Int32 = 0
+    ) {
         self.id = id
         self.front = front
         self.back = back

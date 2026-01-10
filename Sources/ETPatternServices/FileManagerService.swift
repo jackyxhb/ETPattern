@@ -12,6 +12,7 @@ public class FileManagerService {
         let bundle = Bundle.main
         let paths = bundle.paths(forResourcesOfType: "csv", inDirectory: nil)
         return paths.map { ($0 as NSString).lastPathComponent.replacingOccurrences(of: ".csv", with: "") }
+            .filter { !$0.hasPrefix("Group_") }
     }
 
     public static func loadBundledCSV(named fileName: String) -> String? {

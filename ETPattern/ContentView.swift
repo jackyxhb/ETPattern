@@ -82,6 +82,9 @@ struct ContentView: View {
             SessionStatsView()
                 .presentationDetents([.medium, .large])
         }
+        .sheet(isPresented: $viewModel.uiState.showingMasteryDashboard) {
+            MasteryDashboardView(modelContext: modelContext)
+        }
         .sheet(isPresented: $viewModel.uiState.showingImport) {
             ImportView(modelContext: modelContext)
                 .presentationDetents([.medium, .large])

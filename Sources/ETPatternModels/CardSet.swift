@@ -19,7 +19,7 @@ public final class CardSet {
     @Relationship(deleteRule: .cascade, inverse: \StudySession.cardSet)
     public var studySessions: [StudySession] = []
 
-    public init(name: String, createdDate: Date = Date()) {
+    public init(name: String = "Unknown Deck", createdDate: Date = Date()) {
         self.name = name
         self.createdDate = createdDate
     }

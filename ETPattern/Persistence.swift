@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftData
+import CloudKit
 import ETPatternModels
 import ETPatternServices
 import ETPatternCore
@@ -50,18 +51,45 @@ struct PersistenceController {
     let container: ModelContainer
 
     init(inMemory: Bool = false) {
-        let schema = Schema([Card.self, CardSet.self, StudySession.self])
-        let config = ModelConfiguration(isStoredInMemoryOnly: inMemory)
+        let schema = Schema([Card.self, CardSet.self, StudySession.self, ReviewLog.self])
+        let config: ModelConfiguration
+        
+        if inMemory {
+            config = ModelConfiguration(isStoredInMemoryOnly: true)
+        } else {
+            // Attempt CloudKit configuration
+            let ckConfig = ModelConfiguration(
+                schema: schema,
+                cloudKitDatabase: .private("iCloud.com.jackxhb.ETPattern")
+            )
+            
+            // Validate if we can use this config (basic check)
+            config = ckConfig
+        }
+
         do {
+            print("🚀 Persistence: Initializing ModelContainer...")
             let container = try ModelContainer(for: schema, configurations: [config])
             self.container = container
+            print("✅ Persistence: ModelContainer initialized successfully.")
             
             // Seed bundled decks after container is ready
-            Task {
-                await PersistenceController.seedBundledCardSets(modelContext: container.mainContext)
-            }
+            
+            // Seed bundled decks logic is now handled by AppInitManager
+            print("✅ Persistence: ModelContainer initialized. Waiting for AppInitManager.")
         } catch {
-            fatalError("Could not configure SwiftData container: \(error)")
+            print("❌ Persistence: Failed to initialize with CloudKit: \(error.localizedDescription)")
+            print("🔄 Persistence: Falling back to local storage...")
+            
+            do {
+                let localConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+                let container = try ModelContainer(for: schema, configurations: [localConfig])
+                self.container = container
+                print("✅ Persistence: Fallback ModelContainer initialized.")
+            } catch {
+                print("🛑 Persistence: CRITICAL ERROR - Fallback failed: \(error)")
+                fatalError("Could not configure SwiftData container: \(error)")
+            }
         }
     }
     
@@ -70,47 +98,55 @@ struct PersistenceController {
         self.container = container
     }
 
-    func initializeBundledCardSets() {
-        Task {
-            await Self.seedBundledCardSets(modelContext: container.mainContext)
-        }
+    @MainActor
+    func initializeBundledCardSets(force: Bool = false) async -> String {
+        return await Self.seedBundledCardSets(modelContext: container.mainContext, force: force)
     }
 
-    private static func seedBundledCardSets(modelContext: ModelContext) async {
+    @MainActor
+    private static func seedBundledCardSets(modelContext: ModelContext, force: Bool) async -> String {
         let csvImporter = CSVImporter(modelContext: modelContext)
-        let bundledFiles = FileManagerService.getBundledCSVFiles()
+        let bundledFiles = FileManagerService.getBundledCSVFiles().sorted {
+            $0.localizedStandardCompare($1) == .orderedAscending
+        }
         let masterDeckName = Constants.Decks.bundledMasterName
 
-        // Check if master deck already exists
+        // Fetch existing decks
         let masterDeckFetch = FetchDescriptor<CardSet>(predicate: #Predicate { $0.name == masterDeckName })
         let existingMasterDecks = (try? modelContext.fetch(masterDeckFetch)) ?? []
-        let masterDeck: CardSet
         
-        if let existing = existingMasterDecks.first {
-            masterDeck = existing
-        } else {
+        let masterDeck: CardSet
+
+        if force {
+            print("🧨 Persistence: FORCE RESET triggered. Deleting \(existingMasterDecks.count) existing master decks...")
+            for deck in existingMasterDecks {
+                modelContext.delete(deck)
+            }
+            try? modelContext.save() // Commit deletion
+            
+            // Create fresh deck
             masterDeck = CardSet(name: masterDeckName)
             modelContext.insert(masterDeck)
-        }
-
-        if !masterDeck.cards.isEmpty {
-            // Master deck already exists and is populated. Check if any cards have nil id and assign IDs.
-            let cardsWithNilId = masterDeck.cards.filter { $0.id == 0 }
-            if !cardsWithNilId.isEmpty {
-                var nextId: Int32 = 1
-                // Find the highest existing card ID to avoid conflicts
-                var fetchDescriptor = FetchDescriptor<Card>(sortBy: [SortDescriptor(\.id, order: .reverse)])
-                fetchDescriptor.fetchLimit = 1
-                if let highestIdCard = (try? modelContext.fetch(fetchDescriptor))?.first {
-                    nextId = highestIdCard.id + 1
-                }
-                for card in cardsWithNilId {
-                    card.id = nextId
-                    nextId += 1
-                }
-                try? modelContext.save()
-            }
-            return
+        } else {
+             // Normal logic (resume or skip)
+             if let existing = existingMasterDecks.first {
+                 masterDeck = existing
+                 let currentCount = masterDeck.cards.count
+                 
+                 // If count is suspiciously high (e.g. double import of 299 cards = 598), force reset
+                 if currentCount > 400 {
+                     print("⚠️ Persistence: Detected potential duplicate data (\(currentCount) cards). Triggering AUTO-REPAIR.")
+                     // Recursively call with force=true to wipe and re-seed
+                     return await seedBundledCardSets(modelContext: modelContext, force: true)
+                 }
+                 
+                 if currentCount >= 290 { // Lower threshold slightly to avoid loops if count is persistent
+                     return "Skipped: Master deck already has \(currentCount) cards."
+                 }
+             } else {
+                 masterDeck = CardSet(name: masterDeckName)
+                 modelContext.insert(masterDeck)
+             }
         }
 
         var totalImported = 0
@@ -136,8 +172,9 @@ struct PersistenceController {
                     modelContext.insert(card)
                 }
                 totalImported += cards.count
+                importErrors.append("Scale: \(fileName) -> \(cards.count) cards") 
             } else {
-                importErrors.append("Failed to load bundled CSV \(fileName)")
+                importErrors.append("Failed: \(fileName)")
             }
         }
 
@@ -152,6 +189,12 @@ struct PersistenceController {
         if !importErrors.isEmpty {
             UserDefaults.standard.set(importErrors, forKey: "bundledImportErrors")
         }
+        if !importErrors.isEmpty {
+            UserDefaults.standard.set(importErrors, forKey: "bundledImportErrors")
+            return "Completed with errors: \(importErrors.count) files failed. Imported: \(totalImported)"
+        }
+        
+        return "Success: Imported \(totalImported) cards from \(bundledFiles.count) files."
     }
 }
 

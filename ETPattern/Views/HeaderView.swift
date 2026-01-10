@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import ETPatternServices
 
 struct HeaderView: View {
     @ObservedObject var viewModel: ContentViewModel
@@ -18,9 +19,31 @@ struct HeaderView: View {
                 .foregroundColor(theme.colors.textPrimary)
                 .dynamicTypeSize(.large ... .accessibility5)
             Spacer()
+            cloudSyncStatus
             headerActions
         }
     }
+
+    private var cloudSyncStatus: some View {
+        HStack(spacing: 4) {
+            if cloudSyncManager.isSyncing {
+                Image(systemName: "icloud.and.arrow.down")
+                    .symbolEffect(.pulse)
+                    .foregroundColor(theme.colors.highlight)
+            } else if let error = cloudSyncManager.syncError {
+                Image(systemName: "icloud.slash")
+                    .foregroundColor(theme.colors.danger)
+                    .help(error.localizedDescription)
+            } else {
+                Image(systemName: "icloud")
+                    .foregroundColor(theme.colors.textSecondary.opacity(0.5))
+            }
+        }
+        .imageScale(.small)
+        .font(.caption)
+    }
+    
+    @EnvironmentObject private var cloudSyncManager: ETPatternServices.CloudSyncManager
 
     private var headerActions: some View {
         Button(action: {
@@ -35,6 +58,17 @@ struct HeaderView: View {
                     .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cornerRadius))
                     .shadow(color: theme.colors.shadow.opacity(0.3), radius: 10)
                 VStack(spacing: 0) {
+                    Button {
+                        viewModel.uiState.showingMasteryDashboard = true
+                        viewModel.uiState.showingHeaderMenu = false
+                    } label: {
+                        Label("Mastery Dashboard", systemImage: "sparkles")
+                            .foregroundColor(theme.colors.onSurfaceElevated)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                    }
+                    .buttonStyle(.plain)
+
                     Button {
                         viewModel.uiState.showingSessionStats = true
                         viewModel.uiState.showingHeaderMenu = false
