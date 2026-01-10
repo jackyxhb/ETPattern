@@ -9,6 +9,7 @@ import SwiftUI
 import Translation
 import os
 import Combine
+import ETPatternModels
 
 @MainActor
 final class CardFaceViewModel: ObservableObject {
@@ -378,21 +379,21 @@ struct CardFace: View {
     }
 }
 
-struct SharedOrderToggleButton: View {
-    let isRandomOrder: Bool
+struct SharedStudyStrategyButton: View {
+    let strategy: StudyStrategy
     let theme: Theme
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: isRandomOrder ? "shuffle" : "arrow.up.arrow.down")
+            Image(systemName: strategy.icon)
                 .font(theme.metrics.title3)
                 .foregroundColor(theme.colors.textPrimary)
                 .frame(width: theme.metrics.sharedButtonSize, height: theme.metrics.sharedButtonSize)
                 .background(theme.colors.surfaceLight)
                 .clipShape(Circle())
         }
-        .accessibilityLabel(isRandomOrder ? "Random Order" : "Sequential Order")
+        .accessibilityLabel("Study Mode: \(strategy.displayName)")
     }
 }
 

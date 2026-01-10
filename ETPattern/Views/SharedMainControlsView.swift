@@ -6,37 +6,38 @@
 //
 
 import SwiftUI
+import ETPatternModels
 
 struct SharedMainControlsView<MiddleContent: View>: View {
-    let orderToggleAction: () -> Void
+    let strategyToggleAction: () -> Void
     let previousAction: () -> Void
     let nextAction: () -> Void
     let closeAction: () -> Void
     let isPreviousDisabled: Bool
-    let isRandomOrder: Bool
+    let strategy: StudyStrategy
     let theme: Theme
     let previousHint: String?
     let nextHint: String?
     @ViewBuilder let middleContent: () -> MiddleContent
 
     init(
-        orderToggleAction: @escaping () -> Void,
+        strategyToggleAction: @escaping () -> Void,
         previousAction: @escaping () -> Void,
         nextAction: @escaping () -> Void,
         closeAction: @escaping () -> Void,
         isPreviousDisabled: Bool,
-        isRandomOrder: Bool,
+        strategy: StudyStrategy,
         theme: Theme,
         previousHint: String? = nil,
         nextHint: String? = nil,
         @ViewBuilder middleContent: @escaping () -> MiddleContent
     ) {
-        self.orderToggleAction = orderToggleAction
+        self.strategyToggleAction = strategyToggleAction
         self.previousAction = previousAction
         self.nextAction = nextAction
         self.closeAction = closeAction
         self.isPreviousDisabled = isPreviousDisabled
-        self.isRandomOrder = isRandomOrder
+        self.strategy = strategy
         self.theme = theme
         self.previousHint = previousHint
         self.nextHint = nextHint
@@ -45,10 +46,10 @@ struct SharedMainControlsView<MiddleContent: View>: View {
 
     var body: some View {
         HStack(spacing: theme.metrics.sharedControlsSpacing) {
-            SharedOrderToggleButton(
-                isRandomOrder: isRandomOrder,
+            SharedStudyStrategyButton(
+                strategy: strategy,
                 theme: theme,
-                action: orderToggleAction
+                action: strategyToggleAction
             )
             Spacer()
             previousButton

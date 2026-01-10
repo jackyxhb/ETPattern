@@ -6,14 +6,15 @@
 //
 
 import SwiftUI
+import ETPatternModels
 
 struct SharedBottomControlBarView<MiddleContent: View>: View {
-    let orderToggleAction: () -> Void
+    let strategyToggleAction: () -> Void
     let previousAction: () -> Void
     let nextAction: () -> Void
     let closeAction: () -> Void
     let isPreviousDisabled: Bool
-    let isRandomOrder: Bool
+    let strategy: StudyStrategy
     let currentPosition: Int
     let totalCards: Int
     let theme: Theme
@@ -22,12 +23,12 @@ struct SharedBottomControlBarView<MiddleContent: View>: View {
     @ViewBuilder let middleContent: () -> MiddleContent
 
     init(
-        orderToggleAction: @escaping () -> Void,
+        strategyToggleAction: @escaping () -> Void,
         previousAction: @escaping () -> Void,
         nextAction: @escaping () -> Void,
         closeAction: @escaping () -> Void,
         isPreviousDisabled: Bool,
-        isRandomOrder: Bool,
+        strategy: StudyStrategy,
         currentPosition: Int,
         totalCards: Int,
         theme: Theme,
@@ -35,12 +36,12 @@ struct SharedBottomControlBarView<MiddleContent: View>: View {
         nextHint: String? = nil,
         @ViewBuilder middleContent: @escaping () -> MiddleContent
     ) {
-        self.orderToggleAction = orderToggleAction
+        self.strategyToggleAction = strategyToggleAction
         self.previousAction = previousAction
         self.nextAction = nextAction
         self.closeAction = closeAction
         self.isPreviousDisabled = isPreviousDisabled
-        self.isRandomOrder = isRandomOrder
+        self.strategy = strategy
         self.currentPosition = currentPosition
         self.totalCards = totalCards
         self.theme = theme
@@ -68,12 +69,12 @@ struct SharedBottomControlBarView<MiddleContent: View>: View {
 
     private var mainControlsView: some View {
         SharedMainControlsView(
-            orderToggleAction: orderToggleAction,
+            strategyToggleAction: strategyToggleAction,
             previousAction: previousAction,
             nextAction: nextAction,
             closeAction: closeAction,
             isPreviousDisabled: isPreviousDisabled,
-            isRandomOrder: isRandomOrder,
+            strategy: strategy,
             theme: theme,
             previousHint: previousHint,
             nextHint: nextHint,

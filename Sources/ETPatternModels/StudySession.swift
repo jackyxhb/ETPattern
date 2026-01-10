@@ -25,6 +25,14 @@ public final class StudySession {
     
     @Relationship(deleteRule: .cascade, inverse: \ReviewLog.studySession)
     public var reviewLogs: [ReviewLog] = []
+    
+    public var strategyValue: String = StudyStrategy.intelligent.rawValue
+    public var cardOrder: [Int] = []
+
+    public var strategy: StudyStrategy {
+        get { StudyStrategy(rawValue: strategyValue) ?? .intelligent }
+        set { strategyValue = newValue.rawValue }
+    }
 
     public init(date: Date = Date(), cardsReviewed: Int32 = 0, correctCount: Int32 = 0, isActive: Bool = false, currentCardIndex: Int32 = 0, totalCards: Int32 = 0) {
         self.date = date

@@ -102,9 +102,10 @@ struct AutoPlayView: View {
 
     private var bottomControlBar: some View {
         SharedBottomControlBarView(
-            orderToggleAction: {
+            strategyToggleAction: {
                 UIImpactFeedbackGenerator.lightImpact()
-                sessionManager.toggleOrderMode()
+                sessionManager.cycleStrategy()
+                updateCurrentCard()
             },
             previousAction: {
                 UIImpactFeedbackGenerator.lightImpact()
@@ -119,7 +120,7 @@ struct AutoPlayView: View {
                 dismissAuto()
             },
             isPreviousDisabled: sessionManager.currentIndex == 0,
-            isRandomOrder: sessionManager.isRandomOrder,
+            strategy: sessionManager.currentStrategy,
             currentPosition: sessionManager.getCards().count > 0 ? sessionManager.currentIndex + 1 : 0,
             totalCards: sessionManager.getCards().count,
             theme: theme,
