@@ -11,24 +11,59 @@
 
 ## ✨ What's New
 
+### What's New (v2.0.0)
+
+**The Modernization Update**
+This major release overhauls the entire application architecture, UI, and learning engine.
+
+### 🏛️ Modular Architecture
+
+- **3-Tier Design**: Codebase refactored into `Models`, `Core` (Logic), and `Services` packages.
+- **SwiftData**: Complete migration from Core Data to SwiftData for thread-safe, modern persistence.
+
+### 💎 "Liquid Glass" Design
+
+- **New Aesthetic**: Full UI redesign featuring glassmorphism, depth, and semantic colors.
+- **Monogram Icon**: New App Icon featuring the "Liquid Glass" visual identity.
+
+### 🧠 Intelligent SRS
+
+- **4-Level Grading**: Upgraded from binary to "Againe, Hard, Good, Easy" ratings.
+- **SM-2 Algorithm**: Industry-standard algorithm for optimized review intervals.
+- **Smart Queue**: Prioritizes overdue cards to maximize learning efficiency.
+
+### 🛡️ Data Resilience
+
+- **Auto-Repair**: Automatically detects and fixes duplicate data on launch.
+- **Ghost Filter**: Smart CSV import logic filters out malformed or blank lines.
+- **Race Condition Fix**: Serialized initialization prevents double-import bugs.
+
+---
+
 ### What's New (v1.8.0)
 
 ### 🔁 Sync & Stability
+
 - Fixed intermittent audio overlap in Auto Play and improved quick-deck switching reliability.
 
 ### 🈶 Chinese Translations
+
 - Added Chinese translations for each pattern and its five example sentences using the native Apple translation framework. Translations are fetched on demand, cached locally for offline access, and can be toggled on or off in the app settings.
 
 ### 🧩 Import & Parsing
+
 - CSV importer now trims whitespace, tolerates minor tag formatting, and recovers gracefully from small malformed rows.
 
 ### ⚙️ Installer & CI
+
 - `install.sh` improved for newer macOS releases; CI scripts updated for faster simulator selection.
 
 ### ♿ Accessibility & Localization
+
 - Enhanced VoiceOver labels and improved localized strings in `es.lproj` and `en.lproj`.
 
 ### 🚀 Performance & Fixes
+
 - Reduced main-thread work during deck load; several crash fixes and UI responsiveness improvements.
 
 ---
@@ -36,16 +71,19 @@
 ## Previous Release — v1.7.0
 
 ### 🆔 Global Unique Card IDs
+
 - **Unique Identifier System**: Implemented globally unique card identifiers across all imported decks to prevent content duplication issues.
 - **ID Display**: Added card ID numbers in headers showing "ID/Total" format (e.g., "5/300") for easy reference and navigation.
 - **ID-based Ordering**: Cards in deck details now sort by their unique ID numbers instead of alphabetically for logical sequence navigation.
 
 ### 🔧 Data Integrity & Migration
+
 - **Automatic Migration**: System automatically handles existing cards to ensure ID uniqueness and data integrity.
 - **Type Safety**: Resolved Int32/Int type conversion issues throughout the codebase for better reliability.
 - **Core Data Enhancement**: Updated Persistence layer to assign globally unique IDs during data seeding.
 
 ### 🎨 UI Improvements
+
 - **Card Navigation**: Improved card ordering in DeckDetailView for better user experience.
 - **Header Information**: Card headers now display unique identifiers for easy reference.
 - **Consistent Display**: All views show card IDs uniformly across the application.
@@ -74,6 +112,7 @@
 ## 🚀 Installation
 
 ### From Source
+
 ```bash
 git clone https://github.com/jackyxhb/ETPattern.git
 cd ETPattern
@@ -82,6 +121,7 @@ open ETPattern.xcodeproj
 ```
 
 ### Simulator Testing
+
 ```bash
 xcodebuild -scheme ETPattern -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max' build
 xcrun simctl install booted /path/to/ETPattern.app
@@ -89,6 +129,7 @@ xcrun simctl launch booted com.jack.ETPattern
 ```
 
 ### Device Installation
+
 ```bash
 # Build for device
 xcodebuild -project ETPattern.xcodeproj -scheme ETPattern -destination "id=YOUR_DEVICE_ID" build
@@ -139,7 +180,8 @@ ios-deploy --bundle /path/to/ETPattern.app --id YOUR_DEVICE_ID
 ## 📞 Support
 
 For issues, feature requests, or questions:
-- **Repository**: https://github.com/jackyxhb/ETPattern
+
+- **Repository**: <https://github.com/jackyxhb/ETPattern>
 - **Issues**: Use GitHub Issues for bug reports
 - **Documentation**: Comprehensive README.md included
 
