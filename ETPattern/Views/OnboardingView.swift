@@ -19,7 +19,7 @@ struct OnboardingView: View {
                 title: NSLocalizedString("welcome_title", comment: "Welcome page title"),
                 subtitle: NSLocalizedString("welcome_subtitle", comment: "Welcome page subtitle"),
                 description: NSLocalizedString("welcome_description", comment: "Welcome page description"),
-                systemImage: "sparkles",
+                systemImage: "logo",
                 gradient: theme.gradients.accent
             ),
             SharedOnboardingPageView(

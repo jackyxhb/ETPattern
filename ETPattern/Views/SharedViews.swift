@@ -671,9 +671,17 @@ struct SharedOnboardingPageView: View {
                     .fill(gradient.opacity(0.2))
                     .frame(width: theme.metrics.onboardingCircleSize, height: theme.metrics.onboardingCircleSize)
 
-                Image(systemName: systemImage)
-                    .font(.system(size: theme.metrics.onboardingIconSize))
-                    .foregroundColor(theme.colors.textPrimary)
+                if systemImage == "logo" {
+                    Image("logo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: theme.metrics.onboardingIconSize, height: theme.metrics.onboardingIconSize)
+                        .clipShape(RoundedRectangle(cornerRadius: theme.metrics.onboardingIconSize * 0.223))
+                } else {
+                    Image(systemName: systemImage)
+                        .font(.system(size: theme.metrics.onboardingIconSize))
+                        .foregroundColor(theme.colors.textPrimary)
+                }
             }
             .padding(.bottom, theme.metrics.onboardingCircleBottomPadding)
 
