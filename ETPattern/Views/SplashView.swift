@@ -46,10 +46,10 @@ struct SplashView: View {
                     .scaledToFit()
                     .frame(width: theme.metrics.splashLogoSize, height: theme.metrics.splashLogoSize)
                     .clipShape(RoundedRectangle(cornerRadius: theme.metrics.splashLogoSize * 0.223)) // iOS icon corner radius
-                    .shadow(color: theme.colors.shadow.opacity(0.15), radius: 15, x: 0, y: 8)
+                    .shadow(color: theme.colors.shadow.opacity(0.4), radius: 15, x: 0, y: 8)
                     .overlay(
                         RoundedRectangle(cornerRadius: theme.metrics.splashLogoSize * 0.223)
-                            .stroke(.black.opacity(0.1), lineWidth: 1)
+                            .stroke(.white.opacity(0.15), lineWidth: 1)
                     )
 
                 VStack(spacing: 8) {
