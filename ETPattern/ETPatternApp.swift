@@ -6,7 +6,9 @@
 //
 
 import SwiftUI
-import CoreData
+import SwiftData
+import ETPatternServices
+import ETPatternCore
 
 @main
 @available(iOS 18.0, *)
@@ -21,9 +23,9 @@ struct ETPatternApp: App {
     var body: some Scene {
         WindowGroup {
             SplashHostView {
-                ContentView()
+                ContentView(modelContext: persistenceController.container.mainContext)
             }
-            .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            .modelContainer(persistenceController.container)
             .environmentObject(TTSService.shared)
             .environment(\.theme, Theme.default)
         }

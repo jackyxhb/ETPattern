@@ -6,16 +6,18 @@
 //
 
 import Foundation
-import CoreData
+import SwiftData
+import ETPatternModels
+import ETPatternCore
 
-class CSVImporter {
-    private let viewContext: NSManagedObjectContext
+public class CSVImporter {
+    private let modelContext: ModelContext
 
-    init(viewContext: NSManagedObjectContext) {
-        self.viewContext = viewContext
+    public init(modelContext: ModelContext) {
+        self.modelContext = modelContext
     }
 
-    func parseCSV(_ content: String, cardSetName: String) -> [Card] {
+    public func parseCSV(_ content: String, cardSetName: String) -> [Card] {
         let lines = content.components(separatedBy: .newlines)
         var cards: [Card] = []
         var lineNumber = 1 // Start from 1 since we skip the header
@@ -29,11 +31,14 @@ class CSVImporter {
             let tags = components.count > 2 ? components[2].trimmingCharacters(in: .whitespacesAndNewlines) : ""
 
             if !front.isEmpty && !back.isEmpty {
-                let card = Card(context: viewContext)
-                // ID will be assigned later in Persistence to ensure uniqueness
-                card.cardName = front  // Store the original pattern string
-                card.front = front     // Set front to the same value
-                card.back = back
+                let card = Card(
+                    id: 0, // ID will be assigned later in Persistence to ensure uniqueness
+                    front: front,
+                    back: back,
+                    cardName: front,
+                    groupId: 0,
+                    groupName: ""
+                )
                 card.tags = tags
 
                 // Parse groupId and groupName from tags
@@ -51,15 +56,8 @@ class CSVImporter {
                         card.groupId = 0
                         card.groupName = tags
                     }
-                } else {
-                    card.groupId = 0
-                    card.groupName = ""
                 }
 
-                card.difficulty = 0
-                card.nextReviewDate = Date()
-                card.interval = 1
-                card.easeFactor = 2.5
                 cards.append(card)
                 lineNumber += 1
             }
@@ -68,9 +66,11 @@ class CSVImporter {
         return cards
     }
 
-    func importBundledCSV(named fileName: String, cardSetName: String) throws -> CardSet {
+    public func importBundledCSV(named fileName: String, cardSetName: String) throws -> CardSet {
+        // Note: Using Bundle.main here assumes the app provides the resources.
+        // In a modular setup, we might need to pass the bundle or use a specific one.
         guard let url = Bundle.main.url(forResource: fileName, withExtension: "csv") else {
-            throw AppError.csvFileNotFound(fileName: fileName)
+            throw CSVImporterError.csvFileNotFound(fileName: fileName)
         }
 
         do {
@@ -78,28 +78,45 @@ class CSVImporter {
             let cards = parseCSV(content, cardSetName: cardSetName)
 
             if cards.isEmpty {
-                throw AppError.csvParsingFailed(reason: "No valid cards found in \(fileName)")
+                throw CSVImporterError.csvParsingFailed(reason: "No valid cards found in \(fileName)")
             }
 
-            let cardSet = CardSet(context: viewContext)
-            cardSet.name = cardSetName
-            cardSet.createdDate = Date()
+            let cardSet = CardSet(name: cardSetName)
+            modelContext.insert(cardSet)
 
             // Sort cards by ID to ensure proper order
             let sortedCards = cards.sorted { $0.id < $1.id }
-            cardSet.addToCards(NSSet(array: sortedCards))
-
+            
             // Set the cardSet relationship for each card
             for card in sortedCards {
                 card.cardSet = cardSet
+                cardSet.cards.append(card)
+                modelContext.insert(card)
             }
 
-            try viewContext.save()
+            try modelContext.save()
             return cardSet
-        } catch let error as AppError {
+        } catch let error as CSVImporterError {
             throw error
         } catch {
-            throw AppError.csvImportFailed(reason: error.localizedDescription)
+            throw CSVImporterError.csvImportFailed(reason: error.localizedDescription)
+        }
+    }
+}
+
+public enum CSVImporterError: LocalizedError {
+    case csvFileNotFound(fileName: String)
+    case csvParsingFailed(reason: String)
+    case csvImportFailed(reason: String)
+
+    public var errorDescription: String? {
+        switch self {
+        case .csvFileNotFound(let fileName):
+            return "CSV file not found: \(fileName)"
+        case .csvParsingFailed(let reason):
+            return "CSV parsing failed: \(reason)"
+        case .csvImportFailed(let reason):
+            return "CSV import failed: \(reason)"
         }
     }
 }

@@ -1,6 +1,4 @@
 // swift-tools-version:6.0
-// The swift-tools-version declares the minimum version of Swift required to build this package.
-
 import PackageDescription
 
 let package = Package(
@@ -10,26 +8,30 @@ let package = Package(
         .macOS(.v15)
     ],
     products: [
-        .library(
-            name: "ETPatternCore",
-            targets: ["ETPatternCore"]
-        ),
+        .library(name: "ETPatternModels", targets: ["ETPatternModels"]),
+        .library(name: "ETPatternCore", targets: ["ETPatternCore"]),
+        .library(name: "ETPatternServices", targets: ["ETPatternServices"]),
     ],
-    dependencies: [
-        // Add external dependencies here when needed
-    ],
+    dependencies: [],
     targets: [
+        .target(
+            name: "ETPatternModels",
+            dependencies: [],
+            path: "Sources/ETPatternModels"
+        ),
         .target(
             name: "ETPatternCore",
             dependencies: [],
-            path: "Sources/ETPatternCore",
-            exclude: [
-                // Exclude files that require UIKit/CoreData when building for macOS
-            ]
+            path: "Sources/ETPatternCore"
+        ),
+        .target(
+            name: "ETPatternServices",
+            dependencies: ["ETPatternModels", "ETPatternCore"],
+            path: "Sources/ETPatternServices"
         ),
         .testTarget(
             name: "ETPatternTests",
-            dependencies: ["ETPatternCore"]
+            dependencies: ["ETPatternModels", "ETPatternCore", "ETPatternServices"]
         ),
     ]
 )

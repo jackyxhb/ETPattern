@@ -6,7 +6,9 @@
 //
 
 import SwiftUI
-import CoreData
+import SwiftData
+import ETPatternModels
+import ETPatternServices
 
 struct DeckListView: View {
     @ObservedObject var viewModel: ContentViewModel
@@ -74,8 +76,8 @@ struct DeckListView: View {
     }
 
     private func deckCard(for cardSet: CardSet) -> some View {
-        let cardCount = (cardSet.cards as? Set<Card>)?.count ?? 0
-        let createdText = dateFormatter.string(from: cardSet.createdDate ?? Date())
+        let cardCount = cardSet.cards.count
+        let createdText = dateFormatter.string(from: cardSet.createdDate)
 
         return Button {
             UIImpactFeedbackGenerator.lightImpact()
@@ -84,7 +86,7 @@ struct DeckListView: View {
             VStack(alignment: .leading, spacing: theme.metrics.deckCardInnerSpacing) {
                 HStack {
                     VStack(alignment: .leading, spacing: theme.metrics.deckCardTextSpacing) {
-                        Text(String(format: NSLocalizedString("cards_count", comment: "Card count display format"), cardCount, cardSet.name ?? NSLocalizedString("unnamed_deck", comment: "Fallback name for decks without a name")))
+                        Text(String(format: NSLocalizedString("cards_count", comment: "Card count display format"), cardCount, cardSet.name))
                             .font(.headline)
                             .foregroundColor(theme.colors.textPrimary)
                         Text(String(format: NSLocalizedString("created_text", comment: "Created date display format"), createdText))

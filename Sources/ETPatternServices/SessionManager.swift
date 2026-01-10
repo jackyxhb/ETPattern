@@ -1,23 +1,17 @@
-//
-//  SessionManager.swift
-//  ETPattern
-//
-//  Created by admin on 20/12/2025.
-//
-
 import Foundation
-import CoreData
+import SwiftData
 @preconcurrency import Combine
+import ETPatternModels
 
-class SessionManager: ObservableObject {
+public class SessionManager: ObservableObject {
     // MARK: - Published Properties
-    @Published var sessionCardIDs: [Int] = []
-    @Published var currentIndex: Int = 0
-    @Published var isRandomOrder: Bool = false
-    @Published var cardsPlayedInSession: Int = 0
+    @Published public var sessionCardIDs: [Int] = []
+    @Published public var currentIndex: Int = 0
+    @Published public var isRandomOrder: Bool = false
+    @Published public var cardsPlayedInSession: Int = 0
 
     // MARK: - Computed Properties
-    var currentCard: Card? {
+    public var currentCard: Card? {
         let cards = getCards()
         return cards.indices.contains(currentIndex) ? cards[currentIndex] : nil
     }
@@ -26,19 +20,17 @@ class SessionManager: ObservableObject {
     private let cardSet: CardSet
     private var cancellables = Set<AnyCancellable>()
     private var progressKey: String {
-        let id = cardSet.objectID.uriRepresentation().absoluteString
-        return "studyProgress-\(id)"
+        "studyProgress-\(cardSet.name)"
     }
     private var sessionKey: String {
-        let id = cardSet.objectID.uriRepresentation().absoluteString
-        return "studySession-\(id)"
+        "studySession-\(cardSet.name)"
     }
     private var orderKey: String {
         "studyOrderMode"
     }
 
     // MARK: - Initialization
-    init(cardSet: CardSet) {
+    public init(cardSet: CardSet) {
         self.cardSet = cardSet
         loadOrderMode()
         setupSubscriptions()
@@ -50,15 +42,13 @@ class SessionManager: ObservableObject {
     
     // MARK: - Private Setup Methods
     private func setupSubscriptions() {
-        // Setup any future Combine subscriptions here
-        // Currently no subscriptions, but infrastructure is ready
     }
 
     // MARK: - Session Management
-    func prepareSession() {
-        guard sessionCardIDs.isEmpty, let setCards = cardSet.cards as? Set<Card> else { return }
+    public func prepareSession() {
+        guard sessionCardIDs.isEmpty else { return }
 
-        let sorted = setCards.sorted { $0.id < $1.id }
+        let sorted = cardSet.cards.sorted { $0.id < $1.id }
         let currentIDs = sorted.map { Int($0.id) }
 
         // Load or create session
@@ -73,12 +63,12 @@ class SessionManager: ObservableObject {
         restoreProgressIfAvailable()
     }
 
-    func saveSession() {
+    public func saveSession() {
         UserDefaults.standard.set(sessionCardIDs, forKey: sessionKey)
     }
 
     // MARK: - Order Management
-    func toggleOrderMode() {
+    public func toggleOrderMode() {
         isRandomOrder.toggle()
         UserDefaults.standard.set(isRandomOrder ? "random" : "sequential", forKey: orderKey)
 
@@ -108,19 +98,19 @@ class SessionManager: ObservableObject {
     }
 
     // MARK: - Navigation
-    func moveToNext() {
+    public func moveToNext() {
         guard !sessionCardIDs.isEmpty else { return }
         currentIndex = (currentIndex + 1) % sessionCardIDs.count
         cardsPlayedInSession += 1
     }
 
-    func moveToPrevious() {
+    public func moveToPrevious() {
         guard !sessionCardIDs.isEmpty else { return }
         currentIndex = currentIndex > 0 ? currentIndex - 1 : sessionCardIDs.count - 1
     }
 
     // MARK: - Progress Management
-    func saveProgress() {
+    public func saveProgress() {
         let progress = [
             "currentIndex": currentIndex,
             "cardsPlayedInSession": cardsPlayedInSession
@@ -139,13 +129,13 @@ class SessionManager: ObservableObject {
     }
 
     // MARK: - Card Access
-    func getCards() -> [Card] {
-        guard let allCards = cardSet.cards as? Set<Card> else { return [] }
+    public func getCards() -> [Card] {
+        let allCards = cardSet.cards
         let cardDict = Dictionary(allCards.map { (Int($0.id), $0) }, uniquingKeysWith: { first, _ in first })
         return sessionCardIDs.compactMap { cardDict[$0] }
     }
 
-    func getCards(from allCards: [Card]) -> [Card] {
+    public func getCards(from allCards: [Card]) -> [Card] {
         let cardDict = Dictionary(allCards.map { (Int($0.id), $0) }, uniquingKeysWith: { first, _ in first })
         return sessionCardIDs.compactMap { cardDict[$0] }
     }

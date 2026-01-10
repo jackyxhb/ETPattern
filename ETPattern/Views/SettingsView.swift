@@ -7,6 +7,8 @@
 
 import SwiftUI
 import AVFoundation
+import ETPatternServices
+import ETPatternCore
 
 struct SettingsView: View {
     @Environment(\.theme) var theme
@@ -236,11 +238,9 @@ struct SettingsView: View {
     }
 }
 
-struct SettingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationView {
-            SettingsView()
-                .environmentObject(TTSService.shared)
-        }
+#Preview {
+    NavigationView {
+        SettingsView()
+            .environmentObject(TTSService.shared)
     }
 }

@@ -6,29 +6,30 @@
 //
 
 import SwiftUI
-import CoreData
+import SwiftData
 import UniformTypeIdentifiers
 import os.log
+import ETPatternModels
+import ETPatternServices
 
 struct ContentView: View {
-    @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.theme) var theme
 
     @StateObject private var viewModel: ContentViewModel
     
+    private let modelContext: ModelContext
     private let logger = Logger(subsystem: "com.jack.ETPattern", category: "ContentView")
 
     // MARK: - Onboarding State
     @State private var hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
 
-    init() {
-        let viewContext = PersistenceController.shared.container.viewContext
-        let backgroundContextManager = BackgroundContextManager(persistentContainer: PersistenceController.shared.container)
-        let cardSetRepository = CardSetRepository(viewContext: viewContext, backgroundContextManager: backgroundContextManager)
-        let csvImporter = CSVImporter(viewContext: viewContext)
-        let csvService = CSVService(viewContext: viewContext, csvImporter: csvImporter, backgroundContextManager: backgroundContextManager)
+    init(modelContext: ModelContext) {
+        self.modelContext = modelContext
+        let cardSetRepository = CardSetRepository(modelContext: modelContext)
+        let csvImporter = CSVImporter(modelContext: modelContext)
+        let csvService = CSVService(modelContext: modelContext, csvImporter: csvImporter)
         let shareService = ShareService()
-        let paginatedDataSource = PaginatedCardSetDataSource(viewContext: viewContext)
+        let paginatedDataSource = PaginatedCardSetDataSource(modelContext: modelContext)
         
         _viewModel = StateObject(wrappedValue: ContentViewModel(
             cardSetRepository: cardSetRepository,
@@ -82,7 +83,7 @@ struct ContentView: View {
                 .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $viewModel.uiState.showingImport) {
-            ImportView()
+            ImportView(modelContext: modelContext)
                 .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $viewModel.uiState.showingSettings) {
@@ -201,7 +202,7 @@ struct ContentView: View {
         }
     }
 
-    private func errorStateView(error: AppError) -> some View {
+    private func errorStateView(error: LocalizedError) -> some View {
         VStack(spacing: theme.metrics.emptyStateVerticalSpacing) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: theme.metrics.emptyStateIconSize))
@@ -350,7 +351,7 @@ private struct CardSetActionBar: View {
 }
 
 #Preview {
-    ContentView()
-        .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    ContentView(modelContext: PersistenceController.preview.container.mainContext)
+        .modelContainer(PersistenceController.preview.container)
         .environmentObject(TTSService.shared)
 }

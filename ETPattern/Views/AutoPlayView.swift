@@ -1,18 +1,14 @@
-//
-//  AutoPlayView.swift
-//  ETPattern
-//
-//  Created by admin on 04/12/2025.
-//
-
 import SwiftUI
-import CoreData
+import SwiftData
 import UIKit
+import ETPatternModels
+import ETPatternServices
 
 struct AutoPlayView: View {
     let cardSet: CardSet
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.theme) var theme
     @EnvironmentObject private var ttsService: TTSService
 
@@ -87,7 +83,7 @@ struct AutoPlayView: View {
 
     private var header: some View {
         SharedHeaderView(
-            title: cardSet.name ?? "Auto Play",
+            title: cardSet.name,
             subtitle: "Automatic playback",
             theme: theme
         )
@@ -408,9 +404,9 @@ struct AutoPlayView: View {
     private func text(for phase: AutoPlayPhase, at card: Card) -> String {
         switch phase {
         case .front:
-            return card.front ?? "No front"
+            return card.front
         case .back:
-            return (card.back ?? "No back").replacingOccurrences(of: "<br>", with: "\n")
+            return card.back.replacingOccurrences(of: "<br>", with: "\n")
         }
     }
 
@@ -422,43 +418,24 @@ struct AutoPlayView: View {
         UIApplication.shared.isIdleTimerDisabled = false
     }
 }
-//     let card: Card
-//     let index: Int
-//     let total: Int
-//     let isFlipped: Bool
-//
-//     var body: some View {
-//         ZStack {
-//             CardFace(
-//                 text: card.front ?? "No front",
-//                 pattern: "",
-//                 isFront: true,
-//                 currentIndex: index,
-//                 totalCards: total
-//             )
-//             .opacity(isFlipped ? 0 : 1)
-//             .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
-//
-//             CardFace(
-//                 text: formatBackText,
-//                 pattern: card.front ?? "",
-//                 isFront: false,
-//                 currentIndex: index,
-//                 totalCards: total
-//             )
-//             .opacity(isFlipped ? 1 : 0)
-//             .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
-//         }
-//         .frame(maxWidth: .infinity, maxHeight: 400)
-//         .padding(.vertical)
-//     }
-//
-//     private var formatBackText: String {
-//         (card.back ?? "No back").replacingOccurrences(of: "<br>", with: "\n")
-//     }
-// }
 
 private enum AutoPlayPhase: String, Codable {
     case front
     case back
+}
+
+#Preview {
+    NavigationView {
+        AutoPlayView(cardSet: previewCardSet)
+            .modelContainer(PersistenceController.preview.container)
+            .environmentObject(TTSService.shared)
+    }
+}
+
+@MainActor
+private var previewCardSet: CardSet {
+    let container = PersistenceController.preview.container
+    let cardSet = CardSet(name: "Sample Deck")
+    container.mainContext.insert(cardSet)
+    return cardSet
 }

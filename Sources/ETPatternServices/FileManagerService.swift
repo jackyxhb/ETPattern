@@ -7,13 +7,14 @@
 
 import Foundation
 
-class FileManagerService {
-    static func getBundledCSVFiles() -> [String] {
-        // Return the list of bundled CSV files (Group1.csv through Group12.csv)
-        return (1...12).map { "Group\($0)" }
+public class FileManagerService {
+    public static func getBundledCSVFiles() -> [String] {
+        let bundle = Bundle.main
+        let paths = bundle.paths(forResourcesOfType: "csv", inDirectory: nil)
+        return paths.map { ($0 as NSString).lastPathComponent.replacingOccurrences(of: ".csv", with: "") }
     }
 
-    static func loadBundledCSV(named fileName: String) -> String? {
+    public static func loadBundledCSV(named fileName: String) -> String? {
         guard let url = Bundle.main.url(forResource: fileName, withExtension: "csv") else {
             return nil
         }
@@ -25,7 +26,7 @@ class FileManagerService {
         }
     }
 
-    static func getCardSetName(from fileName: String) -> String {
+    public static func getCardSetName(from fileName: String) -> String {
         // Convert "Group1" to "Group 1" for display
         if fileName.hasPrefix("Group") {
             let number = fileName.replacingOccurrences(of: "Group", with: "")

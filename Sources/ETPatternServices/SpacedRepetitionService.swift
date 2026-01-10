@@ -7,15 +7,18 @@
 
 import Foundation
 import ETPatternCore
+import ETPatternModels
 import os
 
-enum DifficultyRating {
+public enum DifficultyRating {
     case again
     case easy
 }
 
-class SpacedRepetitionService {
-    func updateCardDifficulty(_ card: Card, rating: DifficultyRating) {
+public class SpacedRepetitionService {
+    public init() {}
+
+    public func updateCardDifficulty(_ card: Card, rating: DifficultyRating) {
         // Map local rating to Core rating
         let coreRating: ETPatternCore.DifficultyRating
         switch rating {
@@ -45,20 +48,17 @@ class SpacedRepetitionService {
         card.nextReviewDate = Date().addingTimeInterval(TimeInterval(card.interval * 86400))
     }
 
-    func getCardsDueForReview(from cardSet: CardSet) -> [Card] {
+    public func getCardsDueForReview(from cardSet: CardSet) -> [Card] {
         let now = Date()
-        return (cardSet.cards?.allObjects as? [Card])?.filter { card in
-            // Cards with no nextReviewDate (never reviewed) or past due dates are due
-            guard let nextReviewDate = card.nextReviewDate else { return true }
-            return nextReviewDate <= now
+        return cardSet.cards.filter { card in
+            // Cards with past due dates are due (nextReviewDate defaults to Date() in Model if not provided)
+            return card.nextReviewDate <= now
         }.sorted { (card1, card2) in
-            let date1 = card1.nextReviewDate ?? Date.distantPast
-            let date2 = card2.nextReviewDate ?? Date.distantPast
-            return date1 < date2
-        } ?? []
+            return card1.nextReviewDate < card2.nextReviewDate
+        }
     }
 
-    func getNextReviewDate(for card: Card) -> Date {
+    public func getNextReviewDate(for card: Card) -> Date {
         return Date().addingTimeInterval(TimeInterval(card.interval * 86400))
     }
 }

@@ -1,16 +1,11 @@
-//
-//  DeckDetailView.swift
-//  ETPattern
-//
-//  Created by admin on 25/11/2025.
-//
-
 import SwiftUI
-import CoreData
+import SwiftData
 import UIKit
+import ETPatternModels
+import ETPatternServices
 
 struct DeckDetailView: View {
-    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Environment(\.theme) var theme
 
@@ -26,7 +21,7 @@ struct DeckDetailView: View {
             VStack(spacing: 0) {
                 // Custom header for sheet presentation
                 HStack {
-                    Text(cardSet.name ?? NSLocalizedString("unnamed_deck", comment: "Fallback name for decks without a name"))
+                    Text(cardSet.name)
                         .font(.headline)
                         .foregroundColor(theme.colors.textPrimary)
                         .dynamicTypeSize(.large ... .accessibility5)
@@ -103,7 +98,7 @@ struct DeckDetailView: View {
         }
         .sheet(item: $previewCard) { card in
             let allCards = sortedGroupNames.flatMap { groupedCards[$0] ?? [] }
-            let index = allCards.firstIndex(where: { $0.objectID == card.objectID }) ?? 0
+            let index = allCards.firstIndex(where: { $0.id == card.id }) ?? 0
             CardPreviewContainer(card: card, index: index, total: allCards.count) {
                 previewCard = nil
             }
@@ -111,9 +106,9 @@ struct DeckDetailView: View {
     }
 
     private var groupedCards: [String: [Card]] {
-        guard let cards = cardSet.cards as? Set<Card> else { return [:] }
-        let sortedCards = cards.sorted { ($0.id, $0.front ?? "") < ($1.id, $1.front ?? "") }
-        return Dictionary(grouping: sortedCards) { $0.groupName ?? "Ungrouped" }
+        let cards = cardSet.cards
+        let sortedCards = cards.sorted { ($0.id, $0.front) < ($1.id, $1.front) }
+        return Dictionary(grouping: sortedCards) { $0.groupName }
     }
 
     private var sortedGroupNames: [String] {
@@ -132,7 +127,7 @@ private struct CardRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: theme.metrics.deckDetailCardRowSpacing) {
-            Text(card.front ?? "No front")
+            Text(card.front)
                 .font(.headline)
                 .foregroundColor(theme.colors.textPrimary)
                 .dynamicTypeSize(.large ... .accessibility5)
@@ -156,7 +151,7 @@ private struct CardRow: View {
     }
 
     private var formattedBack: String {
-        (card.back ?? "No back").replacingOccurrences(of: "\n", with: " ").replacingOccurrences(of: "<br>", with: " • ")
+        card.back.replacingOccurrences(of: "\n", with: " ").replacingOccurrences(of: "<br>", with: " • ")
     }
 }
 
@@ -174,10 +169,10 @@ private struct CardPreviewContainer: View {
     var body: some View {
         SharedModalContainer(onClose: onClose) {
             SharedCardDisplayView(
-                frontText: card.front ?? "No front",
+                frontText: card.front,
                 backText: formatBackText(),
-                groupName: card.groupName ?? "",
-                cardName: card.cardName ?? "",
+                groupName: card.groupName,
+                cardName: card.cardName,
                 isFlipped: isFlipped,
                 currentIndex: index,
                 totalCards: total,
@@ -211,34 +206,29 @@ private struct CardPreviewContainer: View {
     }
 
     private func formatBackText() -> String {
-        guard let backText = card.back else { return "No back" }
+        let backText = card.back
         // Replace <br> with newlines for proper display
         return backText.replacingOccurrences(of: "<br>", with: "\n")
     }
 
     private func speakCurrentText() {
-        let textToSpeak = isFlipped ? formatBackText() : (card.front ?? "")
+        let textToSpeak = isFlipped ? formatBackText() : card.front
         ttsService.speak(textToSpeak)
     }
 }
 
-// #Preview temporarily disabled due to Swift 6 compatibility issues
 #Preview {
     NavigationView {
         DeckDetailView(cardSet: previewCardSet)
-            .environment(\.managedObjectContext, previewContext)
+            .modelContainer(PersistenceController.preview.container)
             .environmentObject(TTSService.shared)
     }
 }
 
-private var previewContext: NSManagedObjectContext {
-    PersistenceController.preview.container.viewContext
-}
-
+@MainActor
 private var previewCardSet: CardSet {
-    let context = previewContext
-    let cardSet = CardSet(context: context)
-    cardSet.name = "Sample Deck"
-    cardSet.createdDate = Date()
+    let container = PersistenceController.preview.container
+    let cardSet = CardSet(name: "Sample Deck")
+    container.mainContext.insert(cardSet)
     return cardSet
 }

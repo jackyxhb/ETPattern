@@ -1,19 +1,15 @@
-//
-//  StudyView.swift
-//  ETPattern
-//
-//  Created by admin on 25/11/2025.
-//
-
 import SwiftUI
-import CoreData
+import SwiftData
 import UIKit
 import os.log
+import ETPatternModels
+import ETPatternServices
 
 struct StudyView: View {
     let cardSet: CardSet
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.theme) var theme
     @EnvironmentObject private var ttsService: TTSService
 
@@ -62,7 +58,7 @@ struct StudyView: View {
                         theme: theme
                     )
                     .onAppear {
-                        logger.info("StudyView: Rendering SharedCardDisplayView with front: \((currentCard?.front?.prefix(50)) ?? "nil"), back: \((currentCard?.back?.prefix(50)) ?? "nil")")
+                        logger.info("StudyView: Rendering SharedCardDisplayView with front: \((currentCard?.front.prefix(50)) ?? "nil"), back: \((currentCard?.back.prefix(50)) ?? "nil")")
                     }
                     .gesture(
                         DragGesture(minimumDistance: 50)
@@ -139,7 +135,7 @@ struct StudyView: View {
             // Auto-read the new card
             speakCurrentText()
             // Announce card change for accessibility
-            if let card = currentCard {
+            if let _ = currentCard {
                 UIAccessibility.post(notification: .announcement, argument: "Now showing card \(sessionManager.currentIndex + 1) of \(sessionManager.getCards().count)")
             }
         }
@@ -147,7 +143,7 @@ struct StudyView: View {
 
     private var header: some View {
         SharedHeaderView(
-            title: cardSet.name ?? "Study Session",
+            title: cardSet.name,
             subtitle: "Spaced repetition learning",
             theme: theme
         )
@@ -215,8 +211,6 @@ struct StudyView: View {
         .accessibilityValue(ttsService.isSpeaking ? "Currently speaking" : "Ready to speak")
     }
 
-
-
     private func dismissStudy() {
         sessionManager.saveProgress()
         dismiss()
@@ -229,8 +223,8 @@ struct StudyView: View {
     private func speakCurrentText() {
         guard let currentCard = currentCard else { return }
         let text = isFlipped ?
-            (currentCard.back ?? "").replacingOccurrences(of: "<br>", with: "\n") :
-            currentCard.front ?? ""
+            currentCard.back.replacingOccurrences(of: "<br>", with: "\n") :
+            currentCard.front
         ttsService.speak(text)
     }
 
@@ -244,13 +238,6 @@ struct StudyView: View {
         let spacedRepetitionService = SpacedRepetitionService()
         let rating: DifficultyRating = direction == .right ? .easy : .again
         spacedRepetitionService.updateCardDifficulty(currentCard, rating: rating)
-
-        // Save the changes
-        do {
-            try currentCard.managedObjectContext?.save()
-        } catch {
-            // Handle save error silently for now
-        }
 
         // Provide haptic feedback
         let generator = UIImpactFeedbackGenerator(style: direction == .right ? .heavy : .rigid)
@@ -281,28 +268,24 @@ struct StudyView: View {
     }
 }
 
-// #Preview temporarily disabled due to Swift 6 compatibility issues
 #Preview {
     NavigationView {
         StudyView(cardSet: previewCardSet)
-            .environment(\.managedObjectContext, previewContext)
+            .modelContainer(PersistenceController.preview.container)
             .environmentObject(TTSService.shared)
     }
 }
 
-private var previewContext: NSManagedObjectContext {
-    PersistenceController.preview.container.viewContext
-}
-
+@MainActor
 private var previewCardSet: CardSet {
-    let context = previewContext
-    let cardSet = CardSet(context: context)
-    cardSet.name = "Sample Deck"
+    let container = PersistenceController.preview.container
+    let cardSet = CardSet(name: "Sample Deck")
+    container.mainContext.insert(cardSet)
 
-    let card = Card(context: context)
-    card.front = "I think..."
-    card.back = "Example 1<br>Example 2<br>Example 3<br>Example 4<br>Example 5"
+    let card = Card(id: 1, front: "I think...", back: "Example 1<br>Example 2<br>Example 3<br>Example 4<br>Example 5", cardName: "Pattern", groupId: 1, groupName: "Group 1")
     card.cardSet = cardSet
+    cardSet.cards.append(card)
+    container.mainContext.insert(card)
     
     return cardSet
 }

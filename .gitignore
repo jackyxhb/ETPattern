@@ -22,4 +22,4 @@ xcuserdata/
 *.ipa
 *.app
 
-.fake
+.fakebuild_output*.log

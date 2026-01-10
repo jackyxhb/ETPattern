@@ -7,6 +7,9 @@
 
 import SwiftUI
 @preconcurrency import Combine
+import ETPatternModels
+import ETPatternServices
+import ETPatternCore
 
 @MainActor
 class ContentViewModel: ObservableObject {
@@ -50,7 +53,7 @@ class ContentViewModel: ObservableObject {
         paginatedDataSource.hasMoreData
     }
     
-    var cardSetsError: AppError? {
+    var cardSetsError: DataSourceError? {
         paginatedDataSource.error
     }
     
@@ -74,36 +77,26 @@ class ContentViewModel: ObservableObject {
     private func setupSubscriptions() {
         // Subscribe to paginated data source changes to trigger view updates
         if let observableDataSource = paginatedDataSource as? PaginatedCardSetDataSource {
-            subscribeWeak(to: observableDataSource.$cardSets, storeIn: &cancellables) { viewModel, _ in
-                // Trigger objectWillChange when cardSets change
-                viewModel.objectWillChange.send()
-            }
+            observableDataSource.$cardSets
+                .receive(on: RunLoop.main)
+                .sink { [weak self] _ in self?.objectWillChange.send() }
+                .store(in: &cancellables)
             
-            subscribeWeak(to: observableDataSource.$isLoading, storeIn: &cancellables) { viewModel, _ in
-                viewModel.objectWillChange.send()
-            }
+            observableDataSource.$isLoading
+                .receive(on: RunLoop.main)
+                .sink { [weak self] _ in self?.objectWillChange.send() }
+                .store(in: &cancellables)
             
-            subscribeWeak(to: observableDataSource.$hasMoreData, storeIn: &cancellables) { viewModel, _ in
-                viewModel.objectWillChange.send()
-            }
+            observableDataSource.$hasMoreData
+                .receive(on: RunLoop.main)
+                .sink { [weak self] _ in self?.objectWillChange.send() }
+                .store(in: &cancellables)
             
-            subscribeWeak(to: observableDataSource.$error, storeIn: &cancellables) { viewModel, _ in
-                viewModel.objectWillChange.send()
-            }
+            observableDataSource.$error
+                .receive(on: RunLoop.main)
+                .sink { [weak self] _ in self?.objectWillChange.send() }
+                .store(in: &cancellables)
         }
-        
-        // Example of proper Combine subscription with memory management:
-        // subscribeWeak(to: somePublisher, storeIn: &cancellables) { strongSelf, value in
-        //     // Handle value with guaranteed strong self reference
-        //     strongSelf.handleValue(value)
-        // }
-        
-        // Or for publishers that don't need weak self:
-        // subscribe(to: somePublisher, storeIn: &cancellables) { value in
-        //     // Handle value (self is guaranteed to exist)
-        // }
-        
-        // Currently no subscriptions, but infrastructure is ready
     }
 
     func addCardSet() {
@@ -163,7 +156,7 @@ class ContentViewModel: ObservableObject {
 
     func promptRename(for cardSet: CardSet) {
         uiState.selectedCardSet = cardSet
-        uiState.newName = cardSet.name ?? ""
+        uiState.newName = cardSet.name
         uiState.showingRenameAlert = true
     }
 
@@ -220,7 +213,7 @@ class ContentViewModel: ObservableObject {
     func exportDeck(_ cardSet: CardSet) {
         do {
             let csvContent = try csvService.exportCardSet(cardSet)
-            try shareService.shareCSVContent(csvContent, fileName: cardSet.name ?? "deck")
+            try shareService.shareCSVContent(csvContent, fileName: cardSet.name)
         } catch {
             showError(title: NSLocalizedString("export_error", comment: "Error title for export failures"),
                      message: error.localizedDescription)
@@ -240,7 +233,7 @@ class ContentViewModel: ObservableObject {
     }
 
     private func bundledDeckKind(for cardSet: CardSet) -> CSVService.BundledDeckKind? {
-        let name = (cardSet.name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let name = cardSet.name.trimmingCharacters(in: .whitespacesAndNewlines)
         if name == Constants.Decks.bundledMasterName || name == Constants.Decks.legacyBundledMasterName {
             return .master
         }
@@ -276,7 +269,7 @@ class ContentViewModel: ObservableObject {
         uiState.isReimporting = true
         Task {
             do {
-                let importedCount = try await csvService.reimportCustomDeck(cardSet, from: url)
+                let _ = try await csvService.reimportCustomDeck(cardSet, from: url)
             } catch {
                 showError(title: NSLocalizedString("reimport_failed", comment: "Error title for failed reimport"),
                          message: error.localizedDescription)

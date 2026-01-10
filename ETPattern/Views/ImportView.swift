@@ -1,16 +1,11 @@
-//
-//  ImportView.swift
-//  ETPattern
-//
-//  Created by admin on 29/11/2025.
-//
-
 import SwiftUI
 import UniformTypeIdentifiers
-import CoreData
+import SwiftData
+import ETPatternModels
+import ETPatternServices
 
 struct ImportView: View {
-    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Environment(\.theme) var theme
 
@@ -21,8 +16,8 @@ struct ImportView: View {
 
     private let csvImporter: CSVImporter
 
-    init() {
-        self.csvImporter = CSVImporter(viewContext: PersistenceController.shared.container.viewContext)
+    init(modelContext: ModelContext) {
+        self.csvImporter = CSVImporter(modelContext: modelContext)
     }
 
     var body: some View {
@@ -204,20 +199,18 @@ struct ImportView: View {
             }
 
             // Create new CardSet
-            let cardSet = CardSet(context: viewContext)
-            cardSet.name = cardSetName
-            cardSet.createdDate = Date()
+            let cardSet = CardSet(name: cardSetName)
+            modelContext.insert(cardSet)
 
-            // Sort cards by ID to ensure proper order
+            // Sort cards by ID to ensure proper order and add to cardSet
             let sortedCards = cards.sorted { $0.id < $1.id }
-            cardSet.addToCards(NSSet(array: sortedCards))
-
-            // Set the cardSet relationship for each card
             for card in sortedCards {
                 card.cardSet = cardSet
+                cardSet.cards.append(card)
+                modelContext.insert(card)
             }
 
-            try viewContext.save()
+            try modelContext.save()
 
             // Success - dismiss the view
             dismiss()
@@ -237,6 +230,6 @@ struct ImportView: View {
 }
 
 #Preview {
-    ImportView()
-        .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    ImportView(modelContext: PersistenceController.preview.container.mainContext)
+        .modelContainer(PersistenceController.preview.container)
 }

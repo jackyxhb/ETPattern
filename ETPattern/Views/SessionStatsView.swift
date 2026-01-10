@@ -1,22 +1,14 @@
-//
-//  SessionStatsView.swift
-//  ETPattern
-//
-//  Created by admin on 29/11/2025.
-//
-
 import SwiftUI
-import CoreData
+import SwiftData
+import ETPatternModels
 
 struct SessionStatsView: View {
-    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Environment(\.theme) var theme
 
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \StudySession.date, ascending: false)],
-        animation: .default)
-    private var studySessions: FetchedResults<StudySession>
+    @Query(sort: \StudySession.date, order: .reverse)
+    private var studySessions: [StudySession]
 
     var body: some View {
         ZStack {
@@ -56,12 +48,12 @@ struct SessionStatsView: View {
                         ForEach(studySessions) { session in
                             VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
                                 HStack {
-                                    Text(session.date ?? Date(), style: .date)
+                                    Text(session.date, style: .date)
                                         .font(theme.metrics.headline)
                                         .foregroundColor(theme.colors.textPrimary)
                                         .dynamicTypeSize(.large ... .accessibility5)
                                     Spacer()
-                                    Text(session.date ?? Date(), style: .time)
+                                    Text(session.date, style: .time)
                                         .font(theme.metrics.subheadline)
                                         .foregroundColor(theme.colors.textSecondary)
                                         .dynamicTypeSize(.large ... .accessibility5)
@@ -137,15 +129,15 @@ struct SessionStatsView: View {
 
     private func deleteSessions(offsets: IndexSet) {
         withAnimation {
-            offsets.map { studySessions[$0] }.forEach(viewContext.delete)
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Handle error
+            offsets.map { studySessions[$0] }.forEach { session in
+                modelContext.delete(session)
             }
         }
     }
 }
 
-// #Preview temporarily disabled due to Swift 6 compatibility issues
+#Preview {
+    SessionStatsView()
+        .modelContainer(PersistenceController.preview.container)
+        .environment(\.theme, Theme.default)
+}

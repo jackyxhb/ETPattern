@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		22419E142EFC2A5F000F8B43 /* ETPatternCore in Frameworks */ = {isa = PBXBuildFile; productRef = 22419E132EFC2A5F000F8B43 /* ETPatternCore */; };
+		22419E162EFC2A5F000F8B44 /* ETPatternModels in Frameworks */ = {isa = PBXBuildFile; productRef = 22419E152EFC2A5F000F8B44 /* ETPatternModels */; };
+		22419E182EFC2A5F000F8B45 /* ETPatternServices in Frameworks */ = {isa = PBXBuildFile; productRef = 22419E172EFC2A5F000F8B45 /* ETPatternServices */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +30,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				22419E142EFC2A5F000F8B43 /* ETPatternCore in Frameworks */,
+				22419E162EFC2A5F000F8B44 /* ETPatternModels in Frameworks */,
+				22419E182EFC2A5F000F8B45 /* ETPatternServices in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -71,6 +75,8 @@
 			name = ETPattern;
 			packageProductDependencies = (
 				22419E132EFC2A5F000F8B43 /* ETPatternCore */,
+				22419E152EFC2A5F000F8B44 /* ETPatternModels */,
+				22419E172EFC2A5F000F8B45 /* ETPatternServices */,
 			);
 			productName = ETPattern;
 			productReference = 22EC7D4E2ED5726F00C3DDDA /* ETPattern.app */;
@@ -263,12 +269,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F674YT87QV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "ETPattern 300";
+				INFOPLIST_KEY_CFBundleDisplayName = ETPattern;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -280,7 +288,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.jack.ETPattern;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jackxhb.ETPattern;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -299,12 +307,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F674YT87QV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "ETPattern 300";
+				INFOPLIST_KEY_CFBundleDisplayName = ETPattern;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -316,7 +326,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.jack.ETPattern;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jackxhb.ETPattern;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -364,6 +374,14 @@
 		22419E132EFC2A5F000F8B43 /* ETPatternCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = ETPatternCore;
+		};
+		22419E152EFC2A5F000F8B44 /* ETPatternModels */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ETPatternModels;
+		};
+		22419E172EFC2A5F000F8B45 /* ETPatternServices */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ETPatternServices;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
