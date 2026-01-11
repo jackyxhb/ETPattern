@@ -366,7 +366,7 @@
 /* Begin XCLocalSwiftPackageReference section */
 		22419E122EFC2A5F000F8B43 /* XCLocalSwiftPackageReference "../ETPattern" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = ../ETPattern;
+			relativePath = .;
 		};
 /* End XCLocalSwiftPackageReference section */
 
