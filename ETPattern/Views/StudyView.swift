@@ -135,7 +135,7 @@ struct StudyView: View {
             sessionManager.saveProgress()
             ttsService.stop()
         }
-        .onChange(of: sessionManager.currentIndex) { _ in
+        .onChange(of: sessionManager.currentIndex) { _, _ in
             // Reset to front side when card changes
             isFlipped = false
             // Stop any ongoing speech from previous card

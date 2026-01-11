@@ -486,7 +486,7 @@ struct SharedSettingsPickerSection: View {
                     .dynamicTypeSize(.large ... .accessibility5)
             }
             .pickerStyle(.menu)
-            .onChange(of: selection) { newValue in
+            .onChange(of: selection) { _, newValue in
                 if let userDefaultsKey = userDefaultsKey {
                     UserDefaults.standard.set(newValue, forKey: userDefaultsKey)
                 } else if let onChange = onChange {
@@ -548,7 +548,7 @@ struct SharedSettingsSliderSection<T: BinaryFloatingPoint>: View {
                     .dynamicTypeSize(.large ... .accessibility5)
             }
             .tint(theme.colors.highlight)
-            .onChange(of: value) { newValue in
+            .onChange(of: value) { _, newValue in
                 onChange(newValue)
             }
         }

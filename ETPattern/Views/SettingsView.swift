@@ -142,7 +142,7 @@ struct SettingsView: View {
                                 ttsPercentage = clampedValue
                             }
                     )
-                    .onChange(of: ttsPercentage) { newValue in
+                    .onChange(of: ttsPercentage) { _, newValue in
                         ttsService.setRate(newValue)
                     }
                 }

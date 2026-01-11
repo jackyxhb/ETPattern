@@ -72,7 +72,7 @@ struct AutoPlayView: View {
             stopPlayback()
             sessionManager.saveProgress()
         }
-        .onChange(of: isPlaying) { playing in
+        .onChange(of: isPlaying) { _, playing in
             if playing {
                 disableIdleTimer()
             } else {

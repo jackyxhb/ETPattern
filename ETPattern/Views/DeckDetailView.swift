@@ -193,7 +193,7 @@ private struct CardPreviewContainer: View {
             .onAppear {
                 speakCurrentText()
             }
-            .onChange(of: index) { _ in
+            .onChange(of: index) { _, _ in
                 // Reset to front side when card changes
                 isFlipped = false
                 // Stop any ongoing speech from previous card
