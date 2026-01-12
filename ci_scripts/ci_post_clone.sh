@@ -16,5 +16,21 @@ echo "Environment check:"
 echo "CI_PULL_REQUEST: $CI_PULL_REQUEST"
 echo "CI_BRANCH: $CI_BRANCH"
 echo "CI_BUILD_ID: $CI_BUILD_ID"
+echo "CI_TAG: $CI_TAG"
+
+if [[ -n "$CI_TAG" ]]; then
+    echo "🔖 Tag detected: $CI_TAG"
+    # Strip 'v' prefix if present
+    APP_VERSION="${CI_TAG#v}"
+    echo "📲 Setting MARKETING_VERSION to $APP_VERSION"
+
+    # Navigate to project root (already there in post-clone, but being safe)
+    # Update MARKETING_VERSION in project.pbxproj
+    sed -i '' "s/MARKETING_VERSION = .*/MARKETING_VERSION = $APP_VERSION;/g" ETPattern.xcodeproj/project.pbxproj
+    
+    echo "✅ Updated project version."
+else
+    echo "ℹ️ No tag detected. Skipping version update."
+fi
 
 exit 0
