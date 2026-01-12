@@ -444,6 +444,70 @@ struct SharedModalContainer<Content: View>: View {
     }
 }
 
+struct SharedThemedPicker: View {
+    @Environment(\.theme) var theme
+    let label: String
+    let options: [String: String]
+    @Binding var selection: String
+    let onChange: ((String) -> Void)?
+    
+    @State private var isPresented = false
+
+    var body: some View {
+        Button(action: {
+            isPresented = true
+        }) {
+            HStack {
+                Text(label)
+                    .foregroundColor(theme.colors.textPrimary)
+                Spacer()
+                Text(options[selection] ?? selection)
+                    .foregroundColor(theme.colors.highlight)
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption)
+                    .foregroundColor(theme.colors.textSecondary)
+            }
+            .padding(.vertical, 4)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .popover(isPresented: $isPresented) {
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(spacing: 4) {
+                        ForEach(options.keys.sorted(), id: \.self) { key in
+                            Button(action: {
+                                selection = key
+                                onChange?(key)
+                                isPresented = false
+                            }) {
+                                HStack {
+                                    Text(options[key] ?? key)
+                                        .foregroundColor(theme.colors.textPrimary)
+                                    Spacer()
+                                    if selection == key {
+                                        Image(systemName: "checkmark")
+                                            .foregroundColor(theme.colors.highlight)
+                                    }
+                                }
+                                .padding()
+                                .background(selection == key ? theme.colors.surfaceMedium : Color.clear)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding()
+                }
+            }
+            .frame(minWidth: 200, maxHeight: 300)
+            .presentationCompactAdaptation(.popover)
+            .presentationCompactAdaptation(.popover)
+            .themedPresentation()
+        }
+    }
+}
+
 struct SharedSettingsPickerSection: View {
     @Environment(\.theme) var theme
     let header: String
@@ -473,26 +537,18 @@ struct SharedSettingsPickerSection: View {
 
     var body: some View {
         Section(header: Text(header).foregroundColor(theme.colors.textPrimary).dynamicTypeSize(.large ... .accessibility5)) {
-            Picker(selection: $selection) {
-                ForEach(options.keys.sorted(), id: \.self) { key in
-                    Text(options[key] ?? key)
-                        .foregroundColor(theme.colors.textPrimary)
-                        .dynamicTypeSize(.large ... .accessibility5)
-                        .tag(key)
+            SharedThemedPicker(
+                label: label,
+                options: options,
+                selection: $selection,
+                onChange: { newValue in
+                    if let userDefaultsKey = userDefaultsKey {
+                        UserDefaults.standard.set(newValue, forKey: userDefaultsKey)
+                    } else if let onChange = onChange {
+                        onChange(newValue)
+                    }
                 }
-            } label: {
-                Text(label)
-                    .foregroundColor(theme.colors.textPrimary)
-                    .dynamicTypeSize(.large ... .accessibility5)
-            }
-            .pickerStyle(.menu)
-            .onChange(of: selection) { _, newValue in
-                if let userDefaultsKey = userDefaultsKey {
-                    UserDefaults.standard.set(newValue, forKey: userDefaultsKey)
-                } else if let onChange = onChange {
-                    onChange(newValue)
-                }
-            }
+            )
         }
         .listRowBackground(theme.colors.surfaceLight)
     }
@@ -605,6 +661,16 @@ struct ThemedGlassBackground: ViewModifier {
     }
 }
 
+struct ThemedPresentation: ViewModifier {
+    @Environment(\.theme) var theme
+    
+    func body(content: Content) -> some View {
+        content
+            .presentationBackground(.ultraThinMaterial)
+            .presentationCornerRadius(theme.metrics.cornerRadius)
+    }
+}
+
 // MARK: - View Extensions for Easy Alert Usage
 
 extension View {
@@ -638,6 +704,10 @@ extension View {
 
     func themedGlassBackground() -> some View {
         modifier(ThemedGlassBackground())
+    }
+
+    func themedPresentation() -> some View {
+        modifier(ThemedPresentation())
     }
 
     @ViewBuilder

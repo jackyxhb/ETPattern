@@ -193,5 +193,5 @@ struct SessionStatsView: View {
 #Preview {
     SessionStatsView()
         .modelContainer(PersistenceController.preview.container)
-        .environment(\.theme, Theme.default)
+        .environment(\.theme, Theme.dark)
 }

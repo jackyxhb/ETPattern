@@ -56,5 +56,5 @@ struct ThemeUsageExample: View {
 
 #Preview {
     ThemeUsageExample()
-        .environment(\.theme, Theme.default)
+        .environment(\.theme, Theme.dark)
 }

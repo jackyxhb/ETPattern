@@ -4,6 +4,7 @@
 # Xcode build output
 DerivedData/
 build/
+build_sim/
 
 # User-specific Xcode settings
 xcuserdata/
@@ -23,3 +24,4 @@ xcuserdata/
 *.app
 
 .fakebuild_output*.log
+build.log

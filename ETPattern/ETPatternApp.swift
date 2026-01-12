@@ -15,6 +15,17 @@ import ETPatternCore
 @available(iOS 18.0, *)
 struct ETPatternApp: App {
     let persistenceController = PersistenceController.shared
+    @StateObject private var themeManager = ThemeManager.shared
+    @Environment(\.colorScheme) var systemColorScheme
+
+    var currentTheme: Theme {
+        switch themeManager.currentTheme {
+        case .light: return Theme.light
+        case .dark: return Theme.dark
+        case .system:
+            return systemColorScheme == .dark ? Theme.dark : Theme.light
+        }
+    }
 
     init() {
         // Initialize default settings if not already set
@@ -29,7 +40,9 @@ struct ETPatternApp: App {
             .modelContainer(persistenceController.container)
             .environmentObject(TTSService.shared)
             .environmentObject(CloudSyncManager.shared)
-            .environment(\.theme, Theme.default)
+            .environmentObject(themeManager)
+            .environment(\.theme, currentTheme)
+            .preferredColorScheme(themeManager.colorScheme)
         }
     }
 

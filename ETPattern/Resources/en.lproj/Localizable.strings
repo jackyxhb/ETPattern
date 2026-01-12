@@ -90,3 +90,10 @@
 "delete_deck_failed" = "Failed to Delete Deck";
 "rename_deck_failed" = "Failed to Rename Deck";
 "new_deck" = "New Deck";
+
+/* Appearance */
+"appearance" = "Appearance";
+"theme" = "Theme";
+"theme_system" = "System";
+"theme_light" = "Light";
+"theme_dark" = "Dark";

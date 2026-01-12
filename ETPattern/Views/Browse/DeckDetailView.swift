@@ -101,8 +101,7 @@ struct DeckDetailView: View {
             CardPreviewContainer(card: card, index: index, total: allCards.count) {
                 previewCard = nil
             }
-            .presentationBackground(.ultraThinMaterial)
-            .presentationCornerRadius(theme.metrics.cornerRadius)
+            .themedPresentation()
         }
     }
 

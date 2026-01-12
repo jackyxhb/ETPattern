@@ -59,6 +59,7 @@ struct SettingsView: View {
                 
                 Form {
                     studyModeSection
+                    appearanceSection
                     ttsSection
                     aboutSection
                 }
@@ -93,6 +94,26 @@ struct SettingsView: View {
                 userDefaultsKey: "autoPlayOrderMode"
             )
         }
+    }
+
+    private var appearanceSection: some View {
+        Section(header: Text(NSLocalizedString("appearance", comment: "Appearance section header")).foregroundColor(theme.colors.textPrimary).dynamicTypeSize(.large ... .accessibility5)) {
+            SharedSettingsPickerSection(
+                header: "",
+                label: NSLocalizedString("theme", comment: "Theme selection label"),
+                options: Dictionary(uniqueKeysWithValues: AppTheme.allCases.map { ($0.rawValue, $0.displayName) }),
+                selection: Binding(
+                    get: { ThemeManager.shared.currentTheme.rawValue },
+                    set: { newValue in
+                        if let theme = AppTheme(rawValue: newValue) {
+                            ThemeManager.shared.currentTheme = theme
+                        }
+                    }
+                ),
+                onChange: { _ in }
+            )
+        }
+        .listRowBackground(theme.colors.surfaceLight)
     }
 
     private var ttsSection: some View {

@@ -82,8 +82,7 @@ struct HeaderView: View {
             .padding(theme.metrics.largeSpacing)
             .presentationDetents([.height(320)])
             .presentationDragIndicator(.visible)
-            .presentationBackground(.ultraThinMaterial)
-            .presentationCornerRadius(theme.metrics.cornerRadius)
+            .themedPresentation()
         }
     }
 

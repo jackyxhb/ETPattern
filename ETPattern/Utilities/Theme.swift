@@ -13,14 +13,55 @@ struct Theme {
     let colors: Colors
     let metrics: Metrics
 
-    static let `default` = Theme(
+    static let dark = Theme(
         gradients: Gradients(),
         colors: Colors(),
         metrics: Metrics()
     )
 
+    static let light = Theme(
+        gradients: Gradients(
+            background: LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.95, green: 0.95, blue: 0.97),
+                    Color(red: 0.92, green: 0.92, blue: 0.95),
+                    Color(red: 0.90, green: 0.90, blue: 0.93)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            ),
+            card: LinearGradient(
+                gradient: Gradient(colors: [
+                    Color.white.opacity(0.7),
+                    Color.white.opacity(0.5)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        ),
+        colors: Colors(
+            background: Color(red: 0.95, green: 0.95, blue: 0.97),
+            onBackground: Color.black,
+            surface: Color.white.opacity(0.7),
+            onSurface: Color.black,
+            surfaceVariant: Color.black.opacity(0.05),
+            onSurfaceVariant: Color.black.opacity(0.8),
+            surfaceElevated: Color.white.opacity(0.95),
+            onSurfaceElevated: Color.black,
+            outline: Color.black.opacity(0.1),
+            backgroundStart: Color(red: 0.95, green: 0.95, blue: 0.97),
+            backgroundEnd: Color(red: 0.90, green: 0.90, blue: 0.93),
+            surfaceLight: Color.white.opacity(0.8),
+            surfaceMedium: Color.white.opacity(0.6),
+            shadow: Color.black.opacity(0.1), // Much lighter shadow for light mode
+            textPrimary: Color.black,
+            textSecondary: Color.black.opacity(0.7)
+        ),
+        metrics: Metrics()
+    )
+
     struct Gradients {
-        let background = LinearGradient(
+        var background = LinearGradient(
             gradient: Gradient(colors: [
                 Color(red: 0.05, green: 0.05, blue: 0.15),
                 Color(red: 0.1, green: 0.1, blue: 0.2),
@@ -30,7 +71,7 @@ struct Theme {
             endPoint: .bottom
         )
 
-        let card = LinearGradient(
+        var card = LinearGradient(
             gradient: Gradient(colors: [
                 Color.white.opacity(0.1),
                 Color.white.opacity(0.05)
@@ -39,7 +80,7 @@ struct Theme {
             endPoint: .bottom
         )
 
-        let accent = LinearGradient(
+        var accent = LinearGradient(
             gradient: Gradient(colors: [
                 Color(red: 0.3, green: 0.6, blue: 1.0),
                 Color(red: 0.2, green: 0.5, blue: 0.9)
@@ -48,7 +89,7 @@ struct Theme {
             endPoint: .bottom
         )
 
-        let success = LinearGradient(
+        var success = LinearGradient(
             gradient: Gradient(colors: [
                 Color.green.opacity(0.8),
                 Color.green.opacity(0.6)
@@ -57,7 +98,7 @@ struct Theme {
             endPoint: .bottom
         )
 
-        let danger = LinearGradient(
+        var danger = LinearGradient(
             gradient: Gradient(colors: [
                 Color.red.opacity(0.8),
                 Color.red.opacity(0.6)
@@ -66,7 +107,7 @@ struct Theme {
             endPoint: .bottom
         )
 
-        let warning = LinearGradient(
+        var warning = LinearGradient(
             gradient: Gradient(colors: [
                 Color.orange.opacity(0.8),
                 Color.orange.opacity(0.6)
@@ -75,7 +116,7 @@ struct Theme {
             endPoint: .bottom
         )
 
-        let neutral = LinearGradient(
+        var neutral = LinearGradient(
             gradient: Gradient(colors: [
                 Color.teal.opacity(0.8),
                 Color.teal.opacity(0.6)
@@ -87,34 +128,34 @@ struct Theme {
 
     struct Colors {
         // Background colors
-        let background = Color(red: 0.05, green: 0.05, blue: 0.15)
-        let onBackground = Color.white
+        var background = Color(red: 0.05, green: 0.05, blue: 0.15)
+        var onBackground = Color.white
 
         // Surface colors (elevated)
-        let surface = Color.white.opacity(0.1)
-        let onSurface = Color.white
-        let surfaceVariant = Color.white.opacity(0.05)
-        let onSurfaceVariant = Color.white.opacity(0.8)
+        var surface = Color.white.opacity(0.1)
+        var onSurface = Color.white
+        var surfaceVariant = Color.white.opacity(0.05)
+        var onSurfaceVariant = Color.white.opacity(0.8)
 
         // Elevated surface for menus/popovers
-        let surfaceElevated = Color.white.opacity(0.95)
-        let onSurfaceElevated = Color.black.opacity(0.8)
+        var surfaceElevated = Color.white.opacity(0.95)
+        var onSurfaceElevated = Color.black.opacity(0.8)
 
         // Outline/border
-        let outline = Color.white.opacity(0.2)
+        var outline = Color.white.opacity(0.2)
 
         // Legacy colors (keeping for compatibility)
-        let backgroundStart = Color(red: 0.05, green: 0.05, blue: 0.15)
-        let backgroundEnd = Color(red: 0.15, green: 0.15, blue: 0.25)
-        let highlight = Color(red: 0.3, green: 0.6, blue: 1.0)
-        let surfaceLight = Color.white.opacity(0.15)
-        let surfaceMedium = Color.white.opacity(0.1)
-        let shadow = Color.black.opacity(0.3)
-        let textPrimary = Color.white
-        let textSecondary = Color.white.opacity(0.7)
-        let success = Color.green
-        let warning = Color.orange
-        let danger = Color.red
+        var backgroundStart = Color(red: 0.05, green: 0.05, blue: 0.15)
+        var backgroundEnd = Color(red: 0.15, green: 0.15, blue: 0.25)
+        var highlight = Color(red: 0.3, green: 0.6, blue: 1.0)
+        var surfaceLight = Color.white.opacity(0.15)
+        var surfaceMedium = Color.white.opacity(0.1)
+        var shadow = Color.black.opacity(0.3)
+        var textPrimary = Color.white
+        var textSecondary = Color.white.opacity(0.7)
+        var success = Color.green
+        var warning = Color.orange
+        var danger = Color.red
     }
 
     struct Metrics {
@@ -323,7 +364,7 @@ struct Theme {
 }
 
 private struct ThemeKey: EnvironmentKey {
-    static let defaultValue: Theme = Theme.default
+    static let defaultValue: Theme = Theme.dark
 }
 
 extension EnvironmentValues {
