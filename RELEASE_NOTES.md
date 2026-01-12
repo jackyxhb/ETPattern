@@ -16,12 +16,11 @@
 ### 🛠 Build Stability
 
 - **CI/CD Fix**: Temporarily disabled automated version syncing during archives to resolve build stability issues in cloud environments.
+- **Fixes**: General stability improvements.
 
 ### What's New (v2.0.5)
 
 ### 🤖 Automation
-
-- **Version Syncing**: Implemented automated version synchronization. The app now displays the version matching the latest git tag, ensuring 100% accuracy between the codebase and the deployed binary.
 
 ### What's New (v2.0.4)
 
