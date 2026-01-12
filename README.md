@@ -110,6 +110,10 @@ I doubt...;;I doubt it will rain.<br>I doubt he knows.;;2-Skepticism
 
 ## 📜 Changelog
 
+### v2.0.5
+
+- **Automation**: Added automated version syncing from git tags to the app's "About" view.
+
 ### v2.0.4
 
 - **Branding**: Finalized "Seamless Titanium" App Icon.
