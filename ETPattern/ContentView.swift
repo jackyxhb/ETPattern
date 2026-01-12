@@ -78,34 +78,25 @@ struct ContentView: View {
                 AutoPlayView(cardSet: cardSet, modelContext: modelContext)
             }
         }
-        .sheet(isPresented: $viewModel.uiState.showingSessionStats) {
+        .fullScreenCover(isPresented: $viewModel.uiState.showingSessionStats) {
             SessionStatsView()
-                .presentationDetents([.medium, .large])
                 .presentationBackground(.ultraThinMaterial)
-                .presentationCornerRadius(theme.metrics.cornerRadius)
         }
-        .sheet(isPresented: $viewModel.uiState.showingMasteryDashboard) {
+        .fullScreenCover(isPresented: $viewModel.uiState.showingMasteryDashboard) {
             MasteryDashboardView(modelContext: modelContext)
                 .presentationBackground(.ultraThinMaterial)
-                .presentationCornerRadius(theme.metrics.cornerRadius)
         }
-        .sheet(isPresented: $viewModel.uiState.showingImport) {
+        .fullScreenCover(isPresented: $viewModel.uiState.showingImport) {
             ImportView(modelContext: modelContext)
-                .presentationDetents([.medium, .large])
                 .presentationBackground(.ultraThinMaterial)
-                .presentationCornerRadius(theme.metrics.cornerRadius)
         }
-        .sheet(isPresented: $viewModel.uiState.showingSettings) {
+        .fullScreenCover(isPresented: $viewModel.uiState.showingSettings) {
             SettingsView()
-                .presentationDetents([.medium, .large])
                 .presentationBackground(.ultraThinMaterial)
-                .presentationCornerRadius(theme.metrics.cornerRadius)
         }
-        .sheet(item: $viewModel.uiState.browseCardSet) { deck in
+        .fullScreenCover(item: $viewModel.uiState.browseCardSet) { deck in
             DeckDetailView(cardSet: deck)
-                .presentationDetents([.medium, .large])
                 .presentationBackground(.ultraThinMaterial)
-                .presentationCornerRadius(theme.metrics.cornerRadius)
         }
         .alert("Rename Deck", isPresented: $viewModel.uiState.showingRenameAlert) {
             TextField("Deck Name", text: $viewModel.uiState.newName)

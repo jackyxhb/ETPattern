@@ -52,7 +52,7 @@ struct HeaderView: View {
         }) {
             headerIcon(systemName: "ellipsis")
         }
-        .popover(isPresented: $viewModel.uiState.showingHeaderMenu) {
+        .sheet(isPresented: $viewModel.uiState.showingHeaderMenu) {
             VStack(spacing: theme.metrics.smallSpacing) {
                 menuButton(title: "Mastery Dashboard", icon: "sparkles") {
                     viewModel.uiState.showingMasteryDashboard = true

@@ -475,7 +475,7 @@ struct SharedThemedPicker: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .popover(isPresented: $isPresented) {
+        .sheet(isPresented: $isPresented) {
             VStack(spacing: 0) {
                 ScrollView {
                     VStack(spacing: 4) {
@@ -504,9 +504,8 @@ struct SharedThemedPicker: View {
                     .padding()
                 }
             }
-            .frame(minWidth: 200, maxHeight: 300)
-            .presentationCompactAdaptation(.popover)
-            .presentationCompactAdaptation(.popover)
+            .presentationDetents([.fraction(0.4), .medium])
+            .presentationDragIndicator(.visible)
             .themedPresentation()
         }
     }

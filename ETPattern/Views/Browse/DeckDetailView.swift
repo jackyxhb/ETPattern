@@ -13,6 +13,9 @@ struct DeckDetailView: View {
 
     @State private var previewCard: Card?
 
+    @State private var groups: [String: [Card]] = [:]
+    @State private var groupNames: [String] = []
+
     var body: some View {
         ZStack {
             // Background provided by sheet presentation (.ultraThinMaterial)
@@ -29,92 +32,95 @@ struct DeckDetailView: View {
                         dismiss()
                     }) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(theme.colors.textSecondary)
-                            .font(.title2)
+                        .foregroundColor(theme.colors.textSecondary)
+                        .font(.title2)
                     }
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 12)
                 .background(.ultraThinMaterial)
 
-                if sortedGroupNames.isEmpty {
+                if groupNames.isEmpty {
                     Text("No cards in this deck")
                         .font(.headline)
                         .foregroundColor(theme.colors.textSecondary)
                         .dynamicTypeSize(.large ... .accessibility5)
+                        .padding()
                 } else {
-                ScrollView {
-                    LazyVStack(spacing: theme.metrics.deckDetailGroupSpacing) {
-                        ForEach(sortedGroupNames, id: \.self) { groupName in
-                            DisclosureGroup {
-                                LazyVStack(spacing: theme.metrics.deckDetailCardSpacing) {
-                                    ForEach(groupedCards[groupName] ?? []) { card in
-                                        Button {
-                                            previewCard = card
-                                        } label: {
-                                            CardRow(card: card)
-                                        }
-                                        .buttonStyle(.plain)
-                                        .contextMenu {
+                    ScrollView {
+                        LazyVStack(spacing: theme.metrics.deckDetailGroupSpacing) {
+                            ForEach(groupNames, id: \.self) { groupName in
+                                DisclosureGroup {
+                                    LazyVStack(spacing: theme.metrics.deckDetailCardSpacing) {
+                                        ForEach(groups[groupName] ?? []) { card in
                                             Button {
                                                 previewCard = card
                                             } label: {
-                                                Label("Preview", systemImage: "eye")
+                                                CardRow(card: card)
+                                            }
+                                            .buttonStyle(.plain)
+                                            .contextMenu {
+                                                Button {
+                                                    previewCard = card
+                                                } label: {
+                                                    Label("Preview", systemImage: "eye")
+                                                }
                                             }
                                         }
                                     }
+                                    .padding(.leading, theme.metrics.deckDetailLeadingPadding)
+                                } label: {
+                                    HStack {
+                                        Text(groupName)
+                                            .font(.headline)
+                                            .foregroundColor(theme.colors.textPrimary)
+                                            .dynamicTypeSize(.large ... .accessibility5)
+                                        Spacer()
+                                        Text("\(groups[groupName]?.count ?? 0) cards")
+                                            .font(.subheadline)
+                                            .foregroundColor(theme.colors.textSecondary)
+                                            .dynamicTypeSize(.large ... .accessibility5)
+                                    }
+                                    .padding(theme.metrics.deckDetailGroupPadding)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
+                                            .fill(theme.gradients.card.opacity(0.9))
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
+                                            .stroke(theme.colors.surfaceLight, lineWidth: 1)
+                                    )
                                 }
-                                .padding(.leading, theme.metrics.deckDetailLeadingPadding)
-                            } label: {
-                                HStack {
-                                    Text(groupName)
-                                        .font(.headline)
-                                        .foregroundColor(theme.colors.textPrimary)
-                                        .dynamicTypeSize(.large ... .accessibility5)
-                                    Spacer()
-                                    Text("\(groupedCards[groupName]?.count ?? 0) cards")
-                                        .font(.subheadline)
-                                        .foregroundColor(theme.colors.textSecondary)
-                                        .dynamicTypeSize(.large ... .accessibility5)
-                                }
-                                .padding(theme.metrics.deckDetailGroupPadding)
-                                .background(
-                                    RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
-                                        .fill(theme.gradients.card.opacity(0.9))
-                                )
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
-                                        .stroke(theme.colors.surfaceLight, lineWidth: 1)
-                                )
+                                .tint(.white)
                             }
-                            .tint(.white)
                         }
+                        .padding(theme.metrics.deckDetailScrollPadding)
                     }
-                    .padding(theme.metrics.deckDetailScrollPadding)
-                }
                 }
             }
         }
-        .sheet(item: $previewCard) { card in
-            let allCards = sortedGroupNames.flatMap { groupedCards[$0] ?? [] }
+        .task {
+            loadCards()
+        }
+        .fullScreenCover(item: $previewCard) { card in
+            let allCards = groupNames.flatMap { groups[$0] ?? [] }
             let index = allCards.firstIndex(where: { $0.id == card.id }) ?? 0
             CardPreviewContainer(card: card, index: index, total: allCards.count) {
                 previewCard = nil
             }
-            .themedPresentation()
+            .presentationBackground(.ultraThinMaterial)
         }
     }
 
-    private var groupedCards: [String: [Card]] {
+    private func loadCards() {
         let cards = cardSet.cards
         let sortedCards = cards.sorted { ($0.id, $0.front) < ($1.id, $1.front) }
-        return Dictionary(grouping: sortedCards) { $0.groupName }
-    }
-
-    private var sortedGroupNames: [String] {
-        groupedCards.keys.sorted { groupName1, groupName2 in
-            let groupId1 = groupedCards[groupName1]?.first?.groupId ?? Int32.max
-            let groupId2 = groupedCards[groupName2]?.first?.groupId ?? Int32.max
+        let newGroups = Dictionary(grouping: sortedCards) { $0.groupName }
+        
+        self.groups = newGroups
+        self.groupNames = newGroups.keys.sorted { groupName1, groupName2 in
+            let groupId1 = newGroups[groupName1]?.first?.groupId ?? Int32.max
+            let groupId2 = newGroups[groupName2]?.first?.groupId ?? Int32.max
             return groupId1 < groupId2
         }
     }
