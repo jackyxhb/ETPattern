@@ -213,7 +213,7 @@ struct SettingsView: View {
                 .font(theme.metrics.headline)
                 .foregroundColor(theme.colors.textPrimary)
                 .dynamicTypeSize(.large ... .accessibility5)
-            Text("Version 1.6.0")
+            Text(appVersion)
                 .foregroundColor(theme.colors.textSecondary)
                 .dynamicTypeSize(.large ... .accessibility5)
             Text("Learn English patterns with spaced repetition")
@@ -222,6 +222,11 @@ struct SettingsView: View {
                 .dynamicTypeSize(.large ... .accessibility5)
         }
         .listRowBackground(theme.colors.surfaceLight)
+    }
+
+    private var appVersion: String {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
+        return "Version \(version)"
     }
 
     private func canonicalVoiceLanguage(from value: String) -> String {

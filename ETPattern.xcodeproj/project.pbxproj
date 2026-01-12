@@ -63,6 +63,7 @@
 			buildPhases = (
 				22EC7D4A2ED5726F00C3DDDA /* Sources */,
 				22EC7D4B2ED5726F00C3DDDA /* Frameworks */,
+				223DEBC72F14D26E006B522B /* Sync Version */,
 				22EC7D4C2ED5726F00C3DDDA /* Resources */,
 			);
 			buildRules = (
@@ -108,7 +109,7 @@
 			mainGroup = 22EC7D452ED5726E00C3DDDA;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				22419E122EFC2A5F000F8B43 /* XCLocalSwiftPackageReference "../ETPattern" */,
+				22419E122EFC2A5F000F8B43 /* XCLocalSwiftPackageReference "." */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 22EC7D4F2ED5726F00C3DDDA /* Products */;
@@ -129,6 +130,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		223DEBC72F14D26E006B522B /* Sync Version */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Sync Version";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n\n\"${PROJECT_DIR}/scripts/xcode_version_sync.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		22EC7D4A2ED5726F00C3DDDA /* Sources */ = {
@@ -364,7 +386,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		22419E122EFC2A5F000F8B43 /* XCLocalSwiftPackageReference "../ETPattern" */ = {
+		22419E122EFC2A5F000F8B43 /* XCLocalSwiftPackageReference "." */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = .;
 		};
