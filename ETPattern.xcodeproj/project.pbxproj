@@ -63,7 +63,6 @@
 			buildPhases = (
 				22EC7D4A2ED5726F00C3DDDA /* Sources */,
 				22EC7D4B2ED5726F00C3DDDA /* Frameworks */,
-				223DEBC72F14D26E006B522B /* Sync Version */,
 				22EC7D4C2ED5726F00C3DDDA /* Resources */,
 			);
 			buildRules = (
@@ -130,27 +129,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		223DEBC72F14D26E006B522B /* Sync Version */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Sync Version";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n\n\"${PROJECT_DIR}/scripts/xcode_version_sync.sh\"\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		22EC7D4A2ED5726F00C3DDDA /* Sources */ = {
