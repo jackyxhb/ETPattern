@@ -110,6 +110,12 @@ I doubt...;;I doubt it will rain.<br>I doubt he knows.;;2-Skepticism
 
 ## 📜 Changelog
 
+### v2.0.4
+
+- **Branding**: Finalized "Seamless Titanium" App Icon.
+- **Fixes**: Resolved CSV data corruption issues and iOS 17 deprecation warnings.
+- **CI**: Enhanced CI scripts for version synchronization.
+
 ### v2.0.0 - "The Modern Era"
 
 - **Architecture**: Full modularization (Models/Core/Services).
