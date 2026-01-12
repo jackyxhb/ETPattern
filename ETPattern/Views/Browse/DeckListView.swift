@@ -107,6 +107,7 @@ struct DeckListView: View {
                 theme.gradients.card
                     .opacity(viewModel.isSelected(cardSet) ? 1 : 0.85)
             )
+            .background(.ultraThinMaterial)
             .overlay(
                 RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
                     .stroke(

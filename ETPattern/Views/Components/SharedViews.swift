@@ -283,7 +283,11 @@ struct CardFace: View {
 
     private var cardBackground: some View {
         RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
-            .fill(theme.gradients.card)
+            .fill(theme.gradients.card) // Keep the tint
+            .background(
+                RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
+                    .fill(.ultraThinMaterial)
+            )
             .overlay(
                 RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
                     .stroke(theme.colors.surfaceLight, lineWidth: 1.5)
