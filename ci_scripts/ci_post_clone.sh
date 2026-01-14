@@ -3,8 +3,8 @@
 #  ci_post_clone.sh
 #  ETPattern
 #
-#  Created by Agent on 2026-01-11.
-#
+#  Runs after Xcode Cloud clones the repository.
+#  Version sync is now handled by ci_pre_xcodebuild.sh using agvtool.
 
 echo "Stage: Post-clone is executed"
 
@@ -17,43 +17,8 @@ echo "CI_PULL_REQUEST: $CI_PULL_REQUEST"
 echo "CI_BRANCH: $CI_BRANCH"
 echo "CI_BUILD_ID: $CI_BUILD_ID"
 echo "CI_TAG: $CI_TAG"
+echo "CI_PRIMARY_REPOSITORY_PATH: $CI_PRIMARY_REPOSITORY_PATH"
 
-if [[ -n "$CI_TAG" ]]; then
-    echo "🔖 Tag detected from CI_TAG: $CI_TAG"
-    # Strip 'v' prefix if present
-    APP_VERSION="${CI_TAG#v}"
-else
-    # Xcode Cloud does a shallow clone without tags
-    # Fetch all tags explicitly to make git describe work
-    echo "ℹ️ CI_TAG not set. Fetching tags from remote..."
-    git fetch --tags --quiet 2>/dev/null || true
-    
-    # Now use git describe to get the nearest tag
-    GIT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-    if [[ -n "$GIT_TAG" ]]; then
-        echo "🔖 Tag detected from git describe: $GIT_TAG"
-        APP_VERSION="${GIT_TAG#v}"
-    else
-        echo "⚠️ No tag found. Skipping version update."
-        APP_VERSION=""
-    fi
-fi
-
-if [[ -n "$APP_VERSION" ]]; then
-    echo "📲 Setting MARKETING_VERSION to $APP_VERSION"
-    # Navigate to project root (already there in post-clone, but being safe)
-    # Update MARKETING_VERSION in project.pbxproj
-    sed -i '' "s/MARKETING_VERSION = .*/MARKETING_VERSION = $APP_VERSION;/g" ETPattern.xcodeproj/project.pbxproj
-    echo "✅ Updated project version."
-fi
-
-# Always update build number from CI_BUILD_ID
-if [[ -n "$CI_BUILD_ID" ]]; then
-    echo "🔢 Setting CURRENT_PROJECT_VERSION to $CI_BUILD_ID"
-    sed -i '' "s/CURRENT_PROJECT_VERSION = .*/CURRENT_PROJECT_VERSION = $CI_BUILD_ID;/g" ETPattern.xcodeproj/project.pbxproj
-    echo "✅ Updated build number."
-else
-    echo "ℹ️ No CI_BUILD_ID detected. Keeping existing build number."
-fi
+echo "✅ Post-clone complete. Version sync will run in ci_pre_xcodebuild.sh"
 
 exit 0

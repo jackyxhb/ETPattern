@@ -3,17 +3,14 @@
 #  ci_pre_xcodebuild.sh
 #  ETPattern
 #
-#  Runs just before xcodebuild to set version and build number
+#  Sets Marketing Version from Git tag using agvtool.
+#  Build number is automatic via $(CI_BUILD_NUMBER) in project settings.
 
 set -e  # Exit on error
 
 echo "======================================"
-echo "Stage: Pre-xcodebuild is executing"
+echo "Stage: Pre-xcodebuild - Version Sync"
 echo "======================================"
-
-echo "📂 Current directory: $(pwd)"
-echo "📁 Project directory contents:"
-ls -la
 
 # Get version from CI_TAG or git describe
 if [[ -n "$CI_TAG" ]]; then
@@ -27,33 +24,30 @@ else
         echo "🔖 Tag detected from git describe: $GIT_TAG"
         APP_VERSION="${GIT_TAG#v}"
     else
-        echo "⚠️ No tag found."
+        echo "⚠️ No tag found. Skipping version update."
         APP_VERSION=""
     fi
 fi
 
 # Set Marketing Version using agvtool
 if [[ -n "$APP_VERSION" ]]; then
-    echo "📲 Setting MARKETING_VERSION to $APP_VERSION using agvtool"
+    echo "📲 Setting MARKETING_VERSION to $APP_VERSION"
+    
     # Navigate to repository root (script runs in ci_scripts directory)
     cd "$CI_PRIMARY_REPOSITORY_PATH" || cd ..
-    echo "📂 Now in directory: $(pwd)"
+    echo "📂 Working directory: $(pwd)"
+    
+    # Use agvtool to set marketing version
     xcrun agvtool new-marketing-version "$APP_VERSION"
+    
     echo "✅ Marketing version set to $APP_VERSION"
-fi
-
-# Set Build Number using agvtool
-if [[ -n "$CI_BUILD_ID" ]]; then
-    echo "🔢 Setting build number to $CI_BUILD_ID using agvtool"
-    cd "$CI_PRIMARY_REPOSITORY_PATH" || cd ..
-    xcrun agvtool new-version -all "$CI_BUILD_ID"
-    echo "✅ Build number set to $CI_BUILD_ID"
+    echo ""
+    echo "📋 Version verification:"
+    xcrun agvtool what-marketing-version
 fi
 
 echo "======================================"
-echo "📋 Final version check:"
-xcrun agvtool what-marketing-version
-xcrun agvtool what-version
+echo "ℹ️ Build number is set automatically via \$(CI_BUILD_NUMBER) in project settings"
 echo "======================================"
 
 exit 0
