@@ -20,13 +20,14 @@ Upgrade from a simple binary system to a **4-Level Grading Engine** (Again, Hard
 - **Detailed Metrics**: Tracks `easeFactor`, `lapses`, and `interval` for every card.
 - **Session History**: All `ReviewLogs` are persisted for future analytics.
 
-### 💎 "Liquid Glass" Esthetic
+### 💎 "Liquid Glass" Aesthetic
 
 A complete UI overhaul featuring a modern **Glassmorphism** design language.
 
 - **Depth**: Multi-layer shadows and `.ultraThinMaterial` backgrounds.
 - **Haptics**: Rich tactile feedback for every interaction (Success vs Warning).
 - **Semantics**: A strict 4pt grid system and semantic color tokens via `Theme.swift`.
+- **Identity**: "Seamless Titanium" App Icon with industrial-grade detailing.
 
 ### ⚡️ Data Resilience & Cloud Engine
 
@@ -42,13 +43,19 @@ A complete UI overhaul featuring a modern **Glassmorphism** design language.
 - **Event-Driven TTS**: Audio and UI are perfectly synced; the card flips only when the sentence finishes.
 - **Offline Support**: High-quality neural voices work without an internet connection.
 
+### 📱 Native iPad Experience
+
+- **Optimized Layout**: Fully adaptive layouts properly utilizing the larger canvas.
+- **Sidebar Support**: Dedicated sidebar navigation for quick access to decks and tools.
+- **Floating Modals**: Popovers and sheets are optimized for non-intrusive presentation (Split View ready).
+
 ---
 
 ## 🏗️ Modular Architecture
 
 The project has been refactored into a scalable 3-tier architecture using localized Swift Packages:
 
-```
+```text
 ETPattern/
 ├── ETPatternModels/       # Domain Entities (Schema)
 │   ├── Card, CardSet
@@ -134,6 +141,16 @@ I doubt...;;I doubt it will rain.<br>I doubt he knows.;;2-Skepticism
 
 - **Chinese Translations**: Native on-device translation support.
 - **Unique IDs**: Global ID system to prevent duplications.
+
+---
+
+## 🔒 Privacy
+
+English Thought is a privacy-first application.
+
+- **On-Device Processing**: All learning data stays on your device (and private iCloud container).
+- **No Tracking**: We do not track your usage or collect personal data.
+- **Transparent**: See `index.html` for the full Privacy Policy text.
 
 ---
 
