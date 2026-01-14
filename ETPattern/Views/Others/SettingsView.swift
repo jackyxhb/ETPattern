@@ -97,29 +97,27 @@ struct SettingsView: View {
     }
 
     private var appearanceSection: some View {
-        Section(header: Text(NSLocalizedString("appearance", comment: "Appearance section header")).foregroundColor(theme.colors.textPrimary).dynamicTypeSize(.large ... .accessibility5)) {
-            SharedSettingsPickerSection(
-                header: "",
-                label: NSLocalizedString("theme", comment: "Theme selection label"),
-                options: Dictionary(uniqueKeysWithValues: AppTheme.allCases.map { ($0.rawValue, $0.displayName) }),
-                selection: Binding(
-                    get: { ThemeManager.shared.currentTheme.rawValue },
-                    set: { newValue in
-                        if let theme = AppTheme(rawValue: newValue) {
-                            ThemeManager.shared.currentTheme = theme
-                        }
+        SharedSettingsPickerSection(
+            header: NSLocalizedString("appearance", comment: "Appearance section header"),
+            label: NSLocalizedString("theme", comment: "Theme selection label"),
+            options: Dictionary(uniqueKeysWithValues: AppTheme.allCases.map { ($0.rawValue, $0.displayName) }),
+            selection: Binding(
+                get: { ThemeManager.shared.currentTheme.rawValue },
+                set: { newValue in
+                    if let theme = AppTheme(rawValue: newValue) {
+                        ThemeManager.shared.currentTheme = theme
                     }
-                ),
-                onChange: { _ in }
-            )
-        }
-        .listRowBackground(theme.colors.surfaceLight)
+                }
+            ),
+            onChange: { _ in }
+        )
     }
 
     private var ttsSection: some View {
-        Section(header: Text(NSLocalizedString("text_to_speech", comment: "Text-to-speech section header")).foregroundColor(theme.colors.textPrimary).dynamicTypeSize(.large ... .accessibility5)) {
+        Group {
+            // Voice picker with section header
             SharedSettingsPickerSection(
-                header: "",
+                header: NSLocalizedString("text_to_speech", comment: "Text-to-speech section header"),
                 label: NSLocalizedString("voice", comment: "Voice selection label"),
                 options: voiceOptions,
                 selection: $selectedVoice,
@@ -128,104 +126,105 @@ struct SettingsView: View {
                 }
             )
 
-            VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
-                Text(String(format: NSLocalizedString("speech_speed_value", comment: "Speech speed display with percentage"), Int(ttsPercentage)))
-                    .font(theme.metrics.subheadline)
-                    .foregroundColor(theme.colors.textPrimary)
-                    .dynamicTypeSize(.large ... .accessibility5)
+            // Remaining TTS controls in a continuation section (no header)
+            Section {
+                VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
+                    Text(String(format: NSLocalizedString("speech_speed_value", comment: "Speech speed display with percentage"), Int(ttsPercentage)))
+                        .font(theme.metrics.subheadline)
+                        .foregroundColor(theme.colors.textPrimary)
+                        .dynamicTypeSize(.large ... .accessibility5)
 
-                GeometryReader { geometry in
-                    Slider(value: $ttsPercentage, in: Constants.TTS.minPercentage...Constants.TTS.maxPercentage, step: 10) {
-                        Text(NSLocalizedString("speech_speed", comment: "Speech speed slider label"))
-                            .foregroundColor(theme.colors.textPrimary)
-                            .dynamicTypeSize(.large ... .accessibility5)
-                    } minimumValueLabel: {
-                        Text("50%")
-                            .font(theme.metrics.caption)
-                            .foregroundColor(theme.colors.textSecondary)
-                            .dynamicTypeSize(.large ... .accessibility5)
-                    } maximumValueLabel: {
-                        Text("120%")
-                            .font(theme.metrics.caption)
-                            .foregroundColor(theme.colors.textSecondary)
-                            .dynamicTypeSize(.large ... .accessibility5)
+                    GeometryReader { geometry in
+                        Slider(value: $ttsPercentage, in: Constants.TTS.minPercentage...Constants.TTS.maxPercentage, step: 10) {
+                            Text(NSLocalizedString("speech_speed", comment: "Speech speed slider label"))
+                                .foregroundColor(theme.colors.textPrimary)
+                                .dynamicTypeSize(.large ... .accessibility5)
+                        } minimumValueLabel: {
+                            Text("50%")
+                                .font(theme.metrics.caption)
+                                .foregroundColor(theme.colors.textSecondary)
+                                .dynamicTypeSize(.large ... .accessibility5)
+                        } maximumValueLabel: {
+                            Text("120%")
+                                .font(theme.metrics.caption)
+                                .foregroundColor(theme.colors.textSecondary)
+                                .dynamicTypeSize(.large ... .accessibility5)
+                        }
+                        .tint(theme.colors.highlight)
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { value in
+                                    let sliderWidth = geometry.size.width
+                                    let tapLocation = value.location.x
+                                    let percentage = tapLocation / sliderWidth
+                                    let newValue = Constants.TTS.minPercentage + (Constants.TTS.maxPercentage - Constants.TTS.minPercentage) * Float(percentage)
+                                    let steppedValue = round(newValue / 10) * 10
+                                    let clampedValue = min(max(steppedValue, Constants.TTS.minPercentage), Constants.TTS.maxPercentage)
+                                    ttsPercentage = clampedValue
+                                }
+                        )
+                        .onChange(of: ttsPercentage) { _, newValue in
+                            ttsService.setRate(newValue)
+                        }
                     }
-                    .tint(theme.colors.highlight)
-                    .gesture(
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { value in
-                                let sliderWidth = geometry.size.width
-                                let tapLocation = value.location.x
-                                let percentage = tapLocation / sliderWidth
-                                let newValue = Constants.TTS.minPercentage + (Constants.TTS.maxPercentage - Constants.TTS.minPercentage) * Float(percentage)
-                                let steppedValue = round(newValue / 10) * 10
-                                let clampedValue = min(max(steppedValue, Constants.TTS.minPercentage), Constants.TTS.maxPercentage)
-                                ttsPercentage = clampedValue
-                            }
-                    )
-                    .onChange(of: ttsPercentage) { _, newValue in
-                        ttsService.setRate(newValue)
+                    .frame(height: theme.metrics.sliderHeight)
+                }
+                .padding(.vertical, theme.metrics.smallSpacing)
+
+                SharedSettingsSliderSection(
+                    label: "Pitch",
+                    value: $ttsPitch,
+                    minValue: Constants.TTS.minPitch,
+                    maxValue: Constants.TTS.maxPitch,
+                    step: 0.1,
+                    minLabel: "50%",
+                    maxLabel: "200%",
+                    valueFormatter: { "\(Int($0 * 100))%" },
+                    onChange: { newValue in
+                        ttsService.setPitch(newValue)
                     }
+                )
+
+                SharedSettingsSliderSection(
+                    label: "Volume",
+                    value: $ttsVolume,
+                    minValue: Constants.TTS.minVolume,
+                    maxValue: Constants.TTS.maxVolume,
+                    step: 0.1,
+                    minLabel: "0%",
+                    maxLabel: "100%",
+                    valueFormatter: { "\(Int($0 * 100))%" },
+                    onChange: { newValue in
+                        ttsService.setVolume(newValue)
+                    }
+                )
+
+                SharedSettingsSliderSection(
+                    label: "Pause",
+                    value: $ttsPause,
+                    minValue: Constants.TTS.minPause,
+                    maxValue: Constants.TTS.maxPause,
+                    step: 0.1,
+                    minLabel: "0s",
+                    maxLabel: "2s",
+                    valueFormatter: { String(format: "%.1f", $0) + "s" },
+                    onChange: { newValue in
+                        ttsService.setPause(newValue)
+                    }
+                )
+
+                Button("Test Voice") {
+                    UIImpactFeedbackGenerator.lightImpact()
+                    ttsService.speak("Hello! This is a test of the selected voice and speed.")
                 }
-                .frame(height: theme.metrics.sliderHeight)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(theme.gradients.accent)
+                .foregroundColor(theme.colors.textPrimary)
+                .cornerRadius(theme.metrics.cornerRadius)
             }
-            .padding(.vertical, theme.metrics.smallSpacing)
-            .listRowBackground(theme.colors.surfaceLight)
-
-            SharedSettingsSliderSection(
-                label: "Pitch",
-                value: $ttsPitch,
-                minValue: Constants.TTS.minPitch,
-                maxValue: Constants.TTS.maxPitch,
-                step: 0.1,
-                minLabel: "50%",
-                maxLabel: "200%",
-                valueFormatter: { "\(Int($0 * 100))%" },
-                onChange: { newValue in
-                    ttsService.setPitch(newValue)
-                }
-            )
-
-            SharedSettingsSliderSection(
-                label: "Volume",
-                value: $ttsVolume,
-                minValue: Constants.TTS.minVolume,
-                maxValue: Constants.TTS.maxVolume,
-                step: 0.1,
-                minLabel: "0%",
-                maxLabel: "100%",
-                valueFormatter: { "\(Int($0 * 100))%" },
-                onChange: { newValue in
-                    ttsService.setVolume(newValue)
-                }
-            )
-
-            SharedSettingsSliderSection(
-                label: "Pause",
-                value: $ttsPause,
-                minValue: Constants.TTS.minPause,
-                maxValue: Constants.TTS.maxPause,
-                step: 0.1,
-                minLabel: "0s",
-                maxLabel: "2s",
-                valueFormatter: { String(format: "%.1f", $0) + "s" },
-                onChange: { newValue in
-                    ttsService.setPause(newValue)
-                }
-            )
-
-            Button("Test Voice") {
-                UIImpactFeedbackGenerator.lightImpact()
-                ttsService.speak("Hello! This is a test of the selected voice and speed.")
-            }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(theme.gradients.accent)
-            .foregroundColor(theme.colors.textPrimary)
-            .cornerRadius(theme.metrics.cornerRadius)
             .listRowBackground(theme.colors.surfaceLight)
         }
-        .listRowBackground(theme.colors.surfaceLight)
     }
 
     private var aboutSection: some View {

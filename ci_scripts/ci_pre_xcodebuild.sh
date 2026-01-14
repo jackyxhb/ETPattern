@@ -35,7 +35,9 @@ fi
 # Set Marketing Version using agvtool
 if [[ -n "$APP_VERSION" ]]; then
     echo "📲 Setting MARKETING_VERSION to $APP_VERSION using agvtool"
-    cd ETPattern.xcodeproj/..
+    # Navigate to repository root (script runs in ci_scripts directory)
+    cd "$CI_PRIMARY_REPOSITORY_PATH" || cd ..
+    echo "📂 Now in directory: $(pwd)"
     xcrun agvtool new-marketing-version "$APP_VERSION"
     echo "✅ Marketing version set to $APP_VERSION"
 fi
@@ -43,6 +45,7 @@ fi
 # Set Build Number using agvtool
 if [[ -n "$CI_BUILD_ID" ]]; then
     echo "🔢 Setting build number to $CI_BUILD_ID using agvtool"
+    cd "$CI_PRIMARY_REPOSITORY_PATH" || cd ..
     xcrun agvtool new-version -all "$CI_BUILD_ID"
     echo "✅ Build number set to $CI_BUILD_ID"
 fi
