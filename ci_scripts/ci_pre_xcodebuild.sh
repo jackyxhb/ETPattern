@@ -3,7 +3,7 @@
 #  ci_pre_xcodebuild.sh
 #  ETPattern
 #
-#  Sets Marketing Version from Git tag using agvtool.
+#  Sets Marketing Version from Git tag by directly editing project.pbxproj.
 #  Build number is automatic via $(CI_BUILD_NUMBER) in project settings.
 
 set -e  # Exit on error
@@ -11,6 +11,8 @@ set -e  # Exit on error
 echo "======================================"
 echo "Stage: Pre-xcodebuild - Version Sync"
 echo "======================================"
+echo "📂 Script directory: $(pwd)"
+echo "🔧 CI_PRIMARY_REPOSITORY_PATH: $CI_PRIMARY_REPOSITORY_PATH"
 
 # Get version from CI_TAG or git describe
 if [[ -n "$CI_TAG" ]]; then
@@ -29,25 +31,28 @@ else
     fi
 fi
 
-# Set Marketing Version using agvtool
+# Set Marketing Version by directly editing project.pbxproj
 if [[ -n "$APP_VERSION" ]]; then
     echo "📲 Setting MARKETING_VERSION to $APP_VERSION"
     
-    # Navigate to repository root (script runs in ci_scripts directory)
+    # Navigate to repository root
     cd "$CI_PRIMARY_REPOSITORY_PATH" || cd ..
     echo "📂 Working directory: $(pwd)"
     
-    # Use agvtool to set marketing version
-    xcrun agvtool new-marketing-version "$APP_VERSION"
+    # Show current value
+    echo "📋 Current MARKETING_VERSION values:"
+    grep "MARKETING_VERSION" ETPattern.xcodeproj/project.pbxproj || echo "  (none found)"
     
-    echo "✅ Marketing version set to $APP_VERSION"
-    echo ""
-    echo "📋 Version verification:"
-    xcrun agvtool what-marketing-version
+    # Update MARKETING_VERSION in project.pbxproj using sed
+    sed -i '' "s/MARKETING_VERSION = .*;/MARKETING_VERSION = $APP_VERSION;/g" ETPattern.xcodeproj/project.pbxproj
+    
+    echo "✅ Updated MARKETING_VERSION"
+    echo "📋 New MARKETING_VERSION values:"
+    grep "MARKETING_VERSION" ETPattern.xcodeproj/project.pbxproj || echo "  (none found)"
 fi
 
 echo "======================================"
-echo "ℹ️ Build number is set automatically via \$(CI_BUILD_NUMBER) in project settings"
+echo "ℹ️ Build number is set automatically via \$(CI_BUILD_NUMBER)"
 echo "======================================"
 
 exit 0
