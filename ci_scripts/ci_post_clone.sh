@@ -23,8 +23,12 @@ if [[ -n "$CI_TAG" ]]; then
     # Strip 'v' prefix if present
     APP_VERSION="${CI_TAG#v}"
 else
-    # Fallback: use git describe to get the nearest tag
-    echo "ℹ️ CI_TAG not set. Using git describe to find version..."
+    # Xcode Cloud does a shallow clone without tags
+    # Fetch all tags explicitly to make git describe work
+    echo "ℹ️ CI_TAG not set. Fetching tags from remote..."
+    git fetch --tags --quiet 2>/dev/null || true
+    
+    # Now use git describe to get the nearest tag
     GIT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
     if [[ -n "$GIT_TAG" ]]; then
         echo "🔖 Tag detected from git describe: $GIT_TAG"
