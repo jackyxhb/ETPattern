@@ -19,18 +19,28 @@ echo "CI_BUILD_ID: $CI_BUILD_ID"
 echo "CI_TAG: $CI_TAG"
 
 if [[ -n "$CI_TAG" ]]; then
-    echo "🔖 Tag detected: $CI_TAG"
+    echo "🔖 Tag detected from CI_TAG: $CI_TAG"
     # Strip 'v' prefix if present
     APP_VERSION="${CI_TAG#v}"
-    echo "📲 Setting MARKETING_VERSION to $APP_VERSION"
+else
+    # Fallback: use git describe to get the nearest tag
+    echo "ℹ️ CI_TAG not set. Using git describe to find version..."
+    GIT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+    if [[ -n "$GIT_TAG" ]]; then
+        echo "🔖 Tag detected from git describe: $GIT_TAG"
+        APP_VERSION="${GIT_TAG#v}"
+    else
+        echo "⚠️ No tag found. Skipping version update."
+        APP_VERSION=""
+    fi
+fi
 
+if [[ -n "$APP_VERSION" ]]; then
+    echo "📲 Setting MARKETING_VERSION to $APP_VERSION"
     # Navigate to project root (already there in post-clone, but being safe)
     # Update MARKETING_VERSION in project.pbxproj
     sed -i '' "s/MARKETING_VERSION = .*/MARKETING_VERSION = $APP_VERSION;/g" ETPattern.xcodeproj/project.pbxproj
-    
     echo "✅ Updated project version."
-else
-    echo "ℹ️ No tag detected. Skipping version update."
 fi
 
 # Always update build number from CI_BUILD_ID
