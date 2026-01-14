@@ -1,0 +1,53 @@
+name: Sync Version from Tag
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on tags like v2.0.16, v3.0.0, etc.
+
+permissions:
+  contents: write
+
+jobs:
+  sync-version:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          VERSION="${TAG_NAME#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Extracted version: $VERSION from tag: $TAG_NAME"
+
+      - name: Update MARKETING_VERSION in project
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          echo "📝 Updating MARKETING_VERSION to $VERSION..."
+          sed -i '' "s/MARKETING_VERSION = .*;/MARKETING_VERSION = $VERSION;/g" ETPattern.xcodeproj/project.pbxproj
+          
+          # Verify
+          echo "✅ Updated versions:"
+          grep "MARKETING_VERSION" ETPattern.xcodeproj/project.pbxproj
+
+      - name: Commit and push version update
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Check if there are changes to commit
+          if git diff --quiet ETPattern.xcodeproj/project.pbxproj; then
+            echo "ℹ️ No version changes needed (already up to date)"
+          else
+            git add ETPattern.xcodeproj/project.pbxproj
+            git commit -m "chore: bump version to $VERSION [skip ci]"
+            git push origin HEAD:main
+            echo "✅ Version bump committed and pushed"
+          fi
