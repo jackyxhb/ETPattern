@@ -33,4 +33,13 @@ else
     echo "ℹ️ No tag detected. Skipping version update."
 fi
 
+# Always update build number from CI_BUILD_ID
+if [[ -n "$CI_BUILD_ID" ]]; then
+    echo "🔢 Setting CURRENT_PROJECT_VERSION to $CI_BUILD_ID"
+    sed -i '' "s/CURRENT_PROJECT_VERSION = .*/CURRENT_PROJECT_VERSION = $CI_BUILD_ID;/g" ETPattern.xcodeproj/project.pbxproj
+    echo "✅ Updated build number."
+else
+    echo "ℹ️ No CI_BUILD_ID detected. Keeping existing build number."
+fi
+
 exit 0

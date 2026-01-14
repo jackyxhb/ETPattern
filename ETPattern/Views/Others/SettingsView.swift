@@ -247,7 +247,8 @@ struct SettingsView: View {
 
     private var appVersion: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
-        return "Version \(version)"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "Unknown"
+        return "Version \(version) (\(build))"
     }
 
     private func canonicalVoiceLanguage(from value: String) -> String {
