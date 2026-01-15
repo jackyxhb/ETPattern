@@ -6,7 +6,7 @@ The Promotional Text field allows up to 170 characters and appears at the top of
 
 ### Option 1: Design Focus (Recommended)
 
-"Experience the all-new English Thought v2.0. Featuring a stunning 'Seamless Titanium' design, refined 'Liquid Glass' interface, and rock-solid stability improvements for your daily practice."
+"Experience the all-new English Thought v2 Featuring a refined 'Liquid Glass' interface and rock-solid stability improvements for your daily practice."
 
 ### Option 2: Short & Punchy
 
