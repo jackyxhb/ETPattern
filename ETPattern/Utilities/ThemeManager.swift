@@ -25,8 +25,8 @@ class ThemeManager: ObservableObject {
     }
     
     init() {
-        let savedValue = UserDefaults.standard.string(forKey: "appTheme") ?? AppTheme.system.rawValue
-        self.currentTheme = AppTheme(rawValue: savedValue) ?? .system
+        let savedValue = UserDefaults.standard.string(forKey: "appTheme") ?? AppTheme.dark.rawValue
+        self.currentTheme = AppTheme(rawValue: savedValue) ?? .dark
     }
     
     var theme: Theme {

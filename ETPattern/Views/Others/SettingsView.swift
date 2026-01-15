@@ -16,7 +16,7 @@ struct SettingsView: View {
     @EnvironmentObject private var ttsService: TTSService
     @State private var selectedVoice: String = Constants.TTS.defaultVoice
     @State private var cardOrderMode: String = UserDefaults.standard.string(forKey: "cardOrderMode") ?? "random"
-    @State private var autoPlayOrderMode: String = UserDefaults.standard.string(forKey: "autoPlayOrderMode") ?? "sequential"
+    @State private var autoPlayOrderMode: String = UserDefaults.standard.string(forKey: "autoPlayOrderMode") ?? "random"
     @State private var ttsPercentage: Float = 0 // Will be set in onAppear
     @State private var ttsPitch: Float = 0
     @State private var ttsVolume: Float = 0

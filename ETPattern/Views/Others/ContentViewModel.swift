@@ -59,6 +59,14 @@ class ContentViewModel: ObservableObject {
     
     func loadInitialCardSets() async {
         await paginatedDataSource.loadInitialData()
+        autoSelectSingleDeck()
+    }
+    
+    /// Auto-selects the deck if there's only one available
+    private func autoSelectSingleDeck() {
+        if cardSets.count == 1, uiState.selectedCardSet == nil {
+            uiState.selectedCardSet = cardSets.first
+        }
     }
     
     func loadMoreCardSets() async {
