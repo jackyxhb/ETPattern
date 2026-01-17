@@ -11,6 +11,7 @@ import UniformTypeIdentifiers
 import os.log
 import ETPatternModels
 import ETPatternServices
+import ETPatternFeatures
 
 struct ContentView: View {
     @Environment(\.theme) var theme
@@ -70,12 +71,45 @@ struct ContentView: View {
         }
         .fullScreenCover(isPresented: $viewModel.uiState.showingStudyView) {
             if let cardSet = viewModel.uiState.selectedCardSet {
-                StudyView(cardSet: cardSet, modelContext: modelContext)
+                // Initialize MVVM+ Stack
+                // Note: In a larger app, this composition might happen in a Factory or Router.
+                let coordinator = StudyCoordinator(onDismiss: {
+                    viewModel.uiState.showingStudyView = false
+                })
+                
+                // Create Service with isolated context
+                let container = modelContext.container
+                let service = StudyService(modelContainer: container)
+                
+                let studyVM = StudyViewModel(
+                    cardSet: cardSet,
+                    modelContext: modelContext,
+                    service: service,
+                    coordinator: coordinator
+                )
+                
+                StudyView(viewModel: studyVM)
             }
         }
         .fullScreenCover(isPresented: $viewModel.uiState.showingAutoView) {
             if let cardSet = viewModel.uiState.selectedCardSet {
-                AutoPlayView(cardSet: cardSet, modelContext: modelContext)
+                // Initialize MVVM+ Stack for AutoPlay
+                let coordinator = AutoPlayCoordinator(onDismiss: {
+                    viewModel.uiState.showingAutoView = false
+                })
+                
+                // Reuse or create Service
+                let container = modelContext.container
+                let service = StudyService(modelContainer: container)
+                
+                let autoVM = AutoPlayViewModel(
+                    cardSet: cardSet,
+                    modelContext: modelContext,
+                    service: service,
+                    coordinator: coordinator
+                )
+                
+                AutoPlayView(viewModel: autoVM)
             }
         }
         .fullScreenCover(isPresented: $viewModel.uiState.showingSessionStats) {

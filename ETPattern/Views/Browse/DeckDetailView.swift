@@ -1,6 +1,8 @@
 import SwiftUI
 import SwiftData
+#if canImport(UIKit)
 import UIKit
+#endif
 import ETPatternModels
 import ETPatternServices
 
@@ -189,7 +191,9 @@ private struct CardPreviewContainer: View {
             )
             .padding(.horizontal, theme.metrics.deckDetailPreviewHorizontalPadding)
             .onTapGesture {
+                #if canImport(UIKit)
                 UIImpactFeedbackGenerator.lightImpact()
+                #endif
                 withAnimation(.bouncy) {
                     isFlipped.toggle()
                     speakCurrentText()

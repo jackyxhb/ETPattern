@@ -6,7 +6,9 @@
 //
 
 import Foundation
+#if canImport(UIKit)
 import UIKit
+#endif
 
 /// Protocol for sharing operations
 public protocol ShareServiceProtocol {
@@ -18,6 +20,7 @@ public class ShareService: ShareServiceProtocol {
     public init() {}
     
     public func shareCSVContent(_ content: String, fileName: String) throws {
+        #if canImport(UIKit)
         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("\(fileName).csv")
         try content.write(to: tempURL, atomically: true, encoding: .utf8)
 
@@ -28,5 +31,8 @@ public class ShareService: ShareServiceProtocol {
            let rootVC = window.rootViewController {
             rootVC.present(activityVC, animated: true)
         }
+        #else
+        print("ShareService: Sharing not supported on this platform.")
+        #endif
     }
 }

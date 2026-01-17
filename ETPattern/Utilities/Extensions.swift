@@ -6,7 +6,9 @@
 //
 
 import Foundation
+#if canImport(UIKit)
 import UIKit
+#endif
 import SwiftUI
 import Combine
 
@@ -48,6 +50,7 @@ extension Int {
 }
 
 // MARK: - Haptic Feedback
+#if canImport(UIKit)
 extension UIImpactFeedbackGenerator {
     static func lightImpact() {
         let generator = UIImpactFeedbackGenerator(style: .light)
@@ -81,9 +84,11 @@ extension UINotificationFeedbackGenerator {
         generator.notificationOccurred(.error)
     }
 }
+#endif
 
 // MARK: - View Extensions
 extension View {
+    #if canImport(UIKit)
     func withHapticFeedback(_ style: UIImpactFeedbackGenerator.FeedbackStyle = .medium, onTap: @escaping () -> Void) -> some View {
         self.onTapGesture {
             let generator = UIImpactFeedbackGenerator(style: style)
@@ -103,6 +108,22 @@ extension View {
             UINotificationFeedbackGenerator().notificationOccurred(.error)
         }
     }
+    #else
+    // Fallback or empty implementations for macOS
+    func withHapticFeedback(onTap: @escaping () -> Void) -> some View {
+        self.onTapGesture {
+            onTap()
+        }
+    }
+    
+    func withSuccessHaptic() -> some View {
+        self
+    }
+    
+    func withErrorHaptic() -> some View {
+        self
+    }
+    #endif
 
     func withSpringAnimation() -> some View {
         self.animation(.spring(response: 0.3, dampingFraction: 0.7), value: UUID())

@@ -147,6 +147,13 @@ struct UserProfileTests {
 
 ```
 
+## 7. Project File Management
+
+- **Source of Truth**: The project structure is defined via [XcodeGen/Tuist/SwiftPM].
+* **Manual Edits**: Do not modify the `.xcodeproj` via the Xcode UI for build settings.
+* **Dependencies**: Use Swift Package Manager (SPM) exclusively. No CocoaPods or Carthage.
+* **Organization**: Maintain a folder-to-group 1:1 mapping. If a folder exists in Finder, it must exist as a Group in Xcode.
+
 ---
 
 ### Key 2026 Testing Traits
