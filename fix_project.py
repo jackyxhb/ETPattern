@@ -79,6 +79,8 @@ def run():
     # Helper to check if file exists in group
     def file_exists_in_group(group_uuid, filename):
         group = objects[group_uuid]
+        if 'children' not in group:
+            return False
         for child_uuid in group['children']:
             child = objects[child_uuid]
             if child['isa'] == 'PBXFileReference' and child.get('path') == filename:

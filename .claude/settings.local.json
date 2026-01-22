@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(xcodebuild clean:*)",
+      "Bash(python3:*)",
+      "Bash(plutil -convert:*)",
+      "Bash(xcodebuild build:*)",
+      "Bash(./deploy.sh:*)"
     ]
   }
 }

@@ -554,8 +554,12 @@
 				<string></string>
 				<key>SWIFT_APPROACHABLE_CONCURRENCY</key>
 				<string>YES</string>
+				<key>SWIFT_STRICT_CONCURRENCY</key>
+				<string>complete</string>
 				<key>SWIFT_DEFAULT_ACTOR_ISOLATION</key>
 				<string>MainActor</string>
+				<key>SWIFT_STRICT_CONCURRENCY</key>
+				<string>complete</string>
 				<key>SWIFT_EMIT_LOC_STRINGS</key>
 				<string>YES</string>
 				<key>SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY</key>
@@ -627,8 +631,12 @@
 				<string></string>
 				<key>SWIFT_APPROACHABLE_CONCURRENCY</key>
 				<string>YES</string>
+				<key>SWIFT_STRICT_CONCURRENCY</key>
+				<string>complete</string>
 				<key>SWIFT_DEFAULT_ACTOR_ISOLATION</key>
 				<string>MainActor</string>
+				<key>SWIFT_STRICT_CONCURRENCY</key>
+				<string>complete</string>
 				<key>SWIFT_EMIT_LOC_STRINGS</key>
 				<string>YES</string>
 				<key>SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY</key>
