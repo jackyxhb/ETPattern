@@ -37,7 +37,7 @@ public class TTSService: NSObject, AVSpeechSynthesizerDelegate, @preconcurrency 
     private var completionHandler: (() -> Void)?
     private var completionSequence: Int = 0
     private var currentUtteranceSequence: Int = 0
-    private var isManuallyStopped = false
+    private var activeUtteranceID: ObjectIdentifier?
     private var lastError: TTSServiceError?
     
     // MARK: - Cancellable Storage
@@ -45,12 +45,13 @@ public class TTSService: NSObject, AVSpeechSynthesizerDelegate, @preconcurrency 
 
     @Published public var isSpeaking = false
     @Published public var errorMessage: String?
-
-    override private init() {
+    
+    // Changed to public to allow subclassing in tests
+    override public init() { 
         let storedPreference = UserDefaults.standard.string(forKey: "selectedVoice") ?? Constants.TTS.defaultVoice
         self.voicePreference = storedPreference
         self.resolvedVoiceIdentifier = nil
-
+        
         // Load stored percentage, default to 100% if not set
         let storedPercentage = UserDefaults.standard.float(forKey: "ttsPercentage")
         self.currentPercentage = storedPercentage > 0 ? storedPercentage : Constants.TTS.defaultPercentage
@@ -62,6 +63,17 @@ public class TTSService: NSObject, AVSpeechSynthesizerDelegate, @preconcurrency 
         self.currentPause = storedPause >= 0 ? storedPause : Constants.TTS.defaultPause
         super.init()
         synthesizer.delegate = self
+
+        // Configure Audio Session
+        #if os(iOS)
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playback, mode: .spokenAudio, options: [.duckOthers])
+            try session.setActive(true)
+        } catch {
+            print("TTSService: Failed to configure audio session: \(error)")
+        }
+        #endif
 
         // Resolve initial voice preference to a concrete installed voice identifier.
         resolveVoicePreferenceAndPersistIfNeeded()
@@ -84,10 +96,14 @@ public class TTSService: NSObject, AVSpeechSynthesizerDelegate, @preconcurrency 
         errorMessage = nil
         lastError = nil
 
+        // CRITICAL: Increment sequence FIRST to invalidate any pending didFinish callbacks
+        // This prevents race conditions where old didFinish calls new handler
+        currentUtteranceSequence += 1
+        
         // Clear any previous state completely
         synthesizer.stopSpeaking(at: .immediate)
         completionHandler = nil
-        isManuallyStopped = false
+        activeUtteranceID = nil
 
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             // If text is empty, call completion immediately
@@ -108,7 +124,6 @@ public class TTSService: NSObject, AVSpeechSynthesizerDelegate, @preconcurrency 
         }
 
         completionHandler = completion
-        currentUtteranceSequence += 1
         completionSequence = currentUtteranceSequence
 
         let utterance = AVSpeechUtterance(string: text)
@@ -117,15 +132,23 @@ public class TTSService: NSObject, AVSpeechSynthesizerDelegate, @preconcurrency 
         utterance.pitchMultiplier = currentPitch
         utterance.volume = currentVolume
         utterance.preUtteranceDelay = currentPause
-
+        
+        self.activeUtteranceID = ObjectIdentifier(utterance)
+        
         synthesizer.speak(utterance)
         isSpeaking = true
     }
 
     public func stop() {
-        isManuallyStopped = true
         synthesizer.stopSpeaking(at: .immediate)
+        
+        // CRITICAL: Call completion handler BEFORE clearing it
+        // This ensures any awaiting continuation is resumed
+        let handler = completionHandler
         completionHandler = nil
+        activeUtteranceID = nil
+        handler?()
+        
         currentUtteranceSequence += 1  // Invalidate any pending completion handlers
         isSpeaking = false
     }
@@ -240,27 +263,42 @@ public class TTSService: NSObject, AVSpeechSynthesizerDelegate, @preconcurrency 
 
     // MARK: - AVSpeechSynthesizerDelegate
     public nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        let utteranceID = ObjectIdentifier(utterance)
         Task { @MainActor in
-            // Check state synchronously to prevent race conditions
-            guard !self.isManuallyStopped, let handler = self.completionHandler, self.completionSequence == self.currentUtteranceSequence else {
+            // Check utterance ID and sequence to prevent stale completions
+            guard utteranceID == self.activeUtteranceID,
+                  let handler = self.completionHandler, 
+                  self.completionSequence == self.currentUtteranceSequence else {
                 return
             }
-
-            // Clear the handler before calling it to prevent double calls
+            
+            // Clear state before calling handler
             self.completionHandler = nil
-
-            // Update speaking state
+            self.activeUtteranceID = nil
             self.isSpeaking = false
-
+            
             // Call the completion handler
             handler()
         }
     }
 
     public nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
+        let utteranceID = ObjectIdentifier(utterance)
         Task { @MainActor in
-            self.isSpeaking = false
+            // Check utterance ID and sequence to prevent calling wrong handler
+            guard utteranceID == self.activeUtteranceID,
+                  let handler = self.completionHandler, 
+                  self.completionSequence == self.currentUtteranceSequence else {
+                return
+            }
+            
+            // Clear state before calling handler
             self.completionHandler = nil
+            self.activeUtteranceID = nil
+            self.isSpeaking = false
+            
+            // Call the completion handler
+            handler()
         }
     }
 

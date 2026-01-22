@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import ETPatternCore
 
 struct SharedEmptyStateView<IconContent: View, AdditionalContent: View>: View {
     let title: String

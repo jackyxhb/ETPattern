@@ -6,6 +6,9 @@
 //
 
 import SwiftUI
+import ETPatternCore
+import ETPatternServices
+import ETPatternModels
 import Translation
 import os
 import Combine
@@ -669,8 +672,10 @@ struct ThemedPresentation: ViewModifier {
     
     func body(content: Content) -> some View {
         content
+            #if os(iOS)
             .presentationBackground(.ultraThinMaterial)
             .presentationCornerRadius(theme.metrics.cornerRadius)
+            #endif
     }
 }
 
@@ -823,7 +828,9 @@ struct SharedOnboardingContainer<Content: View>: View {
                             .tag(index)
                     }
                 }
+                #if os(iOS)
                 .tabViewStyle(.page(indexDisplayMode: .never))
+                #endif
 
                 // Custom page indicators
                 HStack(spacing: theme.metrics.onboardingIndicatorSpacing) {
@@ -840,7 +847,9 @@ struct SharedOnboardingContainer<Content: View>: View {
                 HStack(spacing: theme.metrics.onboardingButtonSpacing) {
                     if currentPage.wrappedValue > 0 {
                         Button(action: {
+                            #if os(iOS)
                             UIImpactFeedbackGenerator.lightImpact()
+                            #endif
                             withAnimation(.smooth) {
                                 currentPage.wrappedValue -= 1
                             }
@@ -857,7 +866,9 @@ struct SharedOnboardingContainer<Content: View>: View {
 
                     if currentPage.wrappedValue < pages.count - 1 {
                         Button(action: {
+                            #if os(iOS)
                             UIImpactFeedbackGenerator.lightImpact()
+                            #endif
                             withAnimation(.smooth) {
                                 currentPage.wrappedValue += 1
                             }
@@ -872,7 +883,9 @@ struct SharedOnboardingContainer<Content: View>: View {
                         }
                     } else {
                         Button(action: {
+                            #if os(iOS)
                             UINotificationFeedbackGenerator.success()
+                            #endif
                             withAnimation(.bouncy) {
                                 onComplete()
                             }

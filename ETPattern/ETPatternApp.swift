@@ -8,6 +8,9 @@
 import SwiftUI
 import SwiftData
 import Combine
+import ETPatternCore
+import ETPatternServices
+import ETPatternModels
 import ETPatternServices
 import ETPatternCore
 

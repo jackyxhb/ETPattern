@@ -19,11 +19,14 @@ This workflow automates the process of building, installing, and launching the E
 1. Run the deployment script from the project root:
 
 ```bash
+# This script automatically detects the booted simulator or connected device.
+# It performs a clean install (uninstall -> install) to ensure stability.
 ./deploy.sh
 ```
 
 ## Troubleshooting
 
+- **Launch Failed**: If `simctl launch` fails with a "denied by service delegate" error, launch the app **manually** from the Simulator home screen.
 - **Device not found**: Ensure your device is "trusted" and visible in `xcrun devicectl list devices`.
 - **Build fails**: Check if there are any code errors or signing issues in Xcode.
 - **Permission denied**: Ensure you've run `chmod +x deploy.sh`.

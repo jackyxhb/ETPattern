@@ -1,6 +1,7 @@
 import SwiftUI
 import Foundation
 import ETPatternServices
+import ETPatternCore
 
 /// Simple wrapper that overlays a branded splash while main content loads.
 struct SplashHostView<Content: View>: View {

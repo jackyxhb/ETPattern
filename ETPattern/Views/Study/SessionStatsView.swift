@@ -3,6 +3,7 @@ import SwiftData
 import Charts
 import ETPatternModels
 import ETPatternServices
+import ETPatternCore
 
 struct SessionStatsView: View {
     @Environment(\.modelContext) private var modelContext

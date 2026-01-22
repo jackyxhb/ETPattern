@@ -5,6 +5,7 @@ import UIKit
 #endif
 import ETPatternModels
 import ETPatternServices
+import ETPatternCore
 
 struct AutoPlayView: View {
     @Environment(\.theme) var theme
@@ -41,6 +42,12 @@ struct AutoPlayView: View {
                         swipeDirection: nil,
                         theme: theme
                     )
+                    .onTapGesture {
+                        #if canImport(UIKit)
+                        UIImpactFeedbackGenerator.lightImpact()
+                        #endif
+                        viewModel.toggleFlip()
+                    }
                 }
             }
             .padding(.horizontal, theme.metrics.autoPlayViewHorizontalPadding)

@@ -1,0 +1,9 @@
+Dict {
+    CFBundlePrimaryIcon = Dict {
+        CFBundleIconFiles = Array {
+            AppIcon60x60
+            AppIcon76x76
+        }
+        CFBundleIconName = AppIcon
+    }
+}

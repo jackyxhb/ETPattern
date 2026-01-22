@@ -6,7 +6,8 @@ import UIKit
 import os.log
 import ETPatternModels
 import ETPatternServices
-// import ETPatternViewModels // No need if in same module, otherwise need module name
+import ETPatternCore
+import ETPatternServices
 
 struct StudyView: View {
     @Environment(\.theme) var theme

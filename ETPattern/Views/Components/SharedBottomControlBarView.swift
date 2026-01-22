@@ -7,6 +7,8 @@
 
 import SwiftUI
 import ETPatternModels
+import ETPatternServices
+import ETPatternCore
 
 struct SharedBottomControlBarView<MiddleContent: View>: View {
     let strategyToggleAction: () -> Void

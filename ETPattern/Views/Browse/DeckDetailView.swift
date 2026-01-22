@@ -5,33 +5,39 @@ import UIKit
 #endif
 import ETPatternModels
 import ETPatternServices
+import ETPatternCore
+import ETPatternServices
 
 struct DeckDetailView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.theme) var theme
-
-    let cardSet: CardSet
-
-    @State private var previewCard: Card?
-
-    @State private var groups: [String: [Card]] = [:]
-    @State private var groupNames: [String] = []
+    
+    @State var viewModel: DeckDetailViewModel
+    @ObservedObject var coordinator: BrowseCoordinator
 
     var body: some View {
         ZStack {
-            // Background provided by sheet presentation (.ultraThinMaterial)
+            // Liquid Background
+            LiquidBackground()
             
             VStack(spacing: 0) {
-                // Custom header for sheet presentation
+                // Header
                 HStack {
-                    Text(cardSet.name)
+                    Text(viewModel.deckName)
                         .font(.headline)
                         .foregroundColor(theme.colors.textPrimary)
                         .dynamicTypeSize(.large ... .accessibility5)
                     Spacer()
                     Button(action: {
-                        dismiss()
+                        viewModel.addCard()
+                    }) {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundColor(theme.colors.highlight)
+                            .font(.title2)
+                    }
+                    .padding(.trailing, 8)
+
+                    Button(action: {
+                        viewModel.close()
                     }) {
                         Image(systemName: "xmark.circle.fill")
                         .foregroundColor(theme.colors.textSecondary)
@@ -42,7 +48,14 @@ struct DeckDetailView: View {
                 .padding(.vertical, 12)
                 .background(.ultraThinMaterial)
 
-                if groupNames.isEmpty {
+                if viewModel.isLoading {
+                    ProgressView()
+                        .frame(maxHeight: .infinity)
+                } else if let error = viewModel.errorMessage {
+                    Text(error)
+                        .foregroundColor(theme.colors.danger)
+                        .padding()
+                } else if viewModel.sections.isEmpty {
                     Text("No cards in this deck")
                         .font(.headline)
                         .foregroundColor(theme.colors.textSecondary)
@@ -51,21 +64,26 @@ struct DeckDetailView: View {
                 } else {
                     ScrollView {
                         LazyVStack(spacing: theme.metrics.deckDetailGroupSpacing) {
-                            ForEach(groupNames, id: \.self) { groupName in
+                            ForEach(viewModel.sections) { section in
                                 DisclosureGroup {
                                     LazyVStack(spacing: theme.metrics.deckDetailCardSpacing) {
-                                        ForEach(groups[groupName] ?? []) { card in
+                                        ForEach(section.cards) { card in
                                             Button {
-                                                previewCard = card
+                                                viewModel.previewCard(card)
                                             } label: {
                                                 CardRow(card: card)
                                             }
                                             .buttonStyle(.plain)
                                             .contextMenu {
                                                 Button {
-                                                    previewCard = card
+                                                    viewModel.previewCard(card)
                                                 } label: {
                                                     Label("Preview", systemImage: "eye")
+                                                }
+                                                Button {
+                                                    viewModel.editCard(card)
+                                                } label: {
+                                                    Label("Edit", systemImage: "pencil")
                                                 }
                                             }
                                         }
@@ -73,25 +91,17 @@ struct DeckDetailView: View {
                                     .padding(.leading, theme.metrics.deckDetailLeadingPadding)
                                 } label: {
                                     HStack {
-                                        Text(groupName)
+                                        Text(section.groupName)
                                             .font(.headline)
                                             .foregroundColor(theme.colors.textPrimary)
                                             .dynamicTypeSize(.large ... .accessibility5)
                                         Spacer()
-                                        Text("\(groups[groupName]?.count ?? 0) cards")
+                                        Text("\(section.cards.count) cards")
                                             .font(.subheadline)
                                             .foregroundColor(theme.colors.textSecondary)
                                             .dynamicTypeSize(.large ... .accessibility5)
                                     }
-                                    .padding(theme.metrics.deckDetailGroupPadding)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
-                                            .fill(theme.gradients.card.opacity(0.9))
-                                    )
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
-                                            .stroke(theme.colors.surfaceLight, lineWidth: 1)
-                                    )
+                                    .bentoTileStyle()
                                 }
                                 .tint(.white)
                             }
@@ -102,35 +112,52 @@ struct DeckDetailView: View {
             }
         }
         .task {
-            loadCards()
+            await viewModel.loadData()
         }
-        .fullScreenCover(item: $previewCard) { card in
-            let allCards = groupNames.flatMap { groups[$0] ?? [] }
+        #if os(iOS)
+        .fullScreenCover(item: $coordinator.previewCard) { card in
+            // Calculate index and total for the preview
+            // This logic ideally sits in VM, but for display purity:
+            let allCards = viewModel.sections.flatMap { $0.cards }
             let index = allCards.firstIndex(where: { $0.id == card.id }) ?? 0
+            
             CardPreviewContainer(card: card, index: index, total: allCards.count) {
-                previewCard = nil
+                viewModel.dismissPreview()
             }
+            #if os(iOS)
             .presentationBackground(.ultraThinMaterial)
+            #endif
         }
-    }
-
-    private func loadCards() {
-        let cards = cardSet.cards
-        let sortedCards = cards.sorted { ($0.id, $0.front) < ($1.id, $1.front) }
-        let newGroups = Dictionary(grouping: sortedCards) { $0.groupName }
-        
-        self.groups = newGroups
-        self.groupNames = newGroups.keys.sorted { groupName1, groupName2 in
-            let groupId1 = newGroups[groupName1]?.first?.groupId ?? Int32.max
-            let groupId2 = newGroups[groupName2]?.first?.groupId ?? Int32.max
-            return groupId1 < groupId2
+        #else
+        .sheet(item: $coordinator.previewCard) { card in
+            let allCards = viewModel.sections.flatMap { $0.cards }
+            let index = allCards.firstIndex(where: { $0.id == card.id }) ?? 0
+            
+            CardPreviewContainer(card: card, index: index, total: allCards.count) {
+                viewModel.dismissPreview()
+            }
+        }
+        #endif
+        .sheet(item: $coordinator.editingCard) { cardModel in
+            // For new cards, coordinator sets editingCard to a dummy or we handle nil in VM
+            // In our case, we pass nil to vm if adding new
+            let isNew = cardModel.id == 0 && cardModel.front == ""
+            let vm = EditCardViewModel(
+                card: isNew ? nil : cardModel,
+                deckName: viewModel.deckName,
+                service: viewModel.service,
+                coordinator: coordinator
+            )
+            EditCardView(viewModel: vm)
+                #if os(iOS)
+                .presentationBackground(.ultraThinMaterial)
+                #endif
         }
     }
 }
 
 private struct CardRow: View {
-    let card: Card
-
+    let card: CardDisplayModel
     @Environment(\.theme) var theme
 
     var body: some View {
@@ -147,14 +174,7 @@ private struct CardRow: View {
         }
         .padding(theme.metrics.deckDetailCardRowPadding)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
-                .fill(theme.gradients.card.opacity(0.9))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
-                .stroke(theme.colors.surfaceLight, lineWidth: 1)
-        )
+        .bentoTileStyle()
         .shadow(color: theme.colors.shadow.opacity(0.4), radius: theme.metrics.deckDetailCardShadowRadius, x: 0, y: theme.metrics.deckDetailCardShadowY)
     }
 
@@ -164,7 +184,7 @@ private struct CardRow: View {
 }
 
 private struct CardPreviewContainer: View {
-    let card: Card
+    let card: CardDisplayModel
     let index: Int
     let total: Int
     let onClose: () -> Void
@@ -203,9 +223,7 @@ private struct CardPreviewContainer: View {
                 speakCurrentText()
             }
             .onChange(of: index) { _, _ in
-                // Reset to front side when card changes
                 isFlipped = false
-                // Stop any ongoing speech from previous card
                 ttsService.stop()
                 speakCurrentText()
             }
@@ -216,29 +234,11 @@ private struct CardPreviewContainer: View {
     }
 
     private func formatBackText() -> String {
-        let backText = card.back
-        // Replace <br> with newlines for proper display
-        return backText.replacingOccurrences(of: "<br>", with: "\n")
+        card.back.replacingOccurrences(of: "<br>", with: "\n")
     }
 
     private func speakCurrentText() {
         let textToSpeak = isFlipped ? formatBackText() : card.front
         ttsService.speak(textToSpeak)
     }
-}
-
-#Preview {
-    NavigationView {
-        DeckDetailView(cardSet: previewCardSet)
-            .modelContainer(PersistenceController.preview.container)
-            .environmentObject(TTSService.shared)
-    }
-}
-
-@MainActor
-private var previewCardSet: CardSet {
-    let container = PersistenceController.preview.container
-    let cardSet = CardSet(name: "Sample Deck")
-    container.mainContext.insert(cardSet)
-    return cardSet
 }

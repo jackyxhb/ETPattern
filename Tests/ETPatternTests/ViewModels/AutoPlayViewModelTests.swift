@@ -3,12 +3,12 @@ import SwiftUI
 import SwiftData
 @testable import ETPatternModels
 @testable import ETPatternServices
-@testable import ETPatternFeatures
+@testable import ETPatternServices
 
 @MainActor
 struct AutoPlayViewModelTests {
     
-    func makeDependencies() -> (AutoPlayViewModel, MockStudyService, MockAutoPlayCoordinator, ModelContainer) {
+    func makeDependencies() -> (AutoPlayViewModel, MockStudyService, MockAutoPlayCoordinator, MockTTSService, ModelContainer) {
         let schema = Schema([CardSet.self, Card.self, StudySession.self])
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try! ModelContainer(for: schema, configurations: [config])
@@ -18,6 +18,7 @@ struct AutoPlayViewModelTests {
         let cardSet = CardSet(name: "Test Deck")
         context.insert(cardSet)
         
+        // Create session
         let session = StudySession(totalCards: 1)
         session.cardSet = cardSet
         session.isActive = true
@@ -38,6 +39,7 @@ struct AutoPlayViewModelTests {
         mockService.createSessionReturnValue = session.persistentModelID
         
         let mockCoordinator = MockAutoPlayCoordinator()
+        let mockTTS = MockTTSService()
         
         let vm = AutoPlayViewModel(
             cardSet: cardSet,
@@ -45,13 +47,14 @@ struct AutoPlayViewModelTests {
             service: mockService,
             coordinator: mockCoordinator
         )
+        vm.setTTSService(mockTTS)
         
-        return (vm, mockService, mockCoordinator, container)
+        return (vm, mockService, mockCoordinator, mockTTS, container)
     }
     
     @Test("Initialization starts playback")
     func testInitialization() async {
-        let (vm, _, _, _container) = makeDependencies()
+        let (vm, _, _, _, _container) = makeDependencies()
         await vm.onAppear()
         
         #expect(vm.isPlaying == true)
@@ -63,7 +66,7 @@ struct AutoPlayViewModelTests {
     
     @Test("Toggle playback pauses and resumes")
     func testTogglePlayback() async {
-        let (vm, _, _, _container) = makeDependencies()
+        let (vm, _, _, _, _container) = makeDependencies()
         await vm.onAppear()
         
         #expect(vm.isPlaying == true)
@@ -78,26 +81,61 @@ struct AutoPlayViewModelTests {
         _ = _container
     }
     
-    @Test("Manual next stops playback and moves")
-    func testManualNext() async {
-        let (vm, _, _, _container) = makeDependencies()
+    @Test("Toggle Flip pauses playback and flips card")
+    func testToggleFlip() async {
+        let (vm, _, _, mockTTS, _container) = makeDependencies()
         await vm.onAppear()
         
-        let initialIndex = vm.currentIndex
-        vm.manualNext()
+        #expect(vm.isFlipped == false)
+        #expect(vm.isPlaying == true)
         
-        #expect(vm.currentIndex != initialIndex || vm.sessionCardIDs.count == 1) // If 1 card, loop back
-        // We verify that internal state for card changed.
+        vm.toggleFlip()
+        
+        #expect(vm.isFlipped == true)
+        #expect(vm.isPlaying == false) // Should stop auto-play on manual interaction
+        #expect(mockTTS.stopCalled == true) // Should stop speaking
+        
+        // Flip back
+        vm.toggleFlip()
+        #expect(vm.isFlipped == false)
         
         await vm.onDisappear()
         _ = _container
     }
     
-    @Test("Dismiss calls coordinator")
+    @Test("Cycle Strategy changes strategy")
+    func testCycleStrategy() async {
+        let (vm, _, _, _, _container) = makeDependencies()
+        
+        let initial = vm.studyStrategy
+        vm.cycleStrategy()
+        
+        #expect(vm.studyStrategy != initial)
+        
+        await vm.onDisappear()
+        _ = _container
+    }
+    
+    @Test("Manual logic stops TTS")
+    func testManualInteractionStopsTTS() async {
+        let (vm, _, _, mockTTS, _container) = makeDependencies()
+        await vm.onAppear()
+        
+        vm.manualNext()
+        #expect(mockTTS.stopCalled == true)
+        #expect(vm.isPlaying == false)
+        
+        await vm.onDisappear()
+        _ = _container
+    }
+    
+    @Test("Dismiss calls coordinator and stops playback")
     func testDismiss() async {
-        let (vm, _, coordinator, _container) = makeDependencies()
+        let (vm, _, coordinator, mockTTS, _container) = makeDependencies()
         vm.dismiss()
+        
         #expect(coordinator.dismissCalled == true)
+        #expect(mockTTS.stopCalled == true)
         
         await vm.onDisappear()
         _ = _container

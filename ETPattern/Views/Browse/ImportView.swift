@@ -3,24 +3,21 @@ import UniformTypeIdentifiers
 import SwiftData
 import ETPatternModels
 import ETPatternServices
+import ETPatternCore
+import ETPatternServices
 
 struct ImportView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.theme) var theme
-
-    @State private var isShowingFilePicker = false
-    @State private var isImporting = false
-    @State private var importError: String?
-    @State private var showErrorAlert = false
-
-    private let csvImporter: CSVImporter
-
-    init(modelContext: ModelContext) {
-        self.csvImporter = CSVImporter(modelContext: modelContext)
+    @Environment(\.dismiss) private var dismiss
+    
+    @State private var viewModel: ImportViewModel
+    
+    public init(viewModel: ImportViewModel) {
+        self._viewModel = State(initialValue: viewModel)
     }
 
     var body: some View {
+        @Bindable var viewModel = viewModel
         ZStack {
             // Background provided by sheet presentation (.ultraThinMaterial)
             
@@ -51,33 +48,33 @@ struct ImportView: View {
                             .fontWeight(.bold)
                             .foregroundColor(theme.colors.textPrimary)
                             .dynamicTypeSize(.large ... .accessibility5)
-
+ 
                         Text("Select a CSV file to import flashcards. The file should have the format:")
                             .multilineTextAlignment(.center)
                             .foregroundColor(theme.colors.highlight.opacity(0.8))
                             .dynamicTypeSize(.large ... .accessibility5)
-
+ 
                 VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
-                    Text("• First row: Front;;Back;;Tags")
+                    Text("• First row: \(viewModel.csvFormatHeader)")
                         .foregroundColor(theme.colors.highlight.opacity(0.8))
                         .dynamicTypeSize(.large ... .accessibility5)
-                    Text("• Subsequent rows: Pattern;;Examples<br>More examples;;tag1,tag2")
+                    Text("• Subsequent rows: \(viewModel.csvFormatSubsequent)")
                         .foregroundColor(theme.colors.highlight.opacity(0.8))
                         .dynamicTypeSize(.large ... .accessibility5)
-                    Text("• Separator: ;; (double semicolon)")
+                    Text("• Separator: \(viewModel.csvFormatSeparator)")
                         .foregroundColor(theme.colors.highlight.opacity(0.8))
                         .dynamicTypeSize(.large ... .accessibility5)
-                    Text("• Line breaks in examples: <br>")
+                    Text("• Line breaks in examples: \(viewModel.csvFormatLineBreak)")
                         .foregroundColor(theme.colors.highlight.opacity(0.8))
                         .dynamicTypeSize(.large ... .accessibility5)
                 }
                 .font(theme.metrics.caption)
                 .padding(.horizontal, theme.metrics.mediumSpacing)
-
+ 
                 Spacer()
-
+ 
                 Button(action: {
-                    isShowingFilePicker = true
+                    viewModel.isShowingFilePicker = true
                 }) {
                     HStack {
                         Image(systemName: "doc.badge.plus")
@@ -91,16 +88,16 @@ struct ImportView: View {
                     .dynamicTypeSize(.large ... .accessibility5)
                 }
                 .padding(.horizontal, theme.metrics.mediumSpacing)
-                .disabled(isImporting)
-
-                if isImporting {
+                .disabled(viewModel.isImporting)
+ 
+                if viewModel.isImporting {
                     ProgressView("Importing...")
                         .padding(theme.metrics.mediumSpacing)
                         .foregroundColor(theme.colors.textPrimary)
                         .dynamicTypeSize(.large ... .accessibility5)
                 }
-
-                if let errorMessage = importError, !isImporting {
+ 
+                if let errorMessage = viewModel.importError, !viewModel.isImporting {
                     VStack(spacing: theme.metrics.smallSpacing) {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .foregroundColor(theme.colors.danger)
@@ -119,8 +116,8 @@ struct ImportView: View {
                             .padding(.horizontal)
                         
                         Button(role: .cancel, action: {
-                            importError = nil
-                            showErrorAlert = false
+                            viewModel.importError = nil
+                            viewModel.showErrorAlert = false
                         }) {
                             Text("Dismiss")
                                 .font(.subheadline)
@@ -137,7 +134,7 @@ struct ImportView: View {
                     .background(theme.colors.danger.opacity(0.1))
                     .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cornerRadius))
                 }
-
+ 
                 Spacer()
                     }
                     .padding(theme.metrics.largeSpacing)
@@ -145,90 +142,24 @@ struct ImportView: View {
             }
         }
         .fileImporter(
-            isPresented: $isShowingFilePicker,
+            isPresented: $viewModel.isShowingFilePicker,
             allowedContentTypes: [UTType.commaSeparatedText],
             allowsMultipleSelection: false
         ) { result in
-            handleFileSelection(result)
+            viewModel.handleFileSelection(result)
         }
-        .alert("Import Error", isPresented: $showErrorAlert) {
+        .alert("Import Error", isPresented: $viewModel.showErrorAlert) {
             Button("OK", role: .cancel) { }
         } message: {
-            Text(importError ?? "Unknown error occurred")
+            Text(viewModel.importError ?? "Unknown error occurred")
                 .dynamicTypeSize(.large ... .accessibility5)
         }
-    }
-
-    private func handleFileSelection(_ result: Result<[URL], Error>) {
-        switch result {
-        case .success(let urls):
-            guard let url = urls.first else { return }
-            importCSV(from: url)
-        case .failure(let error):
-            showImportError("Failed to select file: \(error.localizedDescription)")
-        }
-    }
-
-    private func importCSV(from url: URL) {
-        isImporting = true
-
-        // Start accessing the security-scoped resource
-        guard url.startAccessingSecurityScopedResource() else {
-            showImportError("Cannot access the selected file")
-            return
-        }
-
-        defer {
-            url.stopAccessingSecurityScopedResource()
-        }
-
-        do {
-            let content = try String(contentsOf: url, encoding: .utf8)
-
-            // Extract filename for card set name
-            let fileName = url.deletingPathExtension().lastPathComponent
-            let cardSetName = fileName.isEmpty ? "Imported Deck" : fileName
-
-            // Parse CSV and create cards
-            let cards = csvImporter.parseCSV(content, cardSetName: cardSetName)
-
-            if cards.isEmpty {
-                showImportError("No valid cards found in the CSV file. Please check the format.")
-                return
-            }
-
-            // Create new CardSet
-            let cardSet = CardSet(name: cardSetName)
-            modelContext.insert(cardSet)
-
-            // Sort cards by ID to ensure proper order and add to cardSet
-            let sortedCards = cards.sorted { $0.id < $1.id }
-            for card in sortedCards {
-                card.cardSet = cardSet
-                cardSet.cards.append(card)
-                modelContext.insert(card)
-            }
-
-            try modelContext.save()
-
-            // Success - dismiss the view
-            dismiss()
-
-        } catch {
-            showImportError("Failed to import CSV: \(error.localizedDescription)")
-        }
-
-        isImporting = false
-    }
-
-    private func showImportError(_ message: String) {
-        importError = message
-        showErrorAlert = true
-        isImporting = false
     }
 }
 
 #Preview {
-    ImportView(modelContext: PersistenceController.preview.container.mainContext)
-        .modelContainer(PersistenceController.preview.container)
+    let container = PersistenceController.preview.container
+    let viewModel = ImportViewModel(modelContext: container.mainContext, coordinator: nil)
+    return ImportView(viewModel: viewModel)
+        .modelContainer(container)
 }

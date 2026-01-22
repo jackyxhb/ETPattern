@@ -1,4 +1,5 @@
 import SwiftUI
+import ETPatternCore
 import Charts
 import Combine
 import SwiftData

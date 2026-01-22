@@ -1,14 +1,14 @@
 import SwiftUI
 import Combine
 
-enum AppTheme: String, CaseIterable, Identifiable {
+public enum AppTheme: String, CaseIterable, Identifiable {
     case system
     case light
     case dark
     
-    var id: String { rawValue }
+    public var id: String { rawValue }
     
-    var displayName: String {
+    public var displayName: String {
         switch self {
         case .system: return NSLocalizedString("theme_system", comment: "System theme option")
         case .light: return NSLocalizedString("theme_light", comment: "Light theme option")
@@ -18,14 +18,14 @@ enum AppTheme: String, CaseIterable, Identifiable {
 }
 
 @MainActor
-class ThemeManager: ObservableObject {
-    @Published var currentTheme: AppTheme = .system {
+public class ThemeManager: ObservableObject {
+    @Published public var currentTheme: AppTheme = .system {
         didSet {
             UserDefaults.standard.set(currentTheme.rawValue, forKey: "appTheme")
         }
     }
     
-    init() {
+    public init() {
         let savedValue = UserDefaults.standard.string(forKey: "appTheme") ?? AppTheme.dark.rawValue
         self.currentTheme = AppTheme(rawValue: savedValue) ?? .dark
     }
@@ -45,7 +45,7 @@ class ThemeManager: ObservableObject {
         }
     }
     
-    var colorScheme: ColorScheme? {
+    public var colorScheme: ColorScheme? {
         switch currentTheme {
         case .light:
             return .light
@@ -56,5 +56,5 @@ class ThemeManager: ObservableObject {
         }
     }
     
-    static let shared = ThemeManager()
+    public static let shared = ThemeManager()
 }

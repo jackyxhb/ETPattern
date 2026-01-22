@@ -1,5 +1,5 @@
 import Foundation
-@testable import ETPatternFeatures
+@testable import ETPatternServices
 
 @MainActor
 final class MockStudyCoordinator: StudyCoordinatorProtocol {

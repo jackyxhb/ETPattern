@@ -1,6 +1,6 @@
 import Foundation
 import SwiftData
-@testable import ETPatternFeatures
+@testable import ETPatternServices
 @testable import ETPatternServices
 @testable import ETPatternModels
 

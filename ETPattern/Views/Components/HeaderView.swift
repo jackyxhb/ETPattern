@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ETPatternServices
+import ETPatternCore
 
 struct HeaderView: View {
     @ObservedObject var viewModel: ContentViewModel

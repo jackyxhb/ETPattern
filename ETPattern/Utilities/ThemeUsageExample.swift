@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import ETPatternCore
 
 struct ThemeUsageExample: View {
     @Environment(\.theme) var theme: Theme

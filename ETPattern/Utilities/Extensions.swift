@@ -11,6 +11,7 @@ import UIKit
 #endif
 import SwiftUI
 import Combine
+import ETPatternCore
 
 extension String {
     func htmlToAttributedString() -> AttributedString? {
@@ -49,42 +50,7 @@ extension Int {
     }
 }
 
-// MARK: - Haptic Feedback
-#if canImport(UIKit)
-extension UIImpactFeedbackGenerator {
-    static func lightImpact() {
-        let generator = UIImpactFeedbackGenerator(style: .light)
-        generator.impactOccurred()
-    }
-
-    static func mediumImpact() {
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.impactOccurred()
-    }
-
-    static func heavyImpact() {
-        let generator = UIImpactFeedbackGenerator(style: .heavy)
-        generator.impactOccurred()
-    }
-}
-
-extension UINotificationFeedbackGenerator {
-    static func success() {
-        let generator = UINotificationFeedbackGenerator()
-        generator.notificationOccurred(.success)
-    }
-
-    static func warning() {
-        let generator = UINotificationFeedbackGenerator()
-        generator.notificationOccurred(.warning)
-    }
-
-    static func error() {
-        let generator = UINotificationFeedbackGenerator()
-        generator.notificationOccurred(.error)
-    }
-}
-#endif
+// Haptic feedback has been moved to ETPatternCore/UI/Haptics.swift
 
 // MARK: - View Extensions
 extension View {

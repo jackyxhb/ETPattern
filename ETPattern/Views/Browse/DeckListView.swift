@@ -1,147 +1,183 @@
-//
-//  DeckListView.swift
-//  ETPattern
-//
-//  Created by admin on 25/11/2025.
-//
-
 import SwiftUI
 import SwiftData
 import ETPatternModels
+import ETPatternCore
+import ETPatternServices
 import ETPatternServices
 
-struct DeckListView: View {
-    @ObservedObject var viewModel: ContentViewModel
-    let cardSets: [CardSet]
+public struct DeckListView: View {
+    @State private var viewModel: DeckListViewModel
+    @Binding var selectedSet: CardSet?
     @Environment(\.theme) var theme
+    
+    // Grid Columns for Bento Style
+    private let columns = [
+        GridItem(.adaptive(minimum: 160), spacing: 16)
+    ]
+    
+    public init(selectedSet: Binding<CardSet?>, service: CardServiceProtocol) {
+        self._selectedSet = selectedSet
+        self._viewModel = State(initialValue: DeckListViewModel(service: service))
+    }
 
-    var body: some View {
-        LazyVStack(spacing: theme.metrics.deckListSpacing) {
-            ForEach(cardSets) { cardSet in
-                deckCard(for: cardSet)
-                    .contextMenu { contextMenu(for: cardSet) }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(role: .destructive) {
-                            viewModel.deleteCardSet(cardSet)
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
-                        .disabled(viewModel.uiState.isReimporting || viewModel.uiState.isDeletingDeck)
+    public var body: some View {
+        ScrollView {
+            if viewModel.isLoading && viewModel.cardSets.isEmpty {
+                ProgressView()
+                    .padding()
+                    .frame(maxWidth: .infinity, minHeight: 200)
+            } else if viewModel.cardSets.isEmpty {
+                emptyStateView
+            } else {
+                LazyVGrid(columns: columns, spacing: 16) {
+                    // Add New Deck Tile at the start
+                    addDeckTile
+                    
+                    ForEach(viewModel.cardSets) { cardSet in
+                        deckCard(for: cardSet)
+                            .contextMenu { contextMenu(for: cardSet) }
                     }
-            }
-            
-            // Load more indicator
-            if viewModel.hasMoreCardSets && !viewModel.cardSets.isEmpty {
-                loadMoreIndicator
-                    .onAppear {
-                        Task {
-                            await viewModel.loadMoreCardSets()
-                        }
-                    }
+                }
+                .padding()
             }
         }
-        .padding(.bottom, theme.metrics.deckCardBottomPadding)
+        .scrollContentBackground(.hidden)
+        .task {
+            await viewModel.onAppear()
+        }
+        .refreshable {
+            await viewModel.loadCardSets()
+        }
+        .alert("New Deck", isPresented: $viewModel.showingCreateAlert) {
+            TextField("Deck Name", text: $viewModel.newDeckName)
+            Button("Cancel", role: .cancel) { }
+            Button("Create") {
+                viewModel.createDeck()
+            }
+        }
+    }
+    
+    private var emptyStateView: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "square.stack.3d.up.slash")
+                .font(.system(size: 60))
+                .foregroundStyle(theme.colors.textSecondary.opacity(0.3))
+            
+            Text("No Decks Yet")
+                .font(.title3.bold())
+                .foregroundStyle(theme.colors.textPrimary)
+            
+            Text("Create your first flashcard deck to get started.")
+                .font(.subheadline)
+                .foregroundStyle(theme.colors.textSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+            
+            Button {
+                viewModel.showingCreateAlert = true
+            } label: {
+                Label("Create New Deck", systemImage: "plus")
+                    .font(.headline)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(theme.gradients.accent)
+                    .foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
+            .padding(.horizontal, 40)
+        }
+        .padding(.vertical, 60)
     }
 
     @ViewBuilder
     private func contextMenu(for cardSet: CardSet) -> some View {
-        Button {
-            viewModel.promptRename(for: cardSet)
-        } label: {
-            Label("Rename", systemImage: "pencil")
-        }
-        .disabled(viewModel.uiState.isReimporting || viewModel.uiState.isDeletingDeck)
-        
-        Button {
-            viewModel.promptReimport(for: cardSet)
-        } label: {
-            Label("Re-import", systemImage: "arrow.clockwise")
-        }
-        .disabled(viewModel.uiState.isReimporting || viewModel.uiState.isDeletingDeck)
-        
-        Button {
-            viewModel.uiState.selectedCardSet = cardSet
-            viewModel.uiState.showingExportAlert = true
-        } label: {
-            Label("Export", systemImage: "square.and.arrow.up")
-        }
-        .disabled(viewModel.uiState.isReimporting || viewModel.uiState.isDeletingDeck)
-        
         Button(role: .destructive) {
-            viewModel.promptDelete(for: cardSet)
+            withAnimation {
+                if selectedSet?.id == cardSet.id {
+                    selectedSet = nil
+                }
+                viewModel.deleteSet(cardSet)
+            }
         } label: {
             Label("Delete", systemImage: "trash")
         }
-        .disabled(viewModel.uiState.isReimporting || viewModel.uiState.isDeletingDeck)
+    }
+    
+    private var addDeckTile: some View {
+        Button {
+            viewModel.showingCreateAlert = true
+        } label: {
+            VStack(spacing: 8) {
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 32))
+                    .foregroundStyle(theme.colors.textSecondary.opacity(0.5))
+                Text("New Deck")
+                    .font(.headline)
+                    .foregroundStyle(theme.colors.textSecondary)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 120) // Approximate height matching Bento cards
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(style: StrokeStyle(lineWidth: 2, dash: [5]))
+                    .foregroundStyle(theme.colors.textSecondary.opacity(0.3))
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     private func deckCard(for cardSet: CardSet) -> some View {
         let cardCount = cardSet.cards.count
-        let createdText = dateFormatter.string(from: cardSet.createdDate)
-
+        let isSelected = selectedSet?.id == cardSet.id
+        
         return Button {
+            #if canImport(UIKit)
             UIImpactFeedbackGenerator.lightImpact()
-            viewModel.toggleSelection(for: cardSet)
-        } label: {
-            VStack(alignment: .leading, spacing: theme.metrics.deckCardInnerSpacing) {
-                HStack {
-                    VStack(alignment: .leading, spacing: theme.metrics.deckCardTextSpacing) {
-                        Text(String(format: NSLocalizedString("cards_count", comment: "Card count display format"), cardCount, cardSet.name))
-                            .font(.headline)
-                            .foregroundColor(theme.colors.textPrimary)
-                        Text(String(format: NSLocalizedString("created_text", comment: "Created date display format"), createdText))
-                            .font(.caption)
-                            .foregroundColor(theme.colors.textSecondary)
-                    }
-                    Spacer()
-                    if viewModel.isSelected(cardSet) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(theme.colors.highlight)
-                            .imageScale(.large)
-                    }
+            #endif
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                if isSelected {
+                    selectedSet = nil
+                } else {
+                    selectedSet = cardSet
                 }
             }
-            .padding(.vertical, theme.metrics.deckCardVerticalPadding)
-            .padding(.horizontal, theme.metrics.deckCardHorizontalPadding)
-            .background(
-                theme.gradients.card
-                    .opacity(viewModel.isSelected(cardSet) ? 1 : 0.85)
-            )
+        } label: {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Image(systemName: "rectangle.stack.fill")
+                        .font(.title2)
+                        .foregroundStyle(theme.gradients.accent)
+                    Spacer()
+                    if isSelected {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(theme.colors.highlight)
+                    }
+                }
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(cardSet.name)
+                        .font(.headline)
+                        .lineLimit(2)
+                        .foregroundStyle(theme.colors.textPrimary)
+                        .multilineTextAlignment(.leading)
+                    
+                    Text("\(cardCount) cards")
+                        .font(.caption)
+                        .foregroundStyle(theme.colors.textSecondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(16)
             .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
-                    .stroke(
-                        viewModel.isSelected(cardSet)
-                            ? theme.colors.highlight.opacity(0.8) : theme.colors.surfaceLight,
-                        lineWidth: 1.5)
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(isSelected ? theme.colors.highlight.opacity(0.8) : Color.white.opacity(0.1), lineWidth: isSelected ? 2 : 1)
             )
-            .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cornerRadius, style: .continuous))
-            .shadow(color: theme.colors.shadow.opacity(0.3), radius: theme.metrics.shadowRadius, x: 0, y: theme.metrics.shadowY)
+            .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
         }
         .buttonStyle(.plain)
-        .accessibilityIdentifier("deckCard")
-    }
-    
-    private var loadMoreIndicator: some View {
-        HStack {
-            Spacer()
-            VStack(spacing: 8) {
-                ProgressView()
-                    .tint(theme.colors.textPrimary)
-                Text("Loading more decks...")
-                    .font(.caption)
-                    .foregroundColor(theme.colors.textPrimary.opacity(0.7))
-            }
-            Spacer()
-        }
-        .padding(.vertical, theme.metrics.mediumSpacing)
     }
 }
-
-// MARK: - Date Formatter
-private let dateFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .medium
-    formatter.timeStyle = .none
-    return formatter
-}()

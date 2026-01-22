@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import ETPatternCore
 
 struct ProgressCircle: View {
     @Environment(\.theme) var theme

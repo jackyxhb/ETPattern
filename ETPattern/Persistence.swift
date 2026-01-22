@@ -54,8 +54,20 @@ struct PersistenceController {
         let schema = Schema([Card.self, CardSet.self, StudySession.self, ReviewLog.self])
         let config: ModelConfiguration
         
+        // Determine if we should use CloudKit
+        // On Simulator, default to OFF to prevent crashes with ad-hoc signing, unless explicitly enabled.
+        // On Device, default to ON, unless explicitly disabled.
+        #if targetEnvironment(simulator)
+        let useCloudKit = CommandLine.arguments.contains("-enable-cloudkit")
+        #else
+        let useCloudKit = !CommandLine.arguments.contains("-no-cloudkit")
+        #endif
+
         if inMemory {
             config = ModelConfiguration(isStoredInMemoryOnly: true)
+        } else if !useCloudKit {
+             print("⚠️ Persistence: CloudKit disabled (Simulator default or arg). Using local storage.")
+             config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         } else {
             // Attempt CloudKit configuration
             let ckConfig = ModelConfiguration(

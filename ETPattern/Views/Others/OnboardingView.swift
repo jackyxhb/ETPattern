@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import ETPatternCore
 
 struct OnboardingView: View {
     @Environment(\.theme) var theme

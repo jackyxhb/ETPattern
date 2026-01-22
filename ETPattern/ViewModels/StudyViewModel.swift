@@ -1,16 +1,10 @@
-//
-//  StudyViewModel.swift
-//  ETPattern
-//
-//  Created by admin on 17/01/2026.
-//
-
-import Foundation
-import SwiftData
 import SwiftUI
+import SwiftData
+import Combine
 import ETPatternModels
 import ETPatternServices
-import ETPatternFeatures // For Coordinators if needed, but usually Protocol based
+import ETPatternCore
+import ETPatternServices
 
 @Observable @MainActor
 public final class StudyViewModel {
@@ -27,8 +21,8 @@ public final class StudyViewModel {
     private var sessionID: PersistentIdentifier?
     private let cardSet: CardSet
     private let modelContext: ModelContext
-    private let service: StudyServiceProtocol // Use Protocol!
-    private weak var coordinator: StudyCoordinatorProtocol? // Use specific coordinator or protocol
+    private let service: StudyServiceProtocol
+    private let coordinator: StudyCoordinatorProtocol? // Strong reference to prevent premature deallocation
     
     // MARK: - Initialization
     
@@ -68,11 +62,7 @@ public final class StudyViewModel {
             studyStrategy = strategies[nextIndex]
             UserDefaults.standard.set(studyStrategy.rawValue, forKey: "studyStrategy")
             
-            // Restart session or re-sort?
-            // For now, let's just re-sort remaining if possible or just update strategy for next fetch matches
-            // Ideally we might want to reload the session order.
-            // Let's keep it simple: just update the property. 
-            // In a real app, this might trigger a re-shuffle of `sessionCardIDs`.
+            // Re-sort remaining
             Task {
                 await refreshSessionOrder()
             }
@@ -81,7 +71,8 @@ public final class StudyViewModel {
     
     public func moveToNext() {
         guard currentIndex < sessionCardIDs.count - 1 else {
-            // End of session?
+            // End of session? Behave like dismiss or loop?
+            // Usually we dismiss or show summary.
             dismiss()
             return
         }
@@ -111,10 +102,11 @@ public final class StudyViewModel {
         coordinator?.dismiss()
     }
     
-    public func handleRating(_ rating: DifficultyRating) {
-        guard let card = currentCard else { return }
+    @discardableResult
+    public func handleRating(_ rating: DifficultyRating) -> Task<Void, Never> {
+        guard let card = currentCard else { return Task { } }
         
-        Task {
+        return Task {
             // Update Backend/DB
             try? await service.updateCardDifficulty(
                 cardID: card.persistentModelID,
@@ -137,19 +129,12 @@ public final class StudyViewModel {
             if let existingSessionID = try await service.fetchActiveSessionID(for: cardSet.persistentModelID) {
                 print("Resuming session: \(existingSessionID)")
                 self.sessionID = existingSessionID
-                // Load existing state... (In a real app, we'd fetch the session and restore currentIndex)
-                // For simplified implementation, we'll just Init a fresh list based on Strategy
-                // But ideally we should respect `existingSessionID` state.
             } else {
                 print("Creating new session")
                 self.sessionID = try await service.createSession(for: cardSet.persistentModelID, strategy: studyStrategy)
             }
             
             // 2. Prepare Cards
-            // Accessing `cardSet` managed object directly on MainActor is safe if Context is MainActor bound (View's context usually is).
-            // However, for safety and MVVM+, we should probably fetch IDs.
-            // But `cardSet` was passed in.
-            
             self.sessionCardIDs = cardSet.cards
                 .sorted { $0.nextReviewDate < $1.nextReviewDate } // Basic Intelligent Sort
                 .map { $0.persistentModelID }
@@ -165,8 +150,6 @@ public final class StudyViewModel {
     }
     
     private func refreshSessionOrder() async {
-        // Simple re-sort based on new strategy if needed
-        // For now, just logging
         print("Strategy changed to \(studyStrategy). In full impl, this would re-sort remaining cards.")
     }
     

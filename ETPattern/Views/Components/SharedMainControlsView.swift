@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import ETPatternCore
 import ETPatternModels
 
 struct SharedMainControlsView<MiddleContent: View>: View {

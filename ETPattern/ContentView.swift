@@ -11,7 +11,8 @@ import UniformTypeIdentifiers
 import os.log
 import ETPatternModels
 import ETPatternServices
-import ETPatternFeatures
+import ETPatternServices
+import ETPatternCore
 
 struct ContentView: View {
     @Environment(\.theme) var theme
@@ -19,6 +20,7 @@ struct ContentView: View {
     @StateObject private var viewModel: ContentViewModel
     
     private let modelContext: ModelContext
+    private let cardService: CardService
     private let logger = Logger(subsystem: "com.jack.ETPattern", category: "ContentView")
 
     // MARK: - Onboarding State
@@ -26,6 +28,8 @@ struct ContentView: View {
 
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
+        self.cardService = CardService(modelContainer: modelContext.container)
+        
         let cardSetRepository = CardSetRepository(modelContext: modelContext)
         let csvImporter = CSVImporter(modelContext: modelContext)
         let csvService = CSVService(modelContext: modelContext, csvImporter: csvImporter)
@@ -51,7 +55,9 @@ struct ContentView: View {
                 mainContent
             }
             .navigationTitle(NSLocalizedString("flashcard_decks", comment: "Main screen title"))
+            #if os(iOS)
             .navigationBarHidden(true) // Custom header
+            #endif
             .onAppear {
                 Task {
                     await viewModel.loadInitialCardSets()
@@ -69,6 +75,7 @@ struct ContentView: View {
                 EmptyView()
             }
         }
+        #if os(iOS)
         .fullScreenCover(isPresented: $viewModel.uiState.showingStudyView) {
             if let cardSet = viewModel.uiState.selectedCardSet {
                 // Initialize MVVM+ Stack
@@ -91,6 +98,25 @@ struct ContentView: View {
                 StudyView(viewModel: studyVM)
             }
         }
+        #else
+        .sheet(isPresented: $viewModel.uiState.showingStudyView) {
+             if let cardSet = viewModel.uiState.selectedCardSet {
+                let coordinator = StudyCoordinator(onDismiss: {
+                    viewModel.uiState.showingStudyView = false
+                })
+                let container = modelContext.container
+                let service = StudyService(modelContainer: container)
+                let studyVM = StudyViewModel(
+                    cardSet: cardSet,
+                    modelContext: modelContext,
+                    service: service,
+                    coordinator: coordinator
+                )
+                StudyView(viewModel: studyVM)
+            }
+        }
+        #endif
+        #if os(iOS)
         .fullScreenCover(isPresented: $viewModel.uiState.showingAutoView) {
             if let cardSet = viewModel.uiState.selectedCardSet {
                 // Initialize MVVM+ Stack for AutoPlay
@@ -112,6 +138,25 @@ struct ContentView: View {
                 AutoPlayView(viewModel: autoVM)
             }
         }
+        #else
+        .sheet(isPresented: $viewModel.uiState.showingAutoView) {
+            if let cardSet = viewModel.uiState.selectedCardSet {
+                let coordinator = AutoPlayCoordinator(onDismiss: {
+                    viewModel.uiState.showingAutoView = false
+                })
+                let container = modelContext.container
+                let service = StudyService(modelContainer: container)
+                let autoVM = AutoPlayViewModel(
+                    cardSet: cardSet,
+                    modelContext: modelContext,
+                    service: service,
+                    coordinator: coordinator
+                )
+                AutoPlayView(viewModel: autoVM)
+            }
+        }
+        #endif
+        #if os(iOS)
         .fullScreenCover(isPresented: $viewModel.uiState.showingSessionStats) {
             SessionStatsView()
                 .presentationBackground(.ultraThinMaterial)
@@ -121,17 +166,63 @@ struct ContentView: View {
                 .presentationBackground(.ultraThinMaterial)
         }
         .fullScreenCover(isPresented: $viewModel.uiState.showingImport) {
-            ImportView(modelContext: modelContext)
+            let coordinator = BrowseCoordinator(onDismiss: {
+                viewModel.uiState.showingImport = false
+            })
+            let importVM = ImportViewModel(modelContext: modelContext, coordinator: coordinator)
+            ImportView(viewModel: importVM)
                 .presentationBackground(.ultraThinMaterial)
         }
         .fullScreenCover(isPresented: $viewModel.uiState.showingSettings) {
             SettingsView()
                 .presentationBackground(.ultraThinMaterial)
         }
+        #else
+        .sheet(isPresented: $viewModel.uiState.showingSessionStats) {
+            SessionStatsView()
+        }
+        .sheet(isPresented: $viewModel.uiState.showingMasteryDashboard) {
+            MasteryDashboardView(modelContext: modelContext)
+        }
+        .sheet(isPresented: $viewModel.uiState.showingImport) {
+            let coordinator = BrowseCoordinator(onDismiss: {
+                viewModel.uiState.showingImport = false
+            })
+            let importVM = ImportViewModel(modelContext: modelContext, coordinator: coordinator)
+            ImportView(viewModel: importVM)
+        }
+        .sheet(isPresented: $viewModel.uiState.showingSettings) {
+            SettingsView()
+        }
+        #endif
+        #if os(iOS)
         .fullScreenCover(item: $viewModel.uiState.browseCardSet) { deck in
-            DeckDetailView(cardSet: deck)
+            let coordinator = BrowseCoordinator(onDismiss: {
+                viewModel.uiState.browseCardSet = nil
+            })
+            
+            let vm = DeckDetailViewModel(
+                cardSet: deck,
+                service: cardService,
+                coordinator: coordinator
+            )
+            
+            DeckDetailView(viewModel: vm, coordinator: coordinator)
                 .presentationBackground(.ultraThinMaterial)
         }
+        #else
+        .sheet(item: $viewModel.uiState.browseCardSet) { deck in
+            let coordinator = BrowseCoordinator(onDismiss: {
+                viewModel.uiState.browseCardSet = nil
+            })
+            let vm = DeckDetailViewModel(
+                cardSet: deck,
+                service: cardService,
+                coordinator: coordinator
+            )
+            DeckDetailView(viewModel: vm, coordinator: coordinator)
+        }
+        #endif
         .alert("Rename Deck", isPresented: $viewModel.uiState.showingRenameAlert) {
             TextField("Deck Name", text: $viewModel.uiState.newName)
             Button(NSLocalizedString("cancel", comment: "Cancel button"), role: .cancel) {}
@@ -177,6 +268,7 @@ struct ContentView: View {
         } message: {
             Text(viewModel.uiState.errorMessage)
         }
+        #if os(iOS)
         .fullScreenCover(isPresented: $viewModel.uiState.showingOnboarding) {
             OnboardingView {
                 UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
@@ -184,6 +276,15 @@ struct ContentView: View {
                 viewModel.uiState.showingOnboarding = false
             }
         }
+        #else
+        .sheet(isPresented: $viewModel.uiState.showingOnboarding) {
+            OnboardingView {
+                UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                hasSeenOnboarding = true
+                viewModel.uiState.showingOnboarding = false
+            }
+        }
+        #endif
         .onAppear {
             if !hasSeenOnboarding {
                 viewModel.uiState.showingOnboarding = true
@@ -197,30 +298,11 @@ struct ContentView: View {
             HeaderView(viewModel: viewModel)
 
             ScrollView {
-                if viewModel.isLoadingCardSets && viewModel.cardSets.isEmpty {
-                    loadingStateView
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .onAppear {
-                            logger.info("ContentView: Showing loading state")
-                        }
-                } else if let error = viewModel.cardSetsError {
-                    errorStateView(error: error)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .onAppear {
-                            logger.info("ContentView: Showing error state - \(error.localizedDescription)")
-                        }
-                } else if viewModel.cardSets.isEmpty && !viewModel.isLoadingCardSets {
-                    emptyStateView
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .onAppear {
-                            logger.info("ContentView: Showing empty state - no card sets loaded")
-                        }
-                } else {
-                    DeckListView(viewModel: viewModel, cardSets: viewModel.cardSets)
-                        .onAppear {
-                            logger.info("ContentView: Showing DeckListView with \(viewModel.cardSets.count) card sets")
-                        }
-                }
+                // Refactored to use injected CardService
+                DeckListView(selectedSet: $viewModel.uiState.selectedCardSet, service: cardService)
+                    .onAppear {
+                        logger.info("ContentView: Showing Refactored DeckListView")
+                    }
             }
         }
         .padding(.horizontal, theme.metrics.contentHorizontalPadding)
@@ -293,7 +375,9 @@ struct ContentView: View {
         } additionalContent: {
             VStack(spacing: theme.metrics.emptyStateButtonSpacing) {
                 Button(action: {
+                    #if os(iOS)
                     UIImpactFeedbackGenerator.mediumImpact()
+                    #endif
                     viewModel.addCardSet()
                 }) {
                     Label(viewModel.uiState.isCreatingDeck ? "Creating..." : "Create New Deck", systemImage: "plus")
@@ -308,7 +392,9 @@ struct ContentView: View {
                 .disabled(viewModel.uiState.isCreatingDeck || viewModel.uiState.isReimporting)
 
                 Button(action: {
+                    #if os(iOS)
                     UIImpactFeedbackGenerator.lightImpact()
+                    #endif
                     viewModel.uiState.showingImport = true
                 }) {
                     Label("Import CSV", systemImage: "square.and.arrow.down")
@@ -371,7 +457,9 @@ private struct CardSetActionBar: View {
 
         var body: some View {
             Button(action: {
+                #if os(iOS)
                 UIImpactFeedbackGenerator.mediumImpact()
+                #endif
                 action()
             }) {
                 Label(title, systemImage: systemImage)

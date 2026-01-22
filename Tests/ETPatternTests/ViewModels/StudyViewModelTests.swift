@@ -3,7 +3,7 @@ import SwiftUI
 import SwiftData
 @testable import ETPatternModels
 @testable import ETPatternServices
-@testable import ETPatternFeatures
+@testable import ETPatternServices
 
 @MainActor
 struct StudyViewModelTests {

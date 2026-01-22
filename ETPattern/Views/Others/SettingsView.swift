@@ -2,37 +2,29 @@
 //  SettingsView.swift
 //  ETPattern
 //
-//  Created by admin on 29/11/2025.
-//
 
 import SwiftUI
 import AVFoundation
 import ETPatternServices
 import ETPatternCore
+import ETPatternServices
 
-struct SettingsView: View {
+public struct SettingsView: View {
     @Environment(\.theme) var theme
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var ttsService: TTSService
-    @State private var selectedVoice: String = Constants.TTS.defaultVoice
-    @State private var cardOrderMode: String = UserDefaults.standard.string(forKey: "cardOrderMode") ?? "random"
-    @State private var autoPlayOrderMode: String = UserDefaults.standard.string(forKey: "autoPlayOrderMode") ?? "random"
-    @State private var ttsPercentage: Float = 0 // Will be set in onAppear
-    @State private var ttsPitch: Float = 0
-    @State private var ttsVolume: Float = 0
-    @State private var ttsPause: TimeInterval = 0
+    
+    @State private var viewModel: SettingsViewModel
+    
+    public init(ttsService: TTSService = .shared) {
+        _viewModel = State(initialValue: SettingsViewModel(ttsService: ttsService))
+    }
+    
+    public init(viewModel: SettingsViewModel) {
+        _viewModel = State(initialValue: viewModel)
+    }
 
-    private let voiceOptions = [
-        "en-US": NSLocalizedString("american_english", comment: "American English voice option"),
-        "en-GB": NSLocalizedString("british_english", comment: "British English voice option")
-    ]
-
-    private let orderOptions = [
-        "random": NSLocalizedString("random_order", comment: "Random card order option"),
-        "sequential": NSLocalizedString("import_order", comment: "Sequential/Import card order option")
-    ]
-
-    var body: some View {
+    public var body: some View {
+        @Bindable var viewModel = viewModel
         ZStack {
             theme.gradients.background
                 .ignoresSafeArea()
@@ -66,32 +58,33 @@ struct SettingsView: View {
                 .scrollContentBackground(.hidden)
             }
         }
-        .onAppear {
-            let stored = UserDefaults.standard.string(forKey: "selectedVoice") ?? Constants.TTS.defaultVoice
-            selectedVoice = canonicalVoiceLanguage(from: stored)
-            ttsPercentage = ttsService.getCurrentRate()
-            ttsPitch = ttsService.getCurrentPitch()
-            ttsVolume = ttsService.getCurrentVolume()
-            ttsPause = ttsService.getCurrentPause()
-        }
     }
 
     private var studyModeSection: some View {
-        Group {
+        let bindingCardOrder = Binding(
+            get: { viewModel.cardOrderMode },
+            set: { viewModel.updateCardOrder($0) }
+        )
+        let bindingAutoPlayOrder = Binding(
+            get: { viewModel.autoPlayOrderMode },
+            set: { viewModel.updateAutoPlayOrder($0) }
+        )
+        
+        return Group {
             SharedSettingsPickerSection(
                 header: NSLocalizedString("study_mode", comment: "Study mode section header"),
                 label: NSLocalizedString("card_order", comment: "Card order label"),
-                options: orderOptions,
-                selection: $cardOrderMode,
-                userDefaultsKey: "cardOrderMode"
+                options: viewModel.orderOptions,
+                selection: bindingCardOrder,
+                onChange: { _ in }
             )
 
             SharedSettingsPickerSection(
                 header: NSLocalizedString("auto_play_mode", comment: "Auto play mode section header"),
                 label: NSLocalizedString("card_order", comment: "Card order label"),
-                options: orderOptions,
-                selection: $autoPlayOrderMode,
-                userDefaultsKey: "autoPlayOrderMode"
+                options: viewModel.orderOptions,
+                selection: bindingAutoPlayOrder,
+                onChange: { _ in }
             )
         }
     }
@@ -102,10 +95,10 @@ struct SettingsView: View {
             label: NSLocalizedString("theme", comment: "Theme selection label"),
             options: Dictionary(uniqueKeysWithValues: AppTheme.allCases.map { ($0.rawValue, $0.displayName) }),
             selection: Binding(
-                get: { ThemeManager.shared.currentTheme.rawValue },
+                get: { viewModel.currentTheme.rawValue },
                 set: { newValue in
                     if let theme = AppTheme(rawValue: newValue) {
-                        ThemeManager.shared.currentTheme = theme
+                        viewModel.currentTheme = theme
                     }
                 }
             ),
@@ -114,28 +107,30 @@ struct SettingsView: View {
     }
 
     private var ttsSection: some View {
-        Group {
+        @Bindable var viewModel = viewModel
+        return Group {
             // Voice picker with section header
             SharedSettingsPickerSection(
                 header: NSLocalizedString("text_to_speech", comment: "Text-to-speech section header"),
                 label: NSLocalizedString("voice", comment: "Voice selection label"),
-                options: voiceOptions,
-                selection: $selectedVoice,
-                onChange: { newValue in
-                    ttsService.setVoice(newValue)
-                }
+                options: viewModel.voiceOptions,
+                selection: Binding(
+                    get: { viewModel.selectedVoice },
+                    set: { viewModel.updateVoice($0) }
+                ),
+                onChange: { _ in }
             )
 
             // Remaining TTS controls in a continuation section (no header)
             Section {
                 VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
-                    Text(String(format: NSLocalizedString("speech_speed_value", comment: "Speech speed display with percentage"), Int(ttsPercentage)))
+                    Text(String(format: NSLocalizedString("speech_speed_value", comment: "Speech speed display with percentage"), Int(viewModel.ttsPercentage)))
                         .font(theme.metrics.subheadline)
                         .foregroundColor(theme.colors.textPrimary)
                         .dynamicTypeSize(.large ... .accessibility5)
 
                     GeometryReader { geometry in
-                        Slider(value: $ttsPercentage, in: Constants.TTS.minPercentage...Constants.TTS.maxPercentage, step: 10) {
+                        Slider(value: $viewModel.ttsPercentage, in: Constants.TTS.minPercentage...Constants.TTS.maxPercentage, step: 10) {
                             Text(NSLocalizedString("speech_speed", comment: "Speech speed slider label"))
                                 .foregroundColor(theme.colors.textPrimary)
                                 .dynamicTypeSize(.large ... .accessibility5)
@@ -157,14 +152,14 @@ struct SettingsView: View {
                                     let sliderWidth = geometry.size.width
                                     let tapLocation = value.location.x
                                     let percentage = tapLocation / sliderWidth
-                                    let newValue = Constants.TTS.minPercentage + (Constants.TTS.maxPercentage - Constants.TTS.minPercentage) * Float(percentage)
-                                    let steppedValue = round(newValue / 10) * 10
+                                    let percentageValue = Constants.TTS.minPercentage + (Constants.TTS.maxPercentage - Constants.TTS.minPercentage) * Float(percentage)
+                                    let steppedValue = round(percentageValue / 10) * 10
                                     let clampedValue = min(max(steppedValue, Constants.TTS.minPercentage), Constants.TTS.maxPercentage)
-                                    ttsPercentage = clampedValue
+                                    viewModel.updateRate(clampedValue)
                                 }
                         )
-                        .onChange(of: ttsPercentage) { _, newValue in
-                            ttsService.setRate(newValue)
+                        .onChange(of: viewModel.ttsPercentage) { _, newValue in
+                            viewModel.updateRate(newValue)
                         }
                     }
                     .frame(height: theme.metrics.sliderHeight)
@@ -173,7 +168,7 @@ struct SettingsView: View {
 
                 SharedSettingsSliderSection(
                     label: "Pitch",
-                    value: $ttsPitch,
+                    value: $viewModel.ttsPitch,
                     minValue: Constants.TTS.minPitch,
                     maxValue: Constants.TTS.maxPitch,
                     step: 0.1,
@@ -181,13 +176,13 @@ struct SettingsView: View {
                     maxLabel: "200%",
                     valueFormatter: { "\(Int($0 * 100))%" },
                     onChange: { newValue in
-                        ttsService.setPitch(newValue)
+                        viewModel.updatePitch(newValue)
                     }
                 )
 
                 SharedSettingsSliderSection(
                     label: "Volume",
-                    value: $ttsVolume,
+                    value: $viewModel.ttsVolume,
                     minValue: Constants.TTS.minVolume,
                     maxValue: Constants.TTS.maxVolume,
                     step: 0.1,
@@ -195,27 +190,26 @@ struct SettingsView: View {
                     maxLabel: "100%",
                     valueFormatter: { "\(Int($0 * 100))%" },
                     onChange: { newValue in
-                        ttsService.setVolume(newValue)
+                        viewModel.updateVolume(newValue)
                     }
                 )
 
                 SharedSettingsSliderSection(
                     label: "Pause",
-                    value: $ttsPause,
-                    minValue: Constants.TTS.minPause,
-                    maxValue: Constants.TTS.maxPause,
+                    value: $viewModel.ttsPause,
+                    minValue: Float(Constants.TTS.minPause),
+                    maxValue: Float(Constants.TTS.maxPause),
                     step: 0.1,
                     minLabel: "0s",
                     maxLabel: "2s",
                     valueFormatter: { String(format: "%.1f", $0) + "s" },
                     onChange: { newValue in
-                        ttsService.setPause(newValue)
+                        viewModel.updatePause(newValue)
                     }
                 )
 
                 Button("Test Voice") {
-                    UIImpactFeedbackGenerator.lightImpact()
-                    ttsService.speak("Hello! This is a test of the selected voice and speed.")
+                    viewModel.testVoice()
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
@@ -233,7 +227,7 @@ struct SettingsView: View {
                 .font(theme.metrics.headline)
                 .foregroundColor(theme.colors.textPrimary)
                 .dynamicTypeSize(.large ... .accessibility5)
-            Text(appVersion)
+            Text(viewModel.appVersion)
                 .foregroundColor(theme.colors.textSecondary)
                 .dynamicTypeSize(.large ... .accessibility5)
             Text("Learn English patterns with spaced repetition")
@@ -243,30 +237,10 @@ struct SettingsView: View {
         }
         .listRowBackground(theme.colors.surfaceLight)
     }
-
-    private var appVersion: String {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
-        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "Unknown"
-        return "Version \(version) (\(build))"
-    }
-
-    private func canonicalVoiceLanguage(from value: String) -> String {
-        if voiceOptions.keys.contains(value) {
-            return value
-        }
-
-        // If an older build stored a concrete voice identifier, map it back to a language.
-        if let voice = AVSpeechSynthesisVoice(identifier: value), voiceOptions.keys.contains(voice.language) {
-            return voice.language
-        }
-
-        return Constants.TTS.defaultVoice
-    }
 }
 
 #Preview {
     NavigationView {
         SettingsView()
-            .environmentObject(TTSService.shared)
     }
 }
