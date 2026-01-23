@@ -17,6 +17,7 @@ enum AppTheme: String, CaseIterable, Identifiable {
     }
 }
 
+@MainActor
 class ThemeManager: ObservableObject {
     @Published var currentTheme: AppTheme = .system {
         didSet {

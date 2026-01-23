@@ -214,7 +214,9 @@ struct SettingsView: View {
                 )
 
                 Button("Test Voice") {
+                    #if os(iOS)
                     UIImpactFeedbackGenerator.lightImpact()
+                    #endif
                     ttsService.speak("Hello! This is a test of the selected voice and speed.")
                 }
                 .frame(maxWidth: .infinity)

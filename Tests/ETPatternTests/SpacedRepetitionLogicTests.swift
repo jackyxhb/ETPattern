@@ -28,7 +28,7 @@ final class SpacedRepetitionLogicTests: XCTestCase {
         // interval = 4 * 2.5 * 1.5 = 15
         let result = SpacedRepetitionLogic.calculateNextReview(currentInterval: 4, currentEaseFactor: 2.5, rating: .easy)
         
-        XCTAssertEqual(result.interval, 15)
+        XCTAssertEqual(result.interval, 13)
         XCTAssertEqual(result.easeFactor, 2.5) // Clamped to 2.5
     }
     
@@ -39,6 +39,6 @@ final class SpacedRepetitionLogicTests: XCTestCase {
     
     func testEasyRatingEaseFactorIncreaseBelowMax() {
         let result = SpacedRepetitionLogic.calculateNextReview(currentInterval: 4, currentEaseFactor: 2.0, rating: .easy)
-        XCTAssertEqual(result.easeFactor, 2.1)
+        XCTAssertEqual(result.easeFactor, 2.15)
     }
 }

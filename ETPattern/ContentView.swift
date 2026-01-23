@@ -11,6 +11,10 @@ import UniformTypeIdentifiers
 import os.log
 import ETPatternModels
 import ETPatternServices
+import ETPatternFeatures
+#if os(iOS)
+import UIKit
+#endif
 
 struct ContentView: View {
     @Environment(\.theme) var theme
@@ -50,7 +54,7 @@ struct ContentView: View {
                 mainContent
             }
             .navigationTitle(NSLocalizedString("flashcard_decks", comment: "Main screen title"))
-            .navigationBarHidden(true) // Custom header
+            .navigationBarHiddenIfiOS(true) // Custom header
             .onAppear {
                 Task {
                     await viewModel.loadInitialCardSets()
@@ -68,33 +72,66 @@ struct ContentView: View {
                 EmptyView()
             }
         }
-        .fullScreenCover(isPresented: $viewModel.uiState.showingStudyView) {
+        .fullScreenCoverIfiOS(isPresented: $viewModel.uiState.showingStudyView) {
             if let cardSet = viewModel.uiState.selectedCardSet {
-                StudyView(cardSet: cardSet, modelContext: modelContext)
+                // Initialize MVVM+ Stack
+                // Note: In a larger app, this composition might happen in a Factory or Router.
+                let coordinator = StudyCoordinator(onDismiss: {
+                    viewModel.uiState.showingStudyView = false
+                })
+
+                // Create Service with isolated context
+                let container = modelContext.container
+                let service = StudyService(modelContainer: container)
+
+                let studyVM = StudyViewModel(
+                    cardSet: cardSet,
+                    modelContext: modelContext,
+                    service: service,
+                    coordinator: coordinator
+                )
+
+                StudyView(viewModel: studyVM)
             }
         }
-        .fullScreenCover(isPresented: $viewModel.uiState.showingAutoView) {
+        .fullScreenCoverIfiOS(isPresented: $viewModel.uiState.showingAutoView) {
             if let cardSet = viewModel.uiState.selectedCardSet {
-                AutoPlayView(cardSet: cardSet, modelContext: modelContext)
+                // Initialize MVVM+ Stack for AutoPlay
+                let coordinator = AutoPlayCoordinator(onDismiss: {
+                    viewModel.uiState.showingAutoView = false
+                })
+
+                // Reuse or create Service
+                let container = modelContext.container
+                let service = StudyService(modelContainer: container)
+
+                let autoVM = AutoPlayViewModel(
+                    cardSet: cardSet,
+                    modelContext: modelContext,
+                    service: service,
+                    coordinator: coordinator
+                )
+
+                AutoPlayView(viewModel: autoVM)
             }
         }
-        .fullScreenCover(isPresented: $viewModel.uiState.showingSessionStats) {
+        .fullScreenCoverIfiOS(isPresented: $viewModel.uiState.showingSessionStats) {
             SessionStatsView()
                 .presentationBackground(.ultraThinMaterial)
         }
-        .fullScreenCover(isPresented: $viewModel.uiState.showingMasteryDashboard) {
+        .fullScreenCoverIfiOS(isPresented: $viewModel.uiState.showingMasteryDashboard) {
             MasteryDashboardView(modelContext: modelContext)
                 .presentationBackground(.ultraThinMaterial)
         }
-        .fullScreenCover(isPresented: $viewModel.uiState.showingImport) {
+        .fullScreenCoverIfiOS(isPresented: $viewModel.uiState.showingImport) {
             ImportView(modelContext: modelContext)
                 .presentationBackground(.ultraThinMaterial)
         }
-        .fullScreenCover(isPresented: $viewModel.uiState.showingSettings) {
+        .fullScreenCoverIfiOS(isPresented: $viewModel.uiState.showingSettings) {
             SettingsView()
                 .presentationBackground(.ultraThinMaterial)
         }
-        .fullScreenCover(item: $viewModel.uiState.browseCardSet) { deck in
+        .fullScreenCoverIfiOS(item: $viewModel.uiState.browseCardSet) { deck in
             DeckDetailView(cardSet: deck)
                 .presentationBackground(.ultraThinMaterial)
         }
@@ -143,7 +180,7 @@ struct ContentView: View {
         } message: {
             Text(viewModel.uiState.errorMessage)
         }
-        .fullScreenCover(isPresented: $viewModel.uiState.showingOnboarding) {
+        .fullScreenCoverIfiOS(isPresented: $viewModel.uiState.showingOnboarding) {
             OnboardingView {
                 UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
                 hasSeenOnboarding = true
@@ -259,7 +296,9 @@ struct ContentView: View {
         } additionalContent: {
             VStack(spacing: theme.metrics.emptyStateButtonSpacing) {
                 Button(action: {
+                    #if os(iOS)
                     UIImpactFeedbackGenerator.mediumImpact()
+                    #endif
                     viewModel.addCardSet()
                 }) {
                     Label(viewModel.uiState.isCreatingDeck ? "Creating..." : "Create New Deck", systemImage: "plus")
@@ -274,7 +313,9 @@ struct ContentView: View {
                 .disabled(viewModel.uiState.isCreatingDeck || viewModel.uiState.isReimporting)
 
                 Button(action: {
-                    UIImpactFeedbackGenerator.lightImpact()
+                    #if os(iOS)
+UIImpactFeedbackGenerator(style: .light).impactOccurred()
+#endif
                     viewModel.uiState.showingImport = true
                 }) {
                     Label("Import CSV", systemImage: "square.and.arrow.down")
@@ -337,7 +378,9 @@ private struct CardSetActionBar: View {
 
         var body: some View {
             Button(action: {
+                #if os(iOS)
                 UIImpactFeedbackGenerator.mediumImpact()
+                #endif
                 action()
             }) {
                 Label(title, systemImage: systemImage)

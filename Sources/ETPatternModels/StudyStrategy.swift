@@ -1,6 +1,6 @@
 import Foundation
 
-public enum StudyStrategy: String, Codable, CaseIterable {
+public enum StudyStrategy: String, Codable, CaseIterable, Sendable {
     /// Cards ordered by their original sequence (usually ID).
     case linear
     /// Cards purely shuffled.

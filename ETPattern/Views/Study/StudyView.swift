@@ -1,34 +1,30 @@
 import SwiftUI
 import SwiftData
+#if os(iOS)
 import UIKit
+#endif
 import os.log
 import ETPatternModels
 import ETPatternServices
+// import ETPatternViewModels // No need if in same module, otherwise need module name
 
 struct StudyView: View {
-    let cardSet: CardSet
-
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var context
     @Environment(\.theme) var theme
     @EnvironmentObject private var ttsService: TTSService
-
-    @StateObject private var sessionManager: SessionManager
-    private let modelContext: ModelContext
+    
+    // ViewModel injected via init
+    // ViewModel injected via init
+    @State private var viewModel: StudyViewModel
     
     private let logger = Logger(subsystem: "com.jack.ETPattern", category: "StudyView")
     
-    @State private var currentCard: Card?
-    @State private var isFlipped = false
     @State private var showSwipeFeedback = false
     @State private var swipeDirection: SwipeDirection?
     @State private var isSwipeInProgress = false
     @State private var swipeTask: Task<Void, Never>?
 
-    init(cardSet: CardSet, modelContext: ModelContext) {
-        self.cardSet = cardSet
-        self.modelContext = modelContext
-        _sessionManager = StateObject(wrappedValue: SessionManager(cardSet: cardSet, modelContext: modelContext))
+    init(viewModel: StudyViewModel) {
+        _viewModel = State(initialValue: viewModel)
     }
 
     var body: some View {
@@ -39,29 +35,23 @@ struct StudyView: View {
             VStack(spacing: theme.metrics.studyViewSpacing) {
                 header
 
-                if sessionManager.getCards().isEmpty {
+                if viewModel.sessionCardIDs.isEmpty {
                     emptyState
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .onAppear {
-                            print("StudyView: No cards available")
-                        }
                 } else {
                     SharedCardDisplayView(
-                        frontText: currentCard?.front ?? "No front",
-                        backText: (currentCard?.back ?? "No back").replacingOccurrences(of: "<br>", with: "\n"),
-                        groupName: currentCard?.groupName ?? "",
-                        cardName: currentCard?.cardName ?? "",
-                        isFlipped: isFlipped,
-                        currentIndex: sessionManager.currentIndex,
-                        totalCards: sessionManager.getCards().count,
-                        cardId: (currentCard?.id).flatMap { Int($0) },
+                        frontText: viewModel.currentCard?.front ?? "Loading...",
+                        backText: (viewModel.currentCard?.back ?? "").replacingOccurrences(of: "<br>", with: "\n"),
+                        groupName: viewModel.currentCard?.groupName ?? "",
+                        cardName: viewModel.currentCard?.cardName ?? "",
+                        isFlipped: viewModel.isFlipped,
+                        currentIndex: viewModel.currentIndex,
+                        totalCards: viewModel.totalCardsCount,
+                        cardId: (viewModel.currentCard?.id).flatMap { Int($0) },
                         showSwipeFeedback: showSwipeFeedback,
                         swipeDirection: swipeDirection,
                         theme: theme
                     )
-                    .onAppear {
-                        logger.info("StudyView: Rendering SharedCardDisplayView with front: \((currentCard?.front.prefix(50)) ?? "nil"), back: \((currentCard?.back.prefix(50)) ?? "nil")")
-                    }
                     .gesture(
                         DragGesture(minimumDistance: 50)
                             .onChanged { value in
@@ -69,12 +59,13 @@ struct StudyView: View {
                                     let horizontalAmount = value.translation.width
                                     let verticalAmount = value.translation.height
 
-                                    // Only trigger if horizontal movement is greater than vertical
                                     if abs(horizontalAmount) > abs(verticalAmount) && abs(horizontalAmount) > 30 {
                                         isSwipeInProgress = true
                                         swipeDirection = horizontalAmount > 0 ? .right : .left
                                         showSwipeFeedback = true
+                                        #if canImport(UIKit)
                                         UIImpactFeedbackGenerator.lightImpact()
+                                        #endif
                                     }
                                 }
                             }
@@ -82,25 +73,24 @@ struct StudyView: View {
                                 if isSwipeInProgress {
                                     handleSwipe(swipeDirection!)
                                 }
-                                // Reset swipe state
                                 showSwipeFeedback = false
                                 swipeDirection = nil
                                 isSwipeInProgress = false
                             }
                     )
                     .onTapGesture {
+                        #if canImport(UIKit)
                         UIImpactFeedbackGenerator.lightImpact()
-                        withAnimation(.bouncy) {
-                            isFlipped.toggle()
-                            speakCurrentText()
-                        }
+                        #endif
+                        viewModel.flipCard()
+                        speakCurrentText()
                     }
                     .accessibilityAction(named: "Flip Card") {
+                        #if canImport(UIKit)
                         UIImpactFeedbackGenerator.lightImpact()
-                        withAnimation(.bouncy) {
-                            isFlipped.toggle()
-                            speakCurrentText()
-                        }
+                        #endif
+                        viewModel.flipCard()
+                        speakCurrentText()
                     }
                     .accessibilityAction(named: "Mark as Easy") {
                         handleRating(.easy)
@@ -110,12 +100,9 @@ struct StudyView: View {
                     }
                 }
             }
-            .onAppear {
-                print("StudyView: Card count = \(sessionManager.getCards().count)")
-            }
             .padding(.horizontal, theme.metrics.studyViewHorizontalPadding)
             .safeAreaInset(edge: .bottom) {
-                if isFlipped {
+                if viewModel.isFlipped {
                     ratingToolbar
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 } else {
@@ -126,32 +113,32 @@ struct StudyView: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("English Pattern Study Session")
-        .dynamicTypeSize(.large ... .accessibility5) // Support dynamic type throughout the view
-        .onAppear {
-            sessionManager.prepareSession()
-            updateCurrentCard()
+        .dynamicTypeSize(.large ... .accessibility5)
+        .task {
+            await viewModel.onAppear()
+            // Auto-speak first card if needed? Or wait for interaction.
+            // Old logic didn't auto-speak on appear, only on flip/navigation.
         }
         .onDisappear {
-            sessionManager.saveProgress()
+            viewModel.onDisappear()
             ttsService.stop()
         }
-        .onChange(of: sessionManager.currentIndex) { _, _ in
-            // Reset to front side when card changes
-            isFlipped = false
-            // Stop any ongoing speech from previous card
+        .onChange(of: viewModel.currentIndex) { _, _ in
             ttsService.stop()
-            // Auto-read the new card
             speakCurrentText()
-            // Announce card change for accessibility
-            if let _ = currentCard {
-                UIAccessibility.post(notification: .announcement, argument: "Now showing card \(sessionManager.currentIndex + 1) of \(sessionManager.getCards().count)")
-            }
+            #if os(iOS)
+            UIAccessibility.post(notification: .announcement, argument: "Now showing card \(viewModel.currentIndex + 1)")
+            #endif
+        }
+        .onChange(of: viewModel.isFlipped) { _, flipped in
+            if flipped { speakCurrentText() }
         }
     }
 
     private var header: some View {
         SharedHeaderView(
-            title: cardSet.name,
+            // Accessing cardSet via currentCard or we could expose name in ViewModel
+             title: viewModel.currentCard?.cardSet?.name ?? "Study",
             subtitle: "Spaced repetition learning",
             theme: theme
         )
@@ -171,33 +158,36 @@ struct StudyView: View {
     private var bottomControlBar: some View {
         SharedBottomControlBarView(
             strategyToggleAction: {
+                #if os(iOS)
                 UIImpactFeedbackGenerator.lightImpact()
-                sessionManager.cycleStrategy()
-                updateCurrentCard()
+                #endif
+                viewModel.cycleStrategy()
             },
             previousAction: {
+                #if os(iOS)
                 UIImpactFeedbackGenerator.lightImpact()
-                sessionManager.moveToPrevious()
-                updateCurrentCard()
-                sessionManager.saveProgress()
+                #endif
+                viewModel.moveToPrevious()
             },
             nextAction: {
+                #if os(iOS)
                 UIImpactFeedbackGenerator.lightImpact()
-                sessionManager.moveToNext()
-                updateCurrentCard()
-                sessionManager.saveProgress()
+                #endif
+                viewModel.moveToNext()
             },
             closeAction: {
+                #if os(iOS)
                 UIImpactFeedbackGenerator.lightImpact()
-                dismissStudy()
+                #endif
+                viewModel.dismiss()
             },
-            isPreviousDisabled: sessionManager.currentIndex == 0,
-            strategy: sessionManager.currentStrategy,
-            currentPosition: sessionManager.getCards().count > 0 ? sessionManager.currentIndex + 1 : 0,
-            totalCards: sessionManager.getCards().count,
+            isPreviousDisabled: viewModel.currentIndex == 0,
+            strategy: viewModel.studyStrategy,
+            currentPosition: viewModel.sessionCardIDs.count > 0 ? viewModel.currentIndex + 1 : 0,
+            totalCards: viewModel.sessionCardIDs.count,
             theme: theme,
-            previousHint: sessionManager.currentIndex == 0 ? "No previous card available" : "Go to previous card in study session",
-            nextHint: "Go to next card in study session"
+            previousHint: viewModel.currentIndex == 0 ? "No previous card available" : "Go to previous card",
+            nextHint: "Go to next card"
         ) {
             speakCurrentButton
         }
@@ -205,7 +195,9 @@ struct StudyView: View {
 
     private var speakCurrentButton: some View {
         Button(action: {
+            #if canImport(UIKit)
             UIImpactFeedbackGenerator.lightImpact()
+            #endif
             speakCurrentText()
         }) {
             Image(systemName: ttsService.isSpeaking ? "speaker.wave.2.fill" : "speaker.wave.2")
@@ -216,22 +208,11 @@ struct StudyView: View {
                 .clipShape(Circle())
         }
         .accessibilityLabel(ttsService.isSpeaking ? "Stop speaking" : "Speak current card")
-        .accessibilityHint(ttsService.isSpeaking ? "Double tap to stop text-to-speech" : "Double tap to hear the current card content spoken aloud")
-        .accessibilityValue(ttsService.isSpeaking ? "Currently speaking" : "Ready to speak")
-    }
-
-    private func dismissStudy() {
-        sessionManager.saveProgress()
-        dismiss()
-    }
-
-    private func updateCurrentCard() {
-        currentCard = sessionManager.currentCard
     }
 
     private func speakCurrentText() {
-        guard let currentCard = currentCard else { return }
-        let text = isFlipped ?
+        guard let currentCard = viewModel.currentCard else { return }
+        let text = viewModel.isFlipped ?
             currentCard.back.replacingOccurrences(of: "<br>", with: "\n") :
             currentCard.front
         ttsService.speak(text)
@@ -271,58 +252,56 @@ struct StudyView: View {
     }
 
     private func handleRating(_ rating: DifficultyRating) {
-        guard let currentCard = currentCard else { return }
-
         // Cancel any existing swipe task
         swipeTask?.cancel()
 
-        // Update spaced repetition data
-        let spacedRepetitionService = SpacedRepetitionService()
-        spacedRepetitionService.updateCardDifficulty(currentCard, rating: rating, in: sessionManager.currentSession)
-
         // Provide haptic feedback
+        #if canImport(UIKit)
         let generator = UIImpactFeedbackGenerator(style: rating == .again ? .heavy : .medium)
         generator.impactOccurred()
+        #endif
+        
+        // Notify ViewModel
+        viewModel.handleRating(rating)
 
-        // Move to next card after a brief delay
+        // Animation handled by ViewModel state changes? 
+        // ViewModel updates currentIndex immediately. 
+        // We might want to delay standard transition logic in VM or here.
+        // For MVVM, VM should drive state.
+        // If we want delay for visual feedback, we can do it here before calling VM or VM handles it.
+        // Old logic had delay. Let's keep delay here for UI polish if desired, or assume VM handles it.
+        // In the updated VM, `handleRating` calls `moveToNext`.
+        // To keep the 'swipe task' delay logic:
+        /*
         swipeTask = Task {
-            do {
-                try await Task.sleep(for: .milliseconds(400))
-                guard !Task.isCancelled else { return }
-                await MainActor.run {
-                    withAnimation {
-                        sessionManager.moveToNext()
-                        updateCurrentCard()
-                        // Reset to front side for new card
-                        isFlipped = false
-                        // Stop any ongoing speech
-                        ttsService.stop()
-                        // Auto-read the new card
-                        speakCurrentText()
-                    }
-                }
-            } catch {}
+             try? await Task.sleep(for: .milliseconds(400))
+             await MainActor.run { viewModel.handleRating(rating) }
         }
+        */
+        // But VM `handleRating` is async-capable. 
+        // For now, calling it directly for responsiveness.
     }
 
     private func handleSwipe(_ direction: SwipeDirection) {
-        if isFlipped {
+        if viewModel.isFlipped {
             handleRating(direction == .right ? .good : .again)
         } else {
-            // Just flip the card on swipe if not flipped? Or maybe same as tap.
-            withAnimation(.bouncy) {
-                isFlipped = true
-                speakCurrentText()
-            }
+            viewModel.flipCard()
+            speakCurrentText()
         }
     }
 }
 
 #Preview {
     NavigationView {
-        StudyView(cardSet: previewCardSet, modelContext: PersistenceController.preview.container.mainContext)
-            .modelContainer(PersistenceController.preview.container)
-            .environmentObject(TTSService.shared)
+        StudyView(viewModel: StudyViewModel(
+            cardSet: previewCardSet,
+            modelContext: PersistenceController.preview.container.mainContext,
+            service: StudyService(modelContainer: PersistenceController.preview.container),
+            coordinator: nil
+        ))
+        .modelContainer(PersistenceController.preview.container)
+        .environmentObject(TTSService.shared)
     }
 }
 

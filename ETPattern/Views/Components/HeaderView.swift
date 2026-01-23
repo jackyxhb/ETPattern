@@ -47,7 +47,9 @@ struct HeaderView: View {
 
     private var headerActions: some View {
         Button(action: {
+            #if os(iOS)
             UIImpactFeedbackGenerator.lightImpact()
+            #endif
             viewModel.uiState.showingHeaderMenu = true
         }) {
             headerIcon(systemName: "ellipsis")

@@ -6,7 +6,9 @@
 //
 
 import Foundation
+#if canImport(UIKit)
 import UIKit
+#endif
 import SwiftUI
 import Combine
 
@@ -48,6 +50,7 @@ extension Int {
 }
 
 // MARK: - Haptic Feedback
+#if os(iOS)
 extension UIImpactFeedbackGenerator {
     static func lightImpact() {
         let generator = UIImpactFeedbackGenerator(style: .light)
@@ -81,9 +84,11 @@ extension UINotificationFeedbackGenerator {
         generator.notificationOccurred(.error)
     }
 }
+#endif
 
 // MARK: - View Extensions
 extension View {
+    #if os(iOS)
     func withHapticFeedback(_ style: UIImpactFeedbackGenerator.FeedbackStyle = .medium, onTap: @escaping () -> Void) -> some View {
         self.onTapGesture {
             let generator = UIImpactFeedbackGenerator(style: style)
@@ -103,6 +108,22 @@ extension View {
             UINotificationFeedbackGenerator().notificationOccurred(.error)
         }
     }
+    #else
+    // Fallback or empty implementations for macOS
+    func withHapticFeedback(onTap: @escaping () -> Void) -> some View {
+        self.onTapGesture {
+            onTap()
+        }
+    }
+
+    func withSuccessHaptic() -> some View {
+        self
+    }
+
+    func withErrorHaptic() -> some View {
+        self
+    }
+    #endif
 
     func withSpringAnimation() -> some View {
         self.animation(.spring(response: 0.3, dampingFraction: 0.7), value: UUID())
@@ -129,6 +150,53 @@ extension Animation {
 
     static var snappy: Animation {
         .spring(response: 0.2, dampingFraction: 0.8)
+    }
+}
+
+extension View {
+    @ViewBuilder
+    func fullScreenCoverIfiOS<Content: View>(isPresented: Binding<Bool>, @ViewBuilder content: @escaping () -> Content) -> some View {
+        #if os(iOS)
+        fullScreenCover(isPresented: isPresented, content: content)
+        #else
+        self
+        #endif
+    }
+
+    @ViewBuilder
+    func fullScreenCoverIfiOS<Item: Identifiable, Content: View>(item: Binding<Item?>, @ViewBuilder content: @escaping (Item) -> Content) -> some View {
+        #if os(iOS)
+        fullScreenCover(item: item, content: content)
+        #else
+        self
+        #endif
+    }
+
+    @ViewBuilder
+    func navigationBarHiddenIfiOS(_ hidden: Bool) -> some View {
+        #if os(iOS)
+        navigationBarHidden(hidden)
+        #else
+        self
+        #endif
+    }
+
+    @ViewBuilder
+    func tabViewStyleIfiOS<T: TabViewStyle>(_ style: T) -> some View {
+        #if os(iOS)
+        tabViewStyle(style)
+        #else
+        self
+        #endif
+    }
+
+    @ViewBuilder
+    func translationTaskIfiOS(_ configuration: TranslationSession.Configuration, _ action: @escaping (TranslationSession) -> Void) -> some View {
+        #if os(iOS)
+        translationTask(configuration, action)
+        #else
+        self
+        #endif
     }
 }
 
