@@ -36,7 +36,7 @@ struct ETPatternApp: App {
             }
             .modelContainer(persistenceController.container)
             .environmentObject(TTSService.shared)
-            // .environmentObject(CloudSyncManager.shared) // Disabled until iCloud Capability is added in Xcode
+            .environmentObject(CloudSyncManager.shared) // Safe to inject even if unused
             .environmentObject(themeManager)
             .environment(\.theme, currentTheme)
             .preferredColorScheme(themeManager.colorScheme)

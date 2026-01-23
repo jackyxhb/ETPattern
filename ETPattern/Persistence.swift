@@ -54,12 +54,8 @@ struct PersistenceController {
         if inMemory {
             config = ModelConfiguration(isStoredInMemoryOnly: true)
         } else {
-            // Attempt CloudKit configuration
-            let ckConfig = ModelConfiguration(
-                schema: schema,
-                cloudKitDatabase: .private("iCloud.com.jackxhb.ETPattern")
-            )
-            config = ckConfig
+            // Use local storage only
+            config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         }
 
         do {
@@ -68,23 +64,11 @@ struct PersistenceController {
             self.container = container
             print("✅ Persistence: ModelContainer initialized successfully.")
             
-            // Seed bundled decks after container is ready
-            
-            // Seed bundled decks logic is now handled by AppInitManager
+            // Seed bundled decks now handled by AppInitManager
             print("✅ Persistence: ModelContainer initialized. Waiting for AppInitManager.")
         } catch {
-            print("❌ Persistence: Failed to initialize with CloudKit: \(error.localizedDescription)")
-            print("🔄 Persistence: Falling back to local storage...")
-            
-            do {
-                let localConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-                let container = try ModelContainer(for: schema, configurations: [localConfig])
-                self.container = container
-                print("✅ Persistence: Fallback ModelContainer initialized.")
-            } catch {
-                print("🛑 Persistence: CRITICAL ERROR - Fallback failed: \(error)")
-                fatalError("Could not configure SwiftData container: \(error)")
-            }
+            print("🛑 Persistence: CRITICAL ERROR - Initialization failed: \(error)")
+            fatalError("Could not configure SwiftData container: \(error)")
         }
     }
     
@@ -126,7 +110,7 @@ struct PersistenceController {
              // Normal logic (resume or skip)
              if let existing = existingMasterDecks.first {
                  masterDeck = existing
-                 let currentCount = masterDeck.safeCards.count ?? 0
+                 let currentCount = masterDeck.safeCards.count
                  
                  // If count is suspiciously high (e.g. double import of 299 cards = 598), force reset
                  if currentCount > 400 {
