@@ -13,10 +13,10 @@ final class CardSet {
     var name: String = "Unknown Deck"
     var createdDate: Date = Date()
     
-    @Relationship(deleteRule: .cascade, inverse: \Card.cardSet)
+    @Relationship(deleteRule: .nullify, inverse: \Card.cardSet)
     var cards: [Card]? = []
     
-    @Relationship(deleteRule: .cascade, inverse: \StudySession.cardSet)
+    @Relationship(deleteRule: .nullify, inverse: \StudySession.cardSet)
     var studySessions: [StudySession]? = []
 
     init(name: String = "Unknown Deck", createdDate: Date = Date()) {

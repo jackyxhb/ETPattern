@@ -17,13 +17,11 @@ final class CloudSyncManager: ObservableObject {
     }
     
     private func setupObservers() {
-        /*
         NotificationCenter.default.publisher(for: NSPersistentCloudKitContainer.eventChangedNotification)
             .sink { [weak self] notification in
                 self?.handleCloudKitEvent(notification)
             }
             .store(in: &cancellables)
-        */
     }
     
     private func handleCloudKitEvent(_ notification: Notification) {

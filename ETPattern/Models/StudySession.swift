@@ -18,16 +18,16 @@ final class StudySession {
     var currentCardID: Int32?
     var totalCards: Int32 = 0
     
-    var cardSet: CardSet?
-    
     var reviewedCards: [Card]? = []
     var remainingCards: [Card]? = []
     
-    @Relationship(deleteRule: .cascade, inverse: \ReviewLog.studySession)
+    @Relationship(deleteRule: .nullify, inverse: \ReviewLog.studySession)
     var reviewLogs: [ReviewLog]? = []
     
+    var cardSet: CardSet?
+    
     var strategyValue: String = StudyStrategy.intelligent.rawValue
-    var cardOrder: [Int] = []
+    var cardOrder: [Int]? = []
 
     var strategy: StudyStrategy {
         get { StudyStrategy(rawValue: strategyValue) ?? .intelligent }

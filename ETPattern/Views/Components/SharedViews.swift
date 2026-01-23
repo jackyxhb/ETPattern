@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-// import Translation // Temporarily disabled for iOS 17.2 compatibility check
+import Translation
 import os
 import Combine
 
@@ -28,8 +28,6 @@ final class CardFaceViewModel: ObservableObject {
         }
     }
 
-/*
-    @available(iOS 18.0, *)
     func performTranslation(session: TranslationSession) {
         Task {
             do {
@@ -48,7 +46,6 @@ final class CardFaceViewModel: ObservableObject {
             }
         }
     }
-*/
 }
 
 enum SwipeDirection {
@@ -252,14 +249,10 @@ struct CardFace: View {
 
     @ViewBuilder
     private var translationOverlay: some View {
-/*
-        if #available(iOS 18.0, *) {
-            Color.clear
-                .safeAppTranslationTask { session in
-                    viewModel.performTranslation(session: session)
-                }
-        }
-*/
+        Color.clear
+            .safeAppTranslationTask { session in
+                viewModel.performTranslation(session: session)
+            }
     }
 
     // MARK: - Subviews
@@ -726,9 +719,7 @@ extension View {
         modifier(ThemedPresentation())
     }
 
-/*
     @ViewBuilder
-    @available(iOS 18.0, *)
     func safeAppTranslationTask(action: @escaping (TranslationSession) -> Void) -> some View {
         #if targetEnvironment(simulator)
         self
@@ -743,7 +734,6 @@ extension View {
         }
         #endif
     }
-*/
 }
 
 // MARK: - Onboarding Components

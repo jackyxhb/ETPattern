@@ -51,7 +51,6 @@ struct PersistenceController {
         let schema = Schema([Card.self, CardSet.self, StudySession.self, ReviewLog.self])
         let config: ModelConfiguration
         
-        /*
         if inMemory {
             config = ModelConfiguration(isStoredInMemoryOnly: true)
         } else {
@@ -60,16 +59,7 @@ struct PersistenceController {
                 schema: schema,
                 cloudKitDatabase: .private("iCloud.com.jackxhb.ETPattern")
             )
-            
-            // Validate if we can use this config (basic check)
             config = ckConfig
-        }
-        */
-        
-        if inMemory {
-            config = ModelConfiguration(isStoredInMemoryOnly: true)
-        } else {
-            config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         }
 
         do {

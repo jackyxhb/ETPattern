@@ -47,8 +47,8 @@ class SessionManager: ObservableObject {
             self.cardsPlayedInSession = Int(existingSession.cardsReviewed)
             self.currentStrategy = existingSession.strategy
             
-            if !existingSession.cardOrder.isEmpty {
-                self.sessionCardIDs = existingSession.cardOrder
+            if let cardOrder = existingSession.cardOrder, !cardOrder.isEmpty {
+                self.sessionCardIDs = cardOrder
             } else {
                 setupCardIDs()
             }

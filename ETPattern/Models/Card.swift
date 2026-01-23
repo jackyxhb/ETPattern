@@ -33,7 +33,7 @@ final class Card {
     @Relationship(deleteRule: .nullify, inverse: \StudySession.remainingCards)
     var remainingSessions: [StudySession]? = []
     
-    @Relationship(deleteRule: .cascade, inverse: \ReviewLog.card)
+    @Relationship(deleteRule: .nullify, inverse: \ReviewLog.card)
     var reviewLogs: [ReviewLog]? = []
 
     init(
