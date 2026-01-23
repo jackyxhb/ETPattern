@@ -10,7 +10,7 @@ import SwiftData
 import SwiftUI
 import ETPatternModels
 import ETPatternServices
-import ETPatternFeatures // For Coordinators if needed, but usually Protocol based
+import ETPatternFeatures // For Coordinators if needed, but usually Protocol based\nimport ETPatternServices // For SettingsService
 
 @Observable @MainActor
 public final class StudyViewModel {

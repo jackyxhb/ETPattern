@@ -50,7 +50,7 @@ extension Int {
 }
 
 // MARK: - Haptic Feedback
-#if canImport(UIKit)
+#if os(iOS)
 extension UIImpactFeedbackGenerator {
     static func lightImpact() {
         let generator = UIImpactFeedbackGenerator(style: .light)
@@ -88,7 +88,7 @@ extension UINotificationFeedbackGenerator {
 
 // MARK: - View Extensions
 extension View {
-    #if canImport(UIKit)
+    #if os(iOS)
     func withHapticFeedback(_ style: UIImpactFeedbackGenerator.FeedbackStyle = .medium, onTap: @escaping () -> Void) -> some View {
         self.onTapGesture {
             let generator = UIImpactFeedbackGenerator(style: style)
@@ -115,11 +115,11 @@ extension View {
             onTap()
         }
     }
-    
+
     func withSuccessHaptic() -> some View {
         self
     }
-    
+
     func withErrorHaptic() -> some View {
         self
     }
@@ -150,6 +150,53 @@ extension Animation {
 
     static var snappy: Animation {
         .spring(response: 0.2, dampingFraction: 0.8)
+    }
+}
+
+extension View {
+    @ViewBuilder
+    func fullScreenCoverIfiOS<Content: View>(isPresented: Binding<Bool>, @ViewBuilder content: @escaping () -> Content) -> some View {
+        #if os(iOS)
+        fullScreenCover(isPresented: isPresented, content: content)
+        #else
+        self
+        #endif
+    }
+
+    @ViewBuilder
+    func fullScreenCoverIfiOS<Item: Identifiable, Content: View>(item: Binding<Item?>, @ViewBuilder content: @escaping (Item) -> Content) -> some View {
+        #if os(iOS)
+        fullScreenCover(item: item, content: content)
+        #else
+        self
+        #endif
+    }
+
+    @ViewBuilder
+    func navigationBarHiddenIfiOS(_ hidden: Bool) -> some View {
+        #if os(iOS)
+        navigationBarHidden(hidden)
+        #else
+        self
+        #endif
+    }
+
+    @ViewBuilder
+    func tabViewStyleIfiOS<T: TabViewStyle>(_ style: T) -> some View {
+        #if os(iOS)
+        tabViewStyle(style)
+        #else
+        self
+        #endif
+    }
+
+    @ViewBuilder
+    func translationTaskIfiOS(_ configuration: TranslationSession.Configuration, _ action: @escaping (TranslationSession) -> Void) -> some View {
+        #if os(iOS)
+        translationTask(configuration, action)
+        #else
+        self
+        #endif
     }
 }
 

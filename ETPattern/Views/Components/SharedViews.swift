@@ -715,9 +715,7 @@ extension View {
 
     @ViewBuilder
     func safeAppTranslationTask(action: @escaping (TranslationSession) -> Void) -> some View {
-        #if targetEnvironment(simulator)
-        self
-        #else
+        #if os(iOS) && !targetEnvironment(simulator)
         self.translationTask(
             TranslationSession.Configuration(
                 source: Locale.Language(identifier: "en"),
@@ -726,6 +724,8 @@ extension View {
         ) { session in
             action(session)
         }
+        #else
+        self
         #endif
     }
 }
@@ -823,7 +823,7 @@ struct SharedOnboardingContainer<Content: View>: View {
                             .tag(index)
                     }
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
+                .tabViewStyleIfiOS(.page(indexDisplayMode: .never))
 
                 // Custom page indicators
                 HStack(spacing: theme.metrics.onboardingIndicatorSpacing) {
@@ -840,7 +840,9 @@ struct SharedOnboardingContainer<Content: View>: View {
                 HStack(spacing: theme.metrics.onboardingButtonSpacing) {
                     if currentPage.wrappedValue > 0 {
                         Button(action: {
-                            UIImpactFeedbackGenerator.lightImpact()
+                            #if os(iOS)
+UIImpactFeedbackGenerator(style: .light).impactOccurred()
+#endif
                             withAnimation(.smooth) {
                                 currentPage.wrappedValue -= 1
                             }
@@ -857,7 +859,9 @@ struct SharedOnboardingContainer<Content: View>: View {
 
                     if currentPage.wrappedValue < pages.count - 1 {
                         Button(action: {
-                            UIImpactFeedbackGenerator.lightImpact()
+                            #if os(iOS)
+UIImpactFeedbackGenerator(style: .light).impactOccurred()
+#endif
                             withAnimation(.smooth) {
                                 currentPage.wrappedValue += 1
                             }
@@ -872,7 +876,9 @@ struct SharedOnboardingContainer<Content: View>: View {
                         }
                     } else {
                         Button(action: {
-                            UINotificationFeedbackGenerator.success()
+                            #if os(iOS)
+UINotificationFeedbackGenerator().notificationOccurred(.success)
+#endif
                             withAnimation(.bouncy) {
                                 onComplete()
                             }

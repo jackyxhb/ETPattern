@@ -1,6 +1,6 @@
 import SwiftUI
 import SwiftData
-#if canImport(UIKit)
+#if os(iOS)
 import UIKit
 #endif
 import os.log
@@ -126,7 +126,7 @@ struct StudyView: View {
         .onChange(of: viewModel.currentIndex) { _, _ in
             ttsService.stop()
             speakCurrentText()
-            #if canImport(UIKit)
+            #if os(iOS)
             UIAccessibility.post(notification: .announcement, argument: "Now showing card \(viewModel.currentIndex + 1)")
             #endif
         }
@@ -158,25 +158,25 @@ struct StudyView: View {
     private var bottomControlBar: some View {
         SharedBottomControlBarView(
             strategyToggleAction: {
-                #if canImport(UIKit)
+                #if os(iOS)
                 UIImpactFeedbackGenerator.lightImpact()
                 #endif
                 viewModel.cycleStrategy()
             },
             previousAction: {
-                #if canImport(UIKit)
+                #if os(iOS)
                 UIImpactFeedbackGenerator.lightImpact()
                 #endif
                 viewModel.moveToPrevious()
             },
             nextAction: {
-                #if canImport(UIKit)
+                #if os(iOS)
                 UIImpactFeedbackGenerator.lightImpact()
                 #endif
                 viewModel.moveToNext()
             },
             closeAction: {
-                #if canImport(UIKit)
+                #if os(iOS)
                 UIImpactFeedbackGenerator.lightImpact()
                 #endif
                 viewModel.dismiss()

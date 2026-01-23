@@ -1,6 +1,6 @@
 import SwiftUI
 import SwiftData
-#if canImport(UIKit)
+#if os(iOS)
 import UIKit
 #endif
 import ETPatternModels
@@ -104,7 +104,7 @@ struct DeckDetailView: View {
         .task {
             loadCards()
         }
-        .fullScreenCover(item: $previewCard) { card in
+        .fullScreenCoverIfiOS(item: $previewCard) { card in
             let allCards = groupNames.flatMap { groups[$0] ?? [] }
             let index = allCards.firstIndex(where: { $0.id == card.id }) ?? 0
             CardPreviewContainer(card: card, index: index, total: allCards.count) {
@@ -191,9 +191,9 @@ private struct CardPreviewContainer: View {
             )
             .padding(.horizontal, theme.metrics.deckDetailPreviewHorizontalPadding)
             .onTapGesture {
-                #if canImport(UIKit)
-                UIImpactFeedbackGenerator.lightImpact()
-                #endif
+                #if os(iOS)
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+#endif
                 withAnimation(.bouncy) {
                     isFlipped.toggle()
                     speakCurrentText()

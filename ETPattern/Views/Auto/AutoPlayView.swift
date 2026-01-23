@@ -1,6 +1,6 @@
 import SwiftUI
 import SwiftData
-#if canImport(UIKit)
+#if os(iOS)
 import UIKit
 #endif
 import ETPatternModels
@@ -82,25 +82,25 @@ struct AutoPlayView: View {
     private var bottomControlBar: some View {
         SharedBottomControlBarView(
             strategyToggleAction: {
-                #if canImport(UIKit)
+                #if os(iOS)
                 UIImpactFeedbackGenerator.lightImpact()
                 #endif
                 viewModel.cycleStrategy()
             },
             previousAction: {
-                #if canImport(UIKit)
+                #if os(iOS)
                 UIImpactFeedbackGenerator.lightImpact()
                 #endif
                 viewModel.manualPrevious()
             },
             nextAction: {
-                #if canImport(UIKit)
+                #if os(iOS)
                 UIImpactFeedbackGenerator.lightImpact()
                 #endif
                 viewModel.manualNext()
             },
             closeAction: {
-                #if canImport(UIKit)
+                #if os(iOS)
                 UIImpactFeedbackGenerator.lightImpact()
                 #endif
                 viewModel.dismiss()
@@ -119,7 +119,7 @@ struct AutoPlayView: View {
 
     private var playPauseButton: some View {
         Button(action: {
-            #if canImport(UIKit)
+            #if os(iOS)
             UIImpactFeedbackGenerator.mediumImpact()
             #endif
             viewModel.togglePlayback()

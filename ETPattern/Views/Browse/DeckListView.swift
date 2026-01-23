@@ -80,7 +80,9 @@ struct DeckListView: View {
         let createdText = dateFormatter.string(from: cardSet.createdDate)
 
         return Button {
+            #if os(iOS)
             UIImpactFeedbackGenerator.lightImpact()
+            #endif
             viewModel.toggleSelection(for: cardSet)
         } label: {
             VStack(alignment: .leading, spacing: theme.metrics.deckCardInnerSpacing) {
