@@ -1,8 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
 import SwiftData
-import ETPatternModels
-import ETPatternServices
 
 struct ImportView: View {
     @Environment(\.modelContext) private var modelContext
@@ -205,7 +203,7 @@ struct ImportView: View {
             let sortedCards = cards.sorted { $0.id < $1.id }
             for card in sortedCards {
                 card.cardSet = cardSet
-                cardSet.cards.append(card)
+                cardSet.safeCards.append(card)
                 modelContext.insert(card)
             }
 

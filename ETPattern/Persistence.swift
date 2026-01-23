@@ -8,9 +8,6 @@
 import Foundation
 import SwiftData
 import CloudKit
-import ETPatternModels
-import ETPatternServices
-import ETPatternCore
 
 @MainActor
 struct PersistenceController {
@@ -40,7 +37,7 @@ struct PersistenceController {
             )
             card.tags = "sample"
             card.cardSet = cardSet
-            cardSet.cards.append(card)
+            cardSet.safeCards.append(card)
             context.insert(card)
         }
 
@@ -54,6 +51,7 @@ struct PersistenceController {
         let schema = Schema([Card.self, CardSet.self, StudySession.self, ReviewLog.self])
         let config: ModelConfiguration
         
+        /*
         if inMemory {
             config = ModelConfiguration(isStoredInMemoryOnly: true)
         } else {
@@ -65,6 +63,13 @@ struct PersistenceController {
             
             // Validate if we can use this config (basic check)
             config = ckConfig
+        }
+        */
+        
+        if inMemory {
+            config = ModelConfiguration(isStoredInMemoryOnly: true)
+        } else {
+            config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         }
 
         do {
@@ -131,7 +136,7 @@ struct PersistenceController {
              // Normal logic (resume or skip)
              if let existing = existingMasterDecks.first {
                  masterDeck = existing
-                 let currentCount = masterDeck.cards.count
+                 let currentCount = masterDeck.safeCards.count ?? 0
                  
                  // If count is suspiciously high (e.g. double import of 299 cards = 598), force reset
                  if currentCount > 400 {
@@ -168,7 +173,7 @@ struct PersistenceController {
                     card.id = nextCardId
                     nextCardId += 1
                     card.cardSet = masterDeck
-                    masterDeck.cards.append(card)
+                    masterDeck.safeCards.append(card)
                     modelContext.insert(card)
                 }
                 totalImported += cards.count

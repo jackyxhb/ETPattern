@@ -7,9 +7,6 @@
 
 import SwiftUI
 @preconcurrency import Combine
-import ETPatternModels
-import ETPatternServices
-import ETPatternCore
 
 @MainActor
 class ContentViewModel: ObservableObject {

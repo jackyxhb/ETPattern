@@ -1,8 +1,6 @@
 import SwiftUI
 import SwiftData
 import Charts
-import ETPatternModels
-import ETPatternServices
 
 struct SessionStatsView: View {
     @Environment(\.modelContext) private var modelContext

@@ -9,25 +9,25 @@ import Foundation
 import SwiftData
 
 @Model
-public final class ReviewLog {
-    public var date: Date
-    public var ratingValue: Int
-    public var interval: Int32
-    public var easeFactor: Double
+final class ReviewLog {
+    var date: Date = Date()
+    var ratingValue: Int = 0
+    var interval: Int32 = 0
+    var easeFactor: Double = 2.5
     
     // Previous values for reference
-    public var previousInterval: Int32
-    public var previousEaseFactor: Double
+    var previousInterval: Int32 = 0
+    var previousEaseFactor: Double = 2.5
     
-    public var card: Card?
-    public var studySession: StudySession?
+    var card: Card?
+    var studySession: StudySession?
     
-    public var rating: DifficultyRating? {
+    var rating: DifficultyRating? {
         get { DifficultyRating(rawValue: ratingValue) }
         set { ratingValue = newValue?.rawValue ?? 0 }
     }
     
-    public init(
+    init(
         date: Date = Date(),
         rating: DifficultyRating = .good,
         interval: Int32 = 0,

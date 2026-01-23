@@ -2,8 +2,6 @@ import SwiftUI
 import Charts
 import Combine
 import SwiftData
-import ETPatternModels
-import ETPatternServices
 
 struct MasteryDashboardView: View {
     @Environment(\.theme) var theme

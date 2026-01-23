@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import ETPatternCore
 
 struct Theme {
     let gradients: Gradients

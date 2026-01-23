@@ -1,27 +1,43 @@
-# macOS metadata
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+Icon
 
-# Xcode build output
-DerivedData/
+
+# Xcode
 build/
-build_sim/
-
-# User-specific Xcode settings
-xcuserdata/
-*.xcuserstate
-*.xcworkspace/xcuserdata/
-
-# SwiftPM / intermediate artifacts
-.build/
-
-# Generated logs & state
+DerivedData/
 *.moved-aside
 *.xccheckout
 *.xcscmblueprint
+*.xcuserstate
+xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcworkspace/xcshareddata/swiftpm/configuration
 
-# Simulator install artifacts
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Dependency managers
+Pods/
+Carthage/Build/
+
+# Artifacts
 *.ipa
 *.app
+*.dSYM.zip
+*.dSYM
 
+# Misc
+*.log
 .fakebuild_output*.log
-build.log
+update_xcode_project.py
+scripts/*.py
+scripts/*.log
+
+# Environment
+.env.local
+.env.*.local
+.env

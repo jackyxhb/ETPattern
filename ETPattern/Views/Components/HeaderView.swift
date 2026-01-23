@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import ETPatternServices
 
 struct HeaderView: View {
     @ObservedObject var viewModel: ContentViewModel
@@ -43,7 +42,7 @@ struct HeaderView: View {
         .font(.caption)
     }
     
-    @EnvironmentObject private var cloudSyncManager: ETPatternServices.CloudSyncManager
+    @EnvironmentObject private var cloudSyncManager: CloudSyncManager
 
     private var headerActions: some View {
         Button(action: {

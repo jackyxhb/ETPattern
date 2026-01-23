@@ -9,34 +9,34 @@ import Foundation
 import SwiftData
 
 @Model
-public final class Card {
-    @Attribute(.unique) public var id: Int32
-    public var front: String
-    public var back: String
-    public var tags: String?
-    public var cardName: String
-    public var groupId: Int32
-    public var groupName: String
-    public var difficulty: Int16
-    public var nextReviewDate: Date
-    public var interval: Int32
-    public var easeFactor: Double
-    public var timesReviewed: Int32
-    public var timesCorrect: Int32
-    public var lastReviewedDate: Date?
-    public var lapses: Int32 = 0
+final class Card {
+    var id: Int32 = 0
+    var front: String = ""
+    var back: String = ""
+    var tags: String?
+    var cardName: String = ""
+    var groupId: Int32 = 0
+    var groupName: String = ""
+    var difficulty: Int16 = 0
+    var nextReviewDate: Date = Date()
+    var interval: Int32 = 1
+    var easeFactor: Double = 2.5
+    var timesReviewed: Int32 = 0
+    var timesCorrect: Int32 = 0
+    var lastReviewedDate: Date?
+    var lapses: Int32 = 0
     
-    public var cardSet: CardSet?
+    var cardSet: CardSet?
 
     @Relationship(deleteRule: .nullify, inverse: \StudySession.reviewedCards)
-    public var reviewedSessions: [StudySession] = []
+    var reviewedSessions: [StudySession]? = []
     @Relationship(deleteRule: .nullify, inverse: \StudySession.remainingCards)
-    public var remainingSessions: [StudySession] = []
+    var remainingSessions: [StudySession]? = []
     
     @Relationship(deleteRule: .cascade, inverse: \ReviewLog.card)
-    public var reviewLogs: [ReviewLog] = []
+    var reviewLogs: [ReviewLog]? = []
 
-    public init(
+    init(
         id: Int32 = 0,
         front: String = "",
         back: String = "",
@@ -67,16 +67,29 @@ public final class Card {
 }
 
 extension Card {
-    public var successRate: Double {
+    var successRate: Double {
         guard timesReviewed > 0 else { return 0.0 }
         return Double(timesCorrect) / Double(timesReviewed)
     }
 
-    public func recordReview(correct: Bool) {
+    func recordReview(correct: Bool) {
         timesReviewed += 1
         if correct {
             timesCorrect += 1
         }
         lastReviewedDate = Date()
+    }
+    
+    var safeReviewedSessions: [StudySession] {
+        get { reviewedSessions ?? [] }
+        set { reviewedSessions = newValue }
+    }
+    var safeRemainingSessions: [StudySession] {
+        get { remainingSessions ?? [] }
+        set { remainingSessions = newValue }
+    }
+    var safeReviewLogs: [ReviewLog] {
+        get { reviewLogs ?? [] }
+        set { reviewLogs = newValue }
     }
 }

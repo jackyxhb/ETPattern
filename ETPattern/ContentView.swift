@@ -9,8 +9,6 @@ import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
 import os.log
-import ETPatternModels
-import ETPatternServices
 
 struct ContentView: View {
     @Environment(\.theme) var theme

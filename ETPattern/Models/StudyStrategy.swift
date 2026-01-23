@@ -1,6 +1,6 @@
 import Foundation
 
-public enum StudyStrategy: String, Codable, CaseIterable {
+enum StudyStrategy: String, Codable, CaseIterable {
     /// Cards ordered by their original sequence (usually ID).
     case linear
     /// Cards purely shuffled.
@@ -8,7 +8,7 @@ public enum StudyStrategy: String, Codable, CaseIterable {
     /// SRS Priority: Due/Lapses first, then New cards, then Mature cards.
     case intelligent
     
-    public var displayName: String {
+    var displayName: String {
         switch self {
         case .linear: return "Sequential"
         case .shuffled: return "Random"
@@ -16,7 +16,7 @@ public enum StudyStrategy: String, Codable, CaseIterable {
         }
     }
     
-    public var icon: String {
+    var icon: String {
         switch self {
         case .linear: return "arrow.right.circle"
         case .shuffled: return "shuffle"

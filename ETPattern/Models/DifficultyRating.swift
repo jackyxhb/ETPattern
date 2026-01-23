@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum DifficultyRating: Int, CaseIterable, Codable {
+enum DifficultyRating: Int, CaseIterable, Codable {
     case again = 0
     case hard = 1
     case good = 2

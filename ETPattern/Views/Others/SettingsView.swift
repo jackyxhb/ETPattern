@@ -7,8 +7,6 @@
 
 import SwiftUI
 import AVFoundation
-import ETPatternServices
-import ETPatternCore
 
 struct SettingsView: View {
     @Environment(\.theme) var theme

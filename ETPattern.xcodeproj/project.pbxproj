@@ -6,11 +6,7 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		22419E142EFC2A5F000F8B43 /* ETPatternCore in Frameworks */ = {isa = PBXBuildFile; productRef = 22419E132EFC2A5F000F8B43 /* ETPatternCore */; };
-		22419E162EFC2A5F000F8B44 /* ETPatternModels in Frameworks */ = {isa = PBXBuildFile; productRef = 22419E152EFC2A5F000F8B44 /* ETPatternModels */; };
-		22419E182EFC2A5F000F8B45 /* ETPatternServices in Frameworks */ = {isa = PBXBuildFile; productRef = 22419E172EFC2A5F000F8B45 /* ETPatternServices */; };
-/* End PBXBuildFile section */
+/* Begin PBXBuildFile section *//* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		22EC7D4E2ED5726F00C3DDDA /* ETPattern.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ETPattern.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -28,11 +24,7 @@
 		22EC7D4B2ED5726F00C3DDDA /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
-			files = (
-				22419E142EFC2A5F000F8B43 /* ETPatternCore in Frameworks */,
-				22419E162EFC2A5F000F8B44 /* ETPatternModels in Frameworks */,
-				22419E182EFC2A5F000F8B45 /* ETPatternServices in Frameworks */,
-			);
+			files = (			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -73,11 +65,6 @@
 				22EC7D502ED5726F00C3DDDA /* ETPattern */,
 			);
 			name = ETPattern;
-			packageProductDependencies = (
-				22419E132EFC2A5F000F8B43 /* ETPatternCore */,
-				22419E152EFC2A5F000F8B44 /* ETPatternModels */,
-				22419E172EFC2A5F000F8B45 /* ETPatternServices */,
-			);
 			productName = ETPattern;
 			productReference = 22EC7D4E2ED5726F00C3DDDA /* ETPattern.app */;
 			productType = "com.apple.product-type.application";
@@ -103,13 +90,9 @@
 			knownRegions = (
 				en,
 				Base,
-				es,
 			);
 			mainGroup = 22EC7D452ED5726E00C3DDDA;
 			minimizedProjectReferenceProxies = 1;
-			packageReferences = (
-				22419E122EFC2A5F000F8B43 /* XCLocalSwiftPackageReference "." */,
-			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 22EC7D4F2ED5726F00C3DDDA /* Products */;
 			projectDirPath = "";
@@ -194,7 +177,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -253,7 +236,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -365,27 +348,9 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		22419E122EFC2A5F000F8B43 /* XCLocalSwiftPackageReference "." */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = .;
-		};
-/* End XCLocalSwiftPackageReference section */
 
-/* Begin XCSwiftPackageProductDependency section */
-		22419E132EFC2A5F000F8B43 /* ETPatternCore */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = ETPatternCore;
-		};
-		22419E152EFC2A5F000F8B44 /* ETPatternModels */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = ETPatternModels;
-		};
-		22419E172EFC2A5F000F8B45 /* ETPatternServices */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = ETPatternServices;
-		};
-/* End XCSwiftPackageProductDependency section */
+
+
 	};
 	rootObject = 22EC7D462ED5726F00C3DDDA /* Project object */;
 }

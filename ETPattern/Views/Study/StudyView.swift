@@ -2,8 +2,6 @@ import SwiftUI
 import SwiftData
 import UIKit
 import os.log
-import ETPatternModels
-import ETPatternServices
 
 struct StudyView: View {
     let cardSet: CardSet
@@ -334,7 +332,7 @@ private var previewCardSet: CardSet {
 
     let card = Card(id: 1, front: "I think...", back: "Example 1<br>Example 2<br>Example 3<br>Example 4<br>Example 5", cardName: "Pattern", groupId: 1, groupName: "Group 1")
     card.cardSet = cardSet
-    cardSet.cards.append(card)
+    cardSet.safeCards.append(card)
     container.mainContext.insert(card)
     
     return cardSet

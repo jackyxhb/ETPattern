@@ -1,8 +1,6 @@
 import SwiftUI
 import SwiftData
 import UIKit
-import ETPatternModels
-import ETPatternServices
 
 struct DeckDetailView: View {
     @Environment(\.modelContext) private var modelContext
@@ -113,7 +111,7 @@ struct DeckDetailView: View {
     }
 
     private func loadCards() {
-        let cards = cardSet.cards
+        let cards = cardSet.safeCards
         let sortedCards = cards.sorted { ($0.id, $0.front) < ($1.id, $1.front) }
         let newGroups = Dictionary(grouping: sortedCards) { $0.groupName }
         

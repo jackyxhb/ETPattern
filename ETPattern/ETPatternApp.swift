@@ -8,11 +8,8 @@
 import SwiftUI
 import SwiftData
 import Combine
-import ETPatternServices
-import ETPatternCore
 
 @main
-@available(iOS 18.0, *)
 struct ETPatternApp: App {
     let persistenceController = PersistenceController.shared
     @StateObject private var themeManager = ThemeManager.shared

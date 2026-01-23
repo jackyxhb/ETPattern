@@ -8,12 +8,10 @@
 import Foundation
 import SwiftData
 import UniformTypeIdentifiers
-import ETPatternModels
-import ETPatternCore
 
 /// Service protocol for CSV import/export operations
 @MainActor
-public protocol CSVServiceProtocol {
+protocol CSVServiceProtocol {
     func exportCardSet(_ cardSet: CardSet) throws -> String
     func reimportBundledDeck(_ cardSet: CardSet, kind: CSVService.BundledDeckKind) async throws -> (importedCount: Int, failures: [String])
     func reimportCustomDeck(_ cardSet: CardSet, from url: URL) async throws -> Int
@@ -21,24 +19,24 @@ public protocol CSVServiceProtocol {
 
 /// Service for handling CSV import/export operations
 @MainActor
-public class CSVService: CSVServiceProtocol {
+class CSVService: CSVServiceProtocol {
     private let csvImporter: CSVImporter
     private let modelContext: ModelContext
 
-    public enum BundledDeckKind {
+    enum BundledDeckKind {
         case master
         case group(fileName: String)
     }
 
-    public init(modelContext: ModelContext, csvImporter: CSVImporter) {
+    init(modelContext: ModelContext, csvImporter: CSVImporter) {
         self.modelContext = modelContext
         self.csvImporter = csvImporter
     }
 
-    public func exportCardSet(_ cardSet: CardSet) throws -> String {
+    func exportCardSet(_ cardSet: CardSet) throws -> String {
         var csvContent = "Front;;Back;;Tags\n"
 
-        for card in cardSet.cards.sorted(by: { $0.front < $1.front }) {
+        for card in cardSet.safeCards.sorted(by: { $0.front < $1.front }) {
             let front = card.front.replacingOccurrences(of: "\"", with: "\"\"")
             let back = card.back.replacingOccurrences(of: "\"", with: "\"\"").replacingOccurrences(of: "\n", with: "<br>")
             let tags = (card.tags ?? "").replacingOccurrences(of: "\"", with: "\"\"")
@@ -49,7 +47,7 @@ public class CSVService: CSVServiceProtocol {
         return csvContent
     }
 
-    public func reimportBundledDeck(_ cardSet: CardSet, kind: BundledDeckKind) async throws -> (importedCount: Int, failures: [String]) {
+    func reimportBundledDeck(_ cardSet: CardSet, kind: BundledDeckKind) async throws -> (importedCount: Int, failures: [String]) {
         deleteAllCards(in: cardSet)
 
         var importedCount = 0
@@ -68,7 +66,7 @@ public class CSVService: CSVServiceProtocol {
                 let cards = self.csvImporter.parseCSV(content, cardSetName: Constants.Decks.bundledMasterName)
                 for card in cards {
                     card.cardSet = cardSet
-                    cardSet.cards.append(card)
+                    cardSet.safeCards.append(card)
                     modelContext.insert(card)
                 }
                 importedCount += cards.count
@@ -81,7 +79,7 @@ public class CSVService: CSVServiceProtocol {
             let cards = self.csvImporter.parseCSV(content, cardSetName: cardSet.name)
             for card in cards {
                 card.cardSet = cardSet
-                cardSet.cards.append(card)
+                cardSet.safeCards.append(card)
                 modelContext.insert(card)
             }
             importedCount = cards.count
@@ -91,7 +89,7 @@ public class CSVService: CSVServiceProtocol {
         return (importedCount, failures)
     }
 
-    public func reimportCustomDeck(_ cardSet: CardSet, from url: URL) async throws -> Int {
+    func reimportCustomDeck(_ cardSet: CardSet, from url: URL) async throws -> Int {
         guard url.startAccessingSecurityScopedResource() else {
             throw CSVServiceError.securityScopedAccessFailed
         }
@@ -107,7 +105,7 @@ public class CSVService: CSVServiceProtocol {
         deleteAllCards(in: cardSet)
         for card in cards {
             card.cardSet = cardSet
-            cardSet.cards.append(card)
+            cardSet.safeCards.append(card)
             modelContext.insert(card)
         }
         
@@ -116,13 +114,13 @@ public class CSVService: CSVServiceProtocol {
     }
 
     private func deleteAllCards(in cardSet: CardSet) {
-        for card in cardSet.cards {
+        for card in cardSet.safeCards {
             modelContext.delete(card)
         }
-        cardSet.cards.removeAll()
+        cardSet.safeCards.removeAll()
     }
 
-    public func bundledDeckKind(for cardSet: CardSet) -> BundledDeckKind? {
+    func bundledDeckKind(for cardSet: CardSet) -> BundledDeckKind? {
         let name = cardSet.name.trimmingCharacters(in: .whitespacesAndNewlines)
         if name == Constants.Decks.bundledMasterName || name == Constants.Decks.legacyBundledMasterName {
             return .master
@@ -138,13 +136,13 @@ public class CSVService: CSVServiceProtocol {
 
 
 // MARK: - CSV Service Errors
-public enum CSVServiceError: LocalizedError {
+enum CSVServiceError: LocalizedError {
     case bundledFileNotFound(String)
     case securityScopedAccessFailed
     case noValidCardsFound
     case cardSetNotFound
 
-    public var errorDescription: String? {
+    var errorDescription: String? {
         switch self {
         case .bundledFileNotFound(let fileName):
             return "Failed to load bundled CSV \(fileName)."

@@ -1,17 +1,16 @@
 import Foundation
 import SwiftData
-import ETPatternModels
 
 @MainActor
-public final class AnalyticsService {
+final class AnalyticsService {
     private let modelContext: ModelContext
 
-    public init(modelContext: ModelContext) {
+    init(modelContext: ModelContext) {
         self.modelContext = modelContext
     }
 
     /// Fetches review logs for a specific time range
-    public func fetchReviewLogs(days: Int = 30) async throws -> [ReviewLog] {
+    func fetchReviewLogs(days: Int = 30) async throws -> [ReviewLog] {
         let now = Date()
         guard let startDate = Calendar.current.date(byAdding: .day, value: -days, to: now) else {
             return []
@@ -26,7 +25,7 @@ public final class AnalyticsService {
     }
 
     /// Agregates daily review counts for bar charts
-    public func aggregateDailyActivity(logs: [ReviewLog]) -> [Date: Int] {
+    func aggregateDailyActivity(logs: [ReviewLog]) -> [Date: Int] {
         var activity: [Date: Int] = [:]
         let calendar = Calendar.current
 
@@ -38,7 +37,7 @@ public final class AnalyticsService {
     }
 
     /// Calculates retention rate (percentage of "Again" ratings vs others)
-    public func calculateRetentionRate(logs: [ReviewLog]) -> Double {
+    func calculateRetentionRate(logs: [ReviewLog]) -> Double {
         guard !logs.isEmpty else { return 0.0 }
         
         let successfulReviews = logs.filter { log in
@@ -50,7 +49,7 @@ public final class AnalyticsService {
     }
 
     /// Categorizes all cards in the database by maturity
-    public func getMaturityDistribution() async throws -> (new: Int, learning: Int, mature: Int) {
+    func getMaturityDistribution() async throws -> (new: Int, learning: Int, mature: Int) {
         let fetchDescriptor = FetchDescriptor<Card>()
         let allCards = try modelContext.fetch(fetchDescriptor)
         

@@ -1,11 +1,9 @@
 import Foundation
 import SwiftData
 @preconcurrency import Combine
-import ETPatternModels
-import ETPatternCore
 
 @MainActor
-public protocol PaginatedCardSetDataSourceProtocol {
+protocol PaginatedCardSetDataSourceProtocol {
     var cardSets: [CardSet] { get }
     var isLoading: Bool { get }
     var hasMoreData: Bool { get }
@@ -17,9 +15,9 @@ public protocol PaginatedCardSetDataSourceProtocol {
     func invalidateCache()
 }
 
-public enum DataSourceError: LocalizedError {
+enum DataSourceError: LocalizedError {
     case fetchFailed(reason: String)
-    public var errorDescription: String? {
+    var errorDescription: String? {
         switch self {
         case .fetchFailed(let reason): return "Fetch failed: \(reason)"
         }
@@ -27,12 +25,12 @@ public enum DataSourceError: LocalizedError {
 }
 
 @MainActor
-public class PaginatedCardSetDataSource: ObservableObject, PaginatedCardSetDataSourceProtocol {
+class PaginatedCardSetDataSource: ObservableObject, PaginatedCardSetDataSourceProtocol {
     // MARK: - Published Properties
-    @Published public private(set) var cardSets: [CardSet] = []
-    @Published public private(set) var isLoading = false
-    @Published public private(set) var hasMoreData = true
-    @Published public private(set) var error: DataSourceError?
+    @Published private(set) var cardSets: [CardSet] = []
+    @Published private(set) var isLoading = false
+    @Published private(set) var hasMoreData = true
+    @Published private(set) var error: DataSourceError?
     
     // MARK: - Private Properties
     private let modelContext: ModelContext
@@ -42,7 +40,7 @@ public class PaginatedCardSetDataSource: ObservableObject, PaginatedCardSetDataS
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Initialization
-    public init(modelContext: ModelContext, pageSize: Int = 20) {
+    init(modelContext: ModelContext, pageSize: Int = 20) {
         self.modelContext = modelContext
         self.pageSize = pageSize
         
@@ -54,7 +52,7 @@ public class PaginatedCardSetDataSource: ObservableObject, PaginatedCardSetDataS
     }
     
     // MARK: - Public Methods
-    public func loadInitialData() async {
+    func loadInitialData() async {
         guard !isLoading else { return }
         
         isLoading = true
@@ -74,7 +72,7 @@ public class PaginatedCardSetDataSource: ObservableObject, PaginatedCardSetDataS
         }
     }
     
-    public func loadMoreData() async {
+    func loadMoreData() async {
         guard !isLoading && !isLoadingMore && hasMoreData else { return }
         
         isLoadingMore = true
@@ -91,11 +89,11 @@ public class PaginatedCardSetDataSource: ObservableObject, PaginatedCardSetDataS
         }
     }
     
-    public func refreshData() async {
+    func refreshData() async {
         await loadInitialData()
     }
     
-    public func invalidateCache() {
+    func invalidateCache() {
         cardSets = []
         currentOffset = 0
         hasMoreData = true

@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import ETPatternModels
 
 struct SharedMainControlsView<MiddleContent: View>: View {
     let strategyToggleAction: () -> Void

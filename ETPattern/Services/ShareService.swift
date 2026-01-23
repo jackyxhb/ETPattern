@@ -9,15 +9,15 @@ import Foundation
 import UIKit
 
 /// Protocol for sharing operations
-public protocol ShareServiceProtocol {
+protocol ShareServiceProtocol {
     func shareCSVContent(_ content: String, fileName: String) throws
 }
 
 /// Service for handling share operations
-public class ShareService: ShareServiceProtocol {
-    public init() {}
+class ShareService: ShareServiceProtocol {
+    init() {}
     
-    public func shareCSVContent(_ content: String, fileName: String) throws {
+    func shareCSVContent(_ content: String, fileName: String) throws {
         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("\(fileName).csv")
         try content.write(to: tempURL, atomically: true, encoding: .utf8)
 

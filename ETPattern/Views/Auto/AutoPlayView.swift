@@ -1,8 +1,6 @@
 import SwiftUI
 import SwiftData
 import UIKit
-import ETPatternModels
-import ETPatternServices
 
 struct AutoPlayView: View {
     let cardSet: CardSet

@@ -7,17 +7,15 @@
 
 import Foundation
 import SwiftData
-import ETPatternModels
-import ETPatternCore
 
-public class CSVImporter {
+class CSVImporter {
     private let modelContext: ModelContext
 
-    public init(modelContext: ModelContext) {
+    init(modelContext: ModelContext) {
         self.modelContext = modelContext
     }
 
-    public func parseCSV(_ content: String, cardSetName: String) -> [Card] {
+    func parseCSV(_ content: String, cardSetName: String) -> [Card] {
         let lines = content.components(separatedBy: .newlines)
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { line in
@@ -71,7 +69,7 @@ public class CSVImporter {
         return cards
     }
 
-    public func importBundledCSV(named fileName: String, cardSetName: String) throws -> CardSet {
+    func importBundledCSV(named fileName: String, cardSetName: String) throws -> CardSet {
         // Note: Using Bundle.main here assumes the app provides the resources.
         // In a modular setup, we might need to pass the bundle or use a specific one.
         guard let url = Bundle.main.url(forResource: fileName, withExtension: "csv") else {
@@ -95,7 +93,7 @@ public class CSVImporter {
             // Set the cardSet relationship for each card
             for card in sortedCards {
                 card.cardSet = cardSet
-                cardSet.cards.append(card)
+                cardSet.safeCards.append(card)
                 modelContext.insert(card)
             }
 
@@ -109,12 +107,12 @@ public class CSVImporter {
     }
 }
 
-public enum CSVImporterError: LocalizedError {
+enum CSVImporterError: LocalizedError {
     case csvFileNotFound(fileName: String)
     case csvParsingFailed(reason: String)
     case csvImportFailed(reason: String)
 
-    public var errorDescription: String? {
+    var errorDescription: String? {
         switch self {
         case .csvFileNotFound(let fileName):
             return "CSV file not found: \(fileName)"

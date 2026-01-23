@@ -6,14 +6,12 @@
 //
 
 import Foundation
-import ETPatternCore
-import ETPatternModels
 import os
 
-public class SpacedRepetitionService {
-    public init() {}
+class SpacedRepetitionService {
+    init() {}
 
-    public func updateCardDifficulty(_ card: Card, rating: DifficultyRating, in session: StudySession? = nil) {
+    func updateCardDifficulty(_ card: Card, rating: DifficultyRating, in session: StudySession? = nil) {
         let previousInterval = card.interval
         let previousEaseFactor = card.easeFactor
         
@@ -57,13 +55,13 @@ public class SpacedRepetitionService {
         )
         reviewLog.card = card
         reviewLog.studySession = session
-        card.reviewLogs.append(reviewLog)
-        session?.reviewLogs.append(reviewLog)
+        card.safeReviewLogs.append(reviewLog)
+        session?.safeReviewLogs.append(reviewLog)
     }
 
-    public func getCardsDueForReview(from cardSet: CardSet) -> [Card] {
+    func getCardsDueForReview(from cardSet: CardSet) -> [Card] {
         let now = Date()
-        return cardSet.cards.filter { card in
+        return cardSet.safeCards.filter { card in
             // Cards with past due dates are due (nextReviewDate defaults to Date() in Model if not provided)
             return card.nextReviewDate <= now
         }.sorted { (card1, card2) in
@@ -71,7 +69,7 @@ public class SpacedRepetitionService {
         }
     }
 
-    public func getNextReviewDate(for card: Card) -> Date {
+    func getNextReviewDate(for card: Card) -> Date {
         return Date().addingTimeInterval(TimeInterval(card.interval * 86400))
     }
 }

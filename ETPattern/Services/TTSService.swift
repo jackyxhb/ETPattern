@@ -8,11 +8,10 @@
 import Foundation
 import AVFoundation
 @preconcurrency import Combine
-import ETPatternCore
 
-public enum TTSServiceError: LocalizedError {
+enum TTSServiceError: LocalizedError {
     case ttsVoiceNotAvailable(voice: String)
-    public var errorDescription: String? {
+    var errorDescription: String? {
         switch self {
         case .ttsVoiceNotAvailable(let voice): return "TTS voice not available: \(voice)"
         }
@@ -20,11 +19,11 @@ public enum TTSServiceError: LocalizedError {
 }
 
 @MainActor
-public class TTSService: NSObject, AVSpeechSynthesizerDelegate, @preconcurrency ObservableObject, @unchecked Sendable {
+class TTSService: NSObject, AVSpeechSynthesizerDelegate, @preconcurrency ObservableObject, @unchecked Sendable {
     // MARK: - Singleton
-    public static let shared = TTSService()
+    static let shared = TTSService()
     
-    public let objectWillChange = PassthroughSubject<Void, Never>()
+    let objectWillChange = PassthroughSubject<Void, Never>()
     private let synthesizer = AVSpeechSynthesizer()
     // Stores the user selection (either language like "en-US" or a concrete voice identifier).
     private var voicePreference: String
@@ -43,8 +42,8 @@ public class TTSService: NSObject, AVSpeechSynthesizerDelegate, @preconcurrency 
     // MARK: - Cancellable Storage
     private var cancellables = Set<AnyCancellable>()
 
-    @Published public var isSpeaking = false
-    @Published public var errorMessage: String?
+    @Published var isSpeaking = false
+    @Published var errorMessage: String?
 
     override private init() {
         let storedPreference = UserDefaults.standard.string(forKey: "selectedVoice") ?? Constants.TTS.defaultVoice
@@ -79,7 +78,7 @@ public class TTSService: NSObject, AVSpeechSynthesizerDelegate, @preconcurrency 
         // Currently no subscriptions, but infrastructure is ready
     }
 
-    public func speak(_ text: String, completion: (() -> Void)? = nil) {
+    func speak(_ text: String, completion: (() -> Void)? = nil) {
         // Clear any previous error
         errorMessage = nil
         lastError = nil
@@ -122,7 +121,7 @@ public class TTSService: NSObject, AVSpeechSynthesizerDelegate, @preconcurrency 
         isSpeaking = true
     }
 
-    public func stop() {
+    func stop() {
         isManuallyStopped = true
         synthesizer.stopSpeaking(at: .immediate)
         completionHandler = nil
@@ -132,12 +131,12 @@ public class TTSService: NSObject, AVSpeechSynthesizerDelegate, @preconcurrency 
 
     /// Accepts either a concrete voice identifier (e.g. "com.apple.ttsbundle.Samantha-compact")
     /// or a language code (e.g. "en-US", "en-GB").
-    public func setVoice(_ voiceIdentifierOrLanguage: String) {
+    func setVoice(_ voiceIdentifierOrLanguage: String) {
         voicePreference = voiceIdentifierOrLanguage
         resolveVoicePreferenceAndPersistIfNeeded()
     }
 
-    public func getCurrentVoice() -> String {
+    func getCurrentVoice() -> String {
         // Return the persisted preference (language or identifier) so Settings stays stable.
         return voicePreference
     }
@@ -196,50 +195,50 @@ public class TTSService: NSObject, AVSpeechSynthesizerDelegate, @preconcurrency 
         return voices.first?.identifier
     }
 
-    public func setRate(_ rate: Float) {
+    func setRate(_ rate: Float) {
         currentPercentage = max(Constants.TTS.minPercentage, min(Constants.TTS.maxPercentage, rate))
         UserDefaults.standard.set(currentPercentage, forKey: "ttsPercentage")
     }
 
-    public func getCurrentRate() -> Float {
+    func getCurrentRate() -> Float {
         return currentPercentage
     }
 
-    public func setPitch(_ pitch: Float) {
+    func setPitch(_ pitch: Float) {
         currentPitch = max(Constants.TTS.minPitch, min(Constants.TTS.maxPitch, pitch))
         UserDefaults.standard.set(currentPitch, forKey: "ttsPitch")
     }
 
-    public func getCurrentPitch() -> Float {
+    func getCurrentPitch() -> Float {
         return currentPitch
     }
 
-    public func setVolume(_ volume: Float) {
+    func setVolume(_ volume: Float) {
         currentVolume = max(Constants.TTS.minVolume, min(Constants.TTS.maxVolume, volume))
         UserDefaults.standard.set(currentVolume, forKey: "ttsVolume")
     }
 
-    public func getCurrentVolume() -> Float {
+    func getCurrentVolume() -> Float {
         return currentVolume
     }
 
-    public func setPause(_ pause: TimeInterval) {
+    func setPause(_ pause: TimeInterval) {
         currentPause = max(Constants.TTS.minPause, min(Constants.TTS.maxPause, pause))
         UserDefaults.standard.set(currentPause, forKey: "ttsPause")
     }
 
-    public func getCurrentPause() -> TimeInterval {
+    func getCurrentPause() -> TimeInterval {
         return currentPause
     }
 
-    public func getAvailableVoices() -> [AVSpeechSynthesisVoice] {
+    func getAvailableVoices() -> [AVSpeechSynthesisVoice] {
         return AVSpeechSynthesisVoice.speechVoices().filter { voice in
             voice.language.starts(with: "en-")
         }
     }
 
     // MARK: - AVSpeechSynthesizerDelegate
-    public nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
         Task { @MainActor in
             // Check state synchronously to prevent race conditions
             guard !self.isManuallyStopped, let handler = self.completionHandler, self.completionSequence == self.currentUtteranceSequence else {
@@ -257,14 +256,14 @@ public class TTSService: NSObject, AVSpeechSynthesizerDelegate, @preconcurrency 
         }
     }
 
-    public nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
         Task { @MainActor in
             self.isSpeaking = false
             self.completionHandler = nil
         }
     }
 
-    public nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
         Task { @MainActor in
             self.isSpeaking = true
         }

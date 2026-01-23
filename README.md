@@ -5,12 +5,12 @@
 ![iOS 17+](https://img.shields.io/badge/iOS-17.0+-blue.svg)
 ![Swift 6.0](https://img.shields.io/badge/Swift-6.0-orange.svg)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI-purple.svg)
-![Architecture](https://img.shields.io/badge/Arch-Modular%20SPM-green.svg)
+![Architecture](https://img.shields.io/badge/Arch-Pure%20Xcode-green.svg)
 ![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)
 
 ---
 
-## ✨ Key Features (v2.0)
+## ✨ Key Features (v2.1)
 
 ### 🧠 Intelligent Spaced Repetition (SRS)
 
@@ -45,57 +45,60 @@ A complete UI overhaul featuring a modern **Glassmorphism** design language.
 
 ### 📱 Native iPad Experience
 
-- **Optimized Layout**: Fully adaptive layouts properly utilizing the larger canvas.
+- **Optimized Layout**: Fully adaptive layouts properly utilize the larger canvas.
 - **Sidebar Support**: Dedicated sidebar navigation for quick access to decks and tools.
 - **Floating Modals**: Popovers and sheets are optimized for non-intrusive presentation (Split View ready).
 
 ---
 
-## 🏗️ Modular Architecture
+## 🏗️ Unified Architecture (Pure Xcode)
 
-The project has been refactored into a scalable 3-tier architecture using localized Swift Packages:
+The project follows a clean, layered architecture consolidated into a single Xcode target for maximum development efficiency.
 
 ```text
 ETPattern/
-├── ETPatternModels/       # Domain Entities (Schema)
-│   ├── Card, CardSet
-│   ├── StudySession, ReviewLog
-│   └── DifficultyRating
-├── ETPatternCore/         # Business Logic (Pure Swift)
-│   ├── SpacedRepetitionLogic (SM-2 implementation)
-│   └── QueueBuilder
-├── ETPatternServices/     # Application Services (IO)
-│   ├── SessionManager
-│   ├── CSVImporter
-│   └── CloudSyncManager
-└── ETPattern/             # App Composition Root (UI)
-    ├── Views/ (StudyView, Dashboard, Splash)
-    └── AppInitManager
+├── Models/           # SwiftData Entities (Card, CardSet, ReviewLog)
+├── Core/             # Pure Logic (SM-2 Algorithm, Constants)
+├── Services/         # I/O & Logic (TTSService, CloudSync, CSV)
+├── ViewModels/       # State Management (MainActor)
+├── Views/            # SwiftUI Presentation (Theme-aware)
+├── Utilities/        # Extensions & Shared Helpers
+├── Resources/        # Assets, Strings, and Bundled Decks
+└── scripts/          # Build, Deploy, and CI automation
 ```
+
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
 - Xcode 16.0+
-- iOS 16.0+ Device/Simulator
+- iOS 17.0+ Device/Simulator
 - Swift 6.0 Toolchain
 
-### Quick Install (Device)
+### Quick Install
 
-Connect your iPhone 16 Plus (or other device) and run:
+The project includes automation scripts for easy deployment:
+
+**For your primary device (iPhone 16 Plus):**
 
 ```bash
 ./deploy.sh
 ```
 
-This verified script builds the app using `xcodebuild` and installs it via `devicectl`.
+**Universal installer (Device or Simulator):**
+
+```bash
+./install.sh
+```
 
 ### Manual Build
 
 1. Open `ETPattern.xcodeproj`
-2. Select target `ETPattern` > Any iOS Device (arm64)
-3. **Cmd + R** to run.
+2. Select target `ETPattern`
+3. Select your destination (Device or Simulator)
+4. **Cmd + R** to run.
 
 ---
 
@@ -117,11 +120,15 @@ I doubt...;;I doubt it will rain.<br>I doubt he knows.;;2-Skepticism
 
 ## 📜 Changelog
 
+### v2.1.0 - "Unified & Simplified"
+
+- **Architecture**: Migrated from a hybrid SPM + Xcode to a pure, monolithic Xcode project.
+- **Cleanup**: Removed all `public` keywords and cross-module imports for easier internal maintenance.
+- **Stability**: Fixed platform compatibility issues by removing stale macOS target declarations.
+
 ### v2.0.6
 
 - **Fixes**: Temporarily disabled version sync script to fix build errors.
-
-### v2.0.5
 
 ### v2.0.4
 
@@ -131,16 +138,10 @@ I doubt...;;I doubt it will rain.<br>I doubt he knows.;;2-Skepticism
 
 ### v2.0.0 - "The Modern Era"
 
-- **Architecture**: Full modularization (Models/Core/Services).
+- **Architecture**: Initial modularization using SPM.
 - **Persistence**: Migration to SwiftData + CloudKit readiness.
 - **UI**: Liquid Glass redesign + "Monogram" App Icon.
 - **SRS**: SM-2 Algorithm + 4-Button Grading System.
-- **Fixes**: Resolved race conditions in seed logic & strictly filtered CSV artifacts.
-
-### v1.8.0
-
-- **Chinese Translations**: Native on-device translation support.
-- **Unique IDs**: Global ID system to prevent duplications.
 
 ---
 

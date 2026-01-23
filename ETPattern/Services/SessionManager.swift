@@ -1,18 +1,17 @@
 import Foundation
 import SwiftData
 @preconcurrency import Combine
-import ETPatternModels
 
-public class SessionManager: ObservableObject {
+class SessionManager: ObservableObject {
     // MARK: - Published Properties
-    @Published public var sessionCardIDs: [Int] = []
-    @Published public var currentIndex: Int = 0
-    @Published public var currentStrategy: StudyStrategy = .intelligent
-    @Published public var cardsPlayedInSession: Int = 0
-    @Published public var currentSession: StudySession?
+    @Published var sessionCardIDs: [Int] = []
+    @Published var currentIndex: Int = 0
+    @Published var currentStrategy: StudyStrategy = .intelligent
+    @Published var cardsPlayedInSession: Int = 0
+    @Published var currentSession: StudySession?
 
     // MARK: - Computed Properties
-    public var currentCard: Card? {
+    var currentCard: Card? {
         let cards = getCards()
         return cards.indices.contains(currentIndex) ? cards[currentIndex] : nil
     }
@@ -24,7 +23,7 @@ public class SessionManager: ObservableObject {
     private var strategyKey: String { "studyStrategy" }
 
     // MARK: - Initialization
-    public init(cardSet: CardSet, modelContext: ModelContext) {
+    init(cardSet: CardSet, modelContext: ModelContext) {
         self.cardSet = cardSet
         self.modelContext = modelContext
         loadSavedStrategy()
@@ -35,7 +34,7 @@ public class SessionManager: ObservableObject {
     }
     
     // MARK: - Session Management
-    public func prepareSession() {
+    func prepareSession() {
         let name = cardSet.name
         let fetchDescriptor = FetchDescriptor<StudySession>(
             predicate: #Predicate<StudySession> { $0.isActive && $0.cardSet?.name == name },
@@ -54,7 +53,7 @@ public class SessionManager: ObservableObject {
                 setupCardIDs()
             }
         } else {
-            let newSession = StudySession(totalCards: Int32(cardSet.cards.count))
+            let newSession = StudySession(totalCards: Int32(cardSet.safeCards.count))
             newSession.cardSet = cardSet
             newSession.isActive = true
             newSession.strategy = currentStrategy
@@ -67,7 +66,7 @@ public class SessionManager: ObservableObject {
     }
 
     private func setupCardIDs() {
-        let allCards = cardSet.cards
+        let allCards = cardSet.safeCards
         
         switch currentStrategy {
         case .linear:
@@ -105,7 +104,7 @@ public class SessionManager: ObservableObject {
     }
 
     // MARK: - Strategy Management
-    public func cycleStrategy() {
+    func cycleStrategy() {
         let all = StudyStrategy.allCases
         if let currentIdx = all.firstIndex(of: currentStrategy) {
             let nextIdx = (currentIdx + 1) % all.count
@@ -134,21 +133,21 @@ public class SessionManager: ObservableObject {
     }
 
     // MARK: - Navigation
-    public func moveToNext() {
+    func moveToNext() {
         guard !sessionCardIDs.isEmpty else { return }
         currentIndex = (currentIndex + 1) % sessionCardIDs.count
         cardsPlayedInSession += 1
         saveProgress()
     }
 
-    public func moveToPrevious() {
+    func moveToPrevious() {
         guard !sessionCardIDs.isEmpty else { return }
         currentIndex = currentIndex > 0 ? currentIndex - 1 : sessionCardIDs.count - 1
         saveProgress()
     }
 
     // MARK: - Progress Management
-    public func saveProgress() {
+    func saveProgress() {
         guard let session = currentSession else { return }
         session.currentCardIndex = Int32(currentIndex)
         session.cardsReviewed = Int32(cardsPlayedInSession)
@@ -156,19 +155,19 @@ public class SessionManager: ObservableObject {
         session.cardOrder = sessionCardIDs
         
         // Update correctCount based on review logs in this session
-        session.correctCount = Int32(session.reviewLogs.filter { $0.ratingValue >= 2 }.count)
+        session.correctCount = Int32(session.safeReviewLogs.filter { $0.ratingValue >= 2 }.count)
         
         try? modelContext.save()
     }
     
-    public func finishSession() {
+    func finishSession() {
         currentSession?.isActive = false
         saveProgress()
     }
 
     // MARK: - Card Access
-    public func getCards() -> [Card] {
-        let allCards = cardSet.cards
+    func getCards() -> [Card] {
+        let allCards = cardSet.safeCards
         let cardDict = Dictionary(allCards.map { (Int($0.id), $0) }, uniquingKeysWith: { first, _ in first })
         return sessionCardIDs.compactMap { cardDict[$0] }
     }

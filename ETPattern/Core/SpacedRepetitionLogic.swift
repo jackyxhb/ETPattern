@@ -6,20 +6,19 @@
 //
 
 import Foundation
-import ETPatternModels
 
-public struct SpacedRepetitionLogic {
-    public struct ReviewResult {
-        public let interval: Int32
-        public let easeFactor: Double
+struct SpacedRepetitionLogic {
+    struct ReviewResult {
+        let interval: Int32
+        let easeFactor: Double
         
-        public init(interval: Int32, easeFactor: Double) {
+        init(interval: Int32, easeFactor: Double) {
             self.interval = interval
             self.easeFactor = easeFactor
         }
     }
     
-    public static func calculateNextReview(
+    static func calculateNextReview(
         currentInterval: Int32,
         currentEaseFactor: Double,
         rating: DifficultyRating

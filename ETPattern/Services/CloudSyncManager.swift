@@ -1,15 +1,14 @@
 import Foundation
 import CoreData
 import Combine
-import ETPatternModels
 
 @MainActor
-public final class CloudSyncManager: ObservableObject {
-    public static let shared = CloudSyncManager()
+final class CloudSyncManager: ObservableObject {
+    static let shared = CloudSyncManager()
     
-    @Published public private(set) var lastSyncDate: Date?
-    @Published public private(set) var isSyncing: Bool = false
-    @Published public private(set) var syncError: Error?
+    @Published private(set) var lastSyncDate: Date?
+    @Published private(set) var isSyncing: Bool = false
+    @Published private(set) var syncError: Error?
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -18,11 +17,13 @@ public final class CloudSyncManager: ObservableObject {
     }
     
     private func setupObservers() {
+        /*
         NotificationCenter.default.publisher(for: NSPersistentCloudKitContainer.eventChangedNotification)
             .sink { [weak self] notification in
                 self?.handleCloudKitEvent(notification)
             }
             .store(in: &cancellables)
+        */
     }
     
     private func handleCloudKitEvent(_ notification: Notification) {

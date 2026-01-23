@@ -7,8 +7,6 @@
 
 import SwiftUI
 import SwiftData
-import ETPatternModels
-import ETPatternServices
 
 struct DeckListView: View {
     @ObservedObject var viewModel: ContentViewModel
@@ -76,7 +74,7 @@ struct DeckListView: View {
     }
 
     private func deckCard(for cardSet: CardSet) -> some View {
-        let cardCount = cardSet.cards.count
+        let cardCount = cardSet.safeCards.count
         let createdText = dateFormatter.string(from: cardSet.createdDate)
 
         return Button {
