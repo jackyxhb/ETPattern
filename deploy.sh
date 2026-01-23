@@ -23,8 +23,8 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# 2. Locate the app bundle
-APP_PATH=$(find build -name "${PROJECT_NAME}.app" -type d | head -n 1)
+# 2. Locate the app bundle (specifically the iphoneos build for physical device)
+APP_PATH=$(find build -path "*iphoneos*" -name "${PROJECT_NAME}.app" -type d | head -n 1)
 
 if [ -z "$APP_PATH" ]; then
     echo "❌ Could not find the built app bundle!"
