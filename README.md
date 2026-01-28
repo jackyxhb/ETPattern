@@ -10,7 +10,7 @@
 
 ---
 
-## ✨ Key Features (v2.1)
+## ✨ Key Features (v2.2)
 
 ### 🧠 Intelligent Spaced Repetition (FSRS v4)
 
