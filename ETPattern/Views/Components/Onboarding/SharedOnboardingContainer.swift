@@ -48,7 +48,7 @@ struct SharedOnboardingContainer<Content: View>: View {
                 HStack(spacing: theme.metrics.onboardingButtonSpacing) {
                     if currentPage.wrappedValue > 0 {
                         Button(action: {
-                            UIImpactFeedbackGenerator.lightImpact()
+                            UIImpactFeedbackGenerator.snap()
                             withAnimation(.smooth) {
                                 currentPage.wrappedValue -= 1
                             }
@@ -65,7 +65,7 @@ struct SharedOnboardingContainer<Content: View>: View {
 
                     if currentPage.wrappedValue < pages.count - 1 {
                         Button(action: {
-                            UIImpactFeedbackGenerator.lightImpact()
+                            UIImpactFeedbackGenerator.snap()
                             withAnimation(.smooth) {
                                 currentPage.wrappedValue += 1
                             }

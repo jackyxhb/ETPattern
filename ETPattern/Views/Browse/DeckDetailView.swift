@@ -22,34 +22,40 @@ struct DeckDetailView: View {
                 // Custom header for sheet presentation
                 HStack {
                     Text(cardSet.name)
-                        .font(.headline)
+                        .font(.title2.bold()) // Stronger title
                         .foregroundColor(theme.colors.textPrimary)
-                        .dynamicTypeSize(.large ... .accessibility5)
                     Spacer()
-                    Button(action: {
-                        dismiss()
-                    }) {
+                    Button(action: { dismiss() }) {
                         Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(theme.colors.textSecondary)
-                        .font(.title2)
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundColor(theme.colors.textSecondary)
+                            .font(.title2)
                     }
                 }
-                .padding(.horizontal)
-                .padding(.vertical, 12)
+                .padding()
                 .background(.ultraThinMaterial)
+                .overlay(Divider(), alignment: .bottom)
 
                 if groupNames.isEmpty {
-                    Text("No cards in this deck")
-                        .font(.headline)
-                        .foregroundColor(theme.colors.textSecondary)
-                        .dynamicTypeSize(.large ... .accessibility5)
-                        .padding()
+                    VStack(spacing: 16) {
+                        Image(systemName: "doc.text.magnifyingglass")
+                            .font(.system(size: 48))
+                            .foregroundColor(theme.colors.textSecondary.opacity(0.5))
+                        Text("No cards in this deck")
+                            .font(.headline)
+                            .foregroundColor(theme.colors.textSecondary)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     ScrollView {
-                        LazyVStack(spacing: theme.metrics.deckDetailGroupSpacing) {
+                        LazyVStack(spacing: 16) {
                             ForEach(groupNames, id: \.self) { groupName in
-                                DisclosureGroup {
-                                    LazyVStack(spacing: theme.metrics.deckDetailCardSpacing) {
+                                LiquidDisclosureGroup(
+                                    title: groupName,
+                                    count: groups[groupName]?.count ?? 0,
+                                    theme: theme
+                                ) {
+                                    LazyVStack(spacing: 12) {
                                         ForEach(groups[groupName] ?? []) { card in
                                             Button {
                                                 previewCard = card
@@ -58,45 +64,22 @@ struct DeckDetailView: View {
                                             }
                                             .buttonStyle(.plain)
                                             .contextMenu {
-                                                Button {
-                                                    previewCard = card
-                                                } label: {
+                                                Button { previewCard = card } label: {
                                                     Label("Preview", systemImage: "eye")
                                                 }
                                             }
                                         }
                                     }
-                                    .padding(.leading, theme.metrics.deckDetailLeadingPadding)
-                                } label: {
-                                    HStack {
-                                        Text(groupName)
-                                            .font(.headline)
-                                            .foregroundColor(theme.colors.textPrimary)
-                                            .dynamicTypeSize(.large ... .accessibility5)
-                                        Spacer()
-                                        Text("\(groups[groupName]?.count ?? 0) cards")
-                                            .font(.subheadline)
-                                            .foregroundColor(theme.colors.textSecondary)
-                                            .dynamicTypeSize(.large ... .accessibility5)
-                                    }
-                                    .padding(theme.metrics.deckDetailGroupPadding)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
-                                            .fill(theme.gradients.card.opacity(0.9))
-                                    )
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
-                                            .stroke(theme.colors.surfaceLight, lineWidth: 1)
-                                    )
+                                    .padding(.top, 8)
                                 }
-                                .tint(.white)
                             }
                         }
-                        .padding(theme.metrics.deckDetailScrollPadding)
+                        .padding()
                     }
                 }
             }
         }
+        .transition(.asymmetric(insertion: .scale(scale: 0.95).combined(with: .opacity), removal: .opacity))
         .task {
             loadCards()
         }
@@ -124,34 +107,103 @@ struct DeckDetailView: View {
     }
 }
 
+// MARK: - Components
+
+private struct LiquidDisclosureGroup<Content: View>: View {
+    let title: String
+    let count: Int
+    let theme: Theme
+    let content: Content
+    
+    @State private var isExpanded = true // Default to expanded for better visibility
+    
+    init(title: String, count: Int, theme: Theme, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.count = count
+        self.theme = theme
+        self.content = content()
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            Button(action: {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    isExpanded.toggle()
+                }
+                UIImpactFeedbackGenerator.snap() // Snap!
+            }) {
+                HStack {
+                    Image(systemName: "folder.fill")
+                        .foregroundColor(.blue)
+                    Text(title)
+                        .font(.headline)
+                        .foregroundColor(theme.colors.textPrimary)
+                    Spacer()
+                    Text("\(count)")
+                        .font(.callout.monospacedDigit())
+                        .foregroundColor(theme.colors.textSecondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(Color.primary.opacity(0.05))
+                        .clipShape(Capsule())
+                    
+                    Image(systemName: "chevron.right")
+                        .font(.caption.bold())
+                        .foregroundColor(theme.colors.textSecondary)
+                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                }
+                .padding()
+                .background(.ultraThinMaterial)
+            }
+            .buttonStyle(.plain)
+            
+            if isExpanded {
+                content
+                    .padding(.horizontal)
+                    .padding(.bottom)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .cornerRadius(20)
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(.white.opacity(0.1), lineWidth: 1)
+        )
+    }
+}
+
 private struct CardRow: View {
     let card: Card
-
     @Environment(\.theme) var theme
 
     var body: some View {
-        VStack(alignment: .leading, spacing: theme.metrics.deckDetailCardRowSpacing) {
-            Text(card.front)
-                .font(.headline)
-                .foregroundColor(theme.colors.textPrimary)
-                .dynamicTypeSize(.large ... .accessibility5)
-            Text(formattedBack)
-                .font(.subheadline)
-                .foregroundColor(theme.colors.textSecondary)
-                .lineLimit(2)
-                .dynamicTypeSize(.large ... .accessibility5)
+        HStack(spacing: 16) {
+            Rectangle()
+                .fill(theme.gradients.accent)
+                .frame(width: 4)
+                .cornerRadius(2)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(card.front)
+                    .font(.body.weight(.medium))
+                    .foregroundColor(theme.colors.textPrimary)
+                    .lineLimit(1)
+                
+                Text(formattedBack)
+                    .font(.subheadline)
+                    .foregroundColor(theme.colors.textSecondary)
+                    .lineLimit(1)
+            }
+            Spacer()
         }
-        .padding(theme.metrics.deckDetailCardRowPadding)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
-                .fill(theme.gradients.card.opacity(0.9))
-        )
+        .padding(.vertical, 12)
+        .padding(.horizontal, 16)
+        .background(.ultraThinMaterial)
+        .cornerRadius(16)
         .overlay(
-            RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
-                .stroke(theme.colors.surfaceLight, lineWidth: 1)
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(.white.opacity(0.1), lineWidth: 1)
         )
-        .shadow(color: theme.colors.shadow.opacity(0.4), radius: theme.metrics.deckDetailCardShadowRadius, x: 0, y: theme.metrics.deckDetailCardShadowY)
     }
 
     private var formattedBack: String {

@@ -10,15 +10,17 @@ import SwiftUI
 // MARK: - Modifiers
 
 struct LiquidGlassModifier: ViewModifier {
+    @Environment(\.theme) var theme
+
     func body(content: Content) -> some View {
         content
             .background(.ultraThinMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .stroke(.white.opacity(0.1), lineWidth: 0.5)
+                    .stroke(theme.colors.outline, lineWidth: 0.5)
             )
-            .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
+            .shadow(color: theme.colors.shadow.opacity(0.2), radius: 10, x: 0, y: 5)
     }
 }
 
@@ -89,7 +91,10 @@ struct LiquidCard: View {
         }
         .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
         .animation(.spring(response: 0.6, dampingFraction: 0.8), value: isFlipped)
-        .onTapGesture(perform: onTap)
+        .onTapGesture {
+            UIImpactFeedbackGenerator.snap()
+            onTap()
+        }
     }
 }
 
@@ -151,7 +156,10 @@ private struct RatingButton: View {
     let action: () -> Void
     
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            UIImpactFeedbackGenerator.snap()
+            action()
+        }) {
             Text(title)
                 .font(.subheadline.bold())
                 .foregroundStyle(.white)

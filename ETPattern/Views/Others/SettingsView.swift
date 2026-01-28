@@ -26,7 +26,8 @@ struct SettingsView: View {
         "en-GB": NSLocalizedString("british_english", comment: "British English voice option")
     ]
 
-    private let orderOptions = [
+    private let orderOptionsKeys = ["random", "sequential"]
+    private let orderOptionsDict = [
         "random": NSLocalizedString("random_order", comment: "Random card order option"),
         "sequential": NSLocalizedString("import_order", comment: "Sequential/Import card order option")
     ]
@@ -56,18 +57,21 @@ struct SettingsView: View {
                 .padding(.vertical, 12)
                 .themedGlassBackground()
                 
-                Form {
-                    generalSection
-                    goalsSection
-                    studyModeSection
-                    appearanceSection
-                    ttsSection
-                    aboutSection
+                ScrollView {
+                    LazyVStack(spacing: 24) {
+                        generalSection
+                        // TODO: Migrate other sections
+                        studyModeSection
+                        appearanceSection
+                        ttsSection
+                        aboutSection
+                    }
+                    .padding(.vertical)
                 }
-                .scrollContentBackground(.hidden)
             }
         }
         .onAppear {
+            // ... (keep same onAppear logic)
             let stored = UserDefaults.standard.string(forKey: "selectedVoice") ?? Constants.TTS.defaultVoice
             selectedVoice = canonicalVoiceLanguage(from: stored)
             ttsPercentage = ttsService.getCurrentRate()
@@ -77,227 +81,191 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Sections
+
     private var generalSection: some View {
-        Section(header: Text("General").foregroundColor(theme.colors.textPrimary)) {
-            Button {
-                dismiss() // Optimistically dismiss
-                // Perform navigation after a short delay to ensure sheet dismissal interaction doesn't conflict
+        LiquidSettingsSection(title: "General") {
+            LiquidSettingsButton(
+                icon: "chart.bar.fill",
+                color: .blue,
+                title: "Usage Statistics"
+            ) {
+                dismiss()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     coordinator.presentFullScreen(.sessionStats)
                 }
-            } label: {
-                HStack {
-                    Label("Usage Statistics", systemImage: "chart.bar")
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundStyle(theme.colors.textSecondary)
-                }
             }
-            .foregroundColor(theme.colors.textPrimary)
+            Divider().padding(.leading, 64)
             
-            Button {
+            LiquidSettingsButton(
+                icon: "graduationcap.fill",
+                color: .purple,
+                title: "Replay Onboarding"
+            ) {
                 dismiss()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     coordinator.presentFullScreen(.onboarding)
                 }
-            } label: {
-                HStack {
-                    Label("Replay Onboarding", systemImage: "questionmark.circle")
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundStyle(theme.colors.textSecondary)
-                }
             }
-            .foregroundColor(theme.colors.textPrimary)
+            
+            Divider().padding(.leading, 64)
+            
+            LiquidSliderRow(
+                icon: "target",
+                color: .orange,
+                title: "Daily Goal",
+                value: Binding(
+                    get: { Float(StatsService.shared.dailyGoal) },
+                    set: { StatsService.shared.dailyGoal = Int($0) }
+                ),
+                range: 10...200,
+                step: 10,
+                formatter: { "\(Int($0)) cards" },
+                onChange: { _ in }
+            )
         }
-        .listRowBackground(theme.colors.surfaceLight)
     }
 
-    private var goalsSection: some View {
-        SharedSettingsSliderSection(
-            label: "Daily Goal",
-            value: Binding(
-                get: { Float(StatsService.shared.dailyGoal) },
-                set: { StatsService.shared.dailyGoal = Int($0) }
-            ),
-            minValue: 10,
-            maxValue: 200,
-            step: 5,
-            minLabel: "10",
-            maxLabel: "200",
-            valueFormatter: { "\(Int($0)) cards" },
-            onChange: { _ in }
-        )
-    }
 
     private var studyModeSection: some View {
-        Group {
-            SharedSettingsPickerSection(
-                header: NSLocalizedString("study_mode", comment: "Study mode section header"),
-                label: NSLocalizedString("card_order", comment: "Card order label"),
-                options: orderOptions,
+        LiquidSettingsSection(title: NSLocalizedString("study_mode", comment: "Study mode section header")) {
+            LiquidPickerRow(
+                icon: "arrow.triangle.2.circlepath",
+                color: .teal,
+                title: NSLocalizedString("card_order", comment: "Card order label"),
+                options: orderOptionsKeys,
                 selection: $cardOrderMode,
-                userDefaultsKey: "cardOrderMode"
-            )
+                optionsDict: orderOptionsDict
+            ) { newValue in
+                UserDefaults.standard.set(newValue, forKey: "cardOrderMode")
+            }
+            
+            Divider().padding(.leading, 64)
 
-            SharedSettingsPickerSection(
-                header: NSLocalizedString("auto_play_mode", comment: "Auto play mode section header"),
-                label: NSLocalizedString("card_order", comment: "Card order label"),
-                options: orderOptions,
+            LiquidPickerRow(
+                icon: "play.circle",
+                color: .green,
+                title: NSLocalizedString("auto_play_mode", comment: "Auto play mode section header"),
+                options: orderOptionsKeys,
                 selection: $autoPlayOrderMode,
-                userDefaultsKey: "autoPlayOrderMode"
-            )
+                optionsDict: orderOptionsDict
+            ) { newValue in
+                UserDefaults.standard.set(newValue, forKey: "autoPlayOrderMode")
+            }
         }
     }
 
     private var appearanceSection: some View {
-        SharedSettingsPickerSection(
-            header: NSLocalizedString("appearance", comment: "Appearance section header"),
-            label: NSLocalizedString("theme", comment: "Theme selection label"),
-            options: Dictionary(uniqueKeysWithValues: AppTheme.allCases.map { ($0.rawValue, $0.displayName) }),
-            selection: Binding(
-                get: { ThemeManager.shared.currentTheme.rawValue },
-                set: { newValue in
-                    if let theme = AppTheme(rawValue: newValue) {
-                        ThemeManager.shared.currentTheme = theme
+        LiquidSettingsSection(title: NSLocalizedString("appearance", comment: "Appearance section header")) {
+            LiquidPickerRow(
+                icon: "paintbrush.fill",
+                color: .pink,
+                title: NSLocalizedString("theme", comment: "Theme selection label"),
+                options: AppTheme.allCases.map { $0.rawValue },
+                selection: Binding(
+                    get: { ThemeManager.shared.currentTheme.rawValue },
+                    set: { newValue in
+                        if let theme = AppTheme(rawValue: newValue) {
+                            ThemeManager.shared.currentTheme = theme
+                        }
                     }
-                }
-            ),
-            onChange: { _ in }
-        )
+                ),
+                optionsDict: Dictionary(uniqueKeysWithValues: AppTheme.allCases.map { ($0.rawValue, $0.displayName) })
+            ) { _ in }
+        }
     }
 
     private var ttsSection: some View {
-        Group {
-            // Voice picker with section header
-            SharedSettingsPickerSection(
-                header: NSLocalizedString("text_to_speech", comment: "Text-to-speech section header"),
-                label: NSLocalizedString("voice", comment: "Voice selection label"),
-                options: voiceOptions,
+        LiquidSettingsSection(title: NSLocalizedString("text_to_speech", comment: "Text-to-speech section header")) {
+            LiquidPickerRow(
+                icon: "waveform",
+                color: .indigo,
+                title: NSLocalizedString("voice", comment: "Voice selection label"),
+                options: Array(voiceOptions.keys).sorted(),
                 selection: $selectedVoice,
-                onChange: { newValue in
-                    ttsService.setVoice(newValue)
-                }
-            )
-
-            // Remaining TTS controls in a continuation section (no header)
-            Section {
-                VStack(alignment: .leading, spacing: theme.metrics.standardSpacing) {
-                    Text(String(format: NSLocalizedString("speech_speed_value", comment: "Speech speed display with percentage"), Int(ttsPercentage)))
-                        .font(theme.metrics.subheadline)
-                        .foregroundColor(theme.colors.textPrimary)
-                        .dynamicTypeSize(.large ... .accessibility5)
-
-                    GeometryReader { geometry in
-                        Slider(value: $ttsPercentage, in: Constants.TTS.minPercentage...Constants.TTS.maxPercentage, step: 10) {
-                            Text(NSLocalizedString("speech_speed", comment: "Speech speed slider label"))
-                                .foregroundColor(theme.colors.textPrimary)
-                                .dynamicTypeSize(.large ... .accessibility5)
-                        } minimumValueLabel: {
-                            Text("50%")
-                                .font(theme.metrics.caption)
-                                .foregroundColor(theme.colors.textSecondary)
-                                .dynamicTypeSize(.large ... .accessibility5)
-                        } maximumValueLabel: {
-                            Text("120%")
-                                .font(theme.metrics.caption)
-                                .foregroundColor(theme.colors.textSecondary)
-                                .dynamicTypeSize(.large ... .accessibility5)
-                        }
-                        .tint(theme.colors.highlight)
-                        .gesture(
-                            DragGesture(minimumDistance: 0)
-                                .onChanged { value in
-                                    let sliderWidth = geometry.size.width
-                                    let tapLocation = value.location.x
-                                    let percentage = tapLocation / sliderWidth
-                                    let newValue = Constants.TTS.minPercentage + (Constants.TTS.maxPercentage - Constants.TTS.minPercentage) * Float(percentage)
-                                    let steppedValue = round(newValue / 10) * 10
-                                    let clampedValue = min(max(steppedValue, Constants.TTS.minPercentage), Constants.TTS.maxPercentage)
-                                    ttsPercentage = clampedValue
-                                }
-                        )
-                        .onChange(of: ttsPercentage) { _, newValue in
-                            ttsService.setRate(newValue)
-                        }
-                    }
-                    .frame(height: theme.metrics.sliderHeight)
-                }
-                .padding(.vertical, theme.metrics.smallSpacing)
-
-                SharedSettingsSliderSection(
-                    label: "Pitch",
-                    value: $ttsPitch,
-                    minValue: Constants.TTS.minPitch,
-                    maxValue: Constants.TTS.maxPitch,
-                    step: 0.1,
-                    minLabel: "50%",
-                    maxLabel: "200%",
-                    valueFormatter: { "\(Int($0 * 100))%" },
-                    onChange: { newValue in
-                        ttsService.setPitch(newValue)
-                    }
-                )
-
-                SharedSettingsSliderSection(
-                    label: "Volume",
-                    value: $ttsVolume,
-                    minValue: Constants.TTS.minVolume,
-                    maxValue: Constants.TTS.maxVolume,
-                    step: 0.1,
-                    minLabel: "0%",
-                    maxLabel: "100%",
-                    valueFormatter: { "\(Int($0 * 100))%" },
-                    onChange: { newValue in
-                        ttsService.setVolume(newValue)
-                    }
-                )
-
-                SharedSettingsSliderSection(
-                    label: "Pause",
-                    value: $ttsPause,
-                    minValue: Constants.TTS.minPause,
-                    maxValue: Constants.TTS.maxPause,
-                    step: 0.1,
-                    minLabel: "0s",
-                    maxLabel: "2s",
-                    valueFormatter: { String(format: "%.1f", $0) + "s" },
-                    onChange: { newValue in
-                        ttsService.setPause(newValue)
-                    }
-                )
-
-                Button("Test Voice") {
-                    UIImpactFeedbackGenerator.lightImpact()
-                    ttsService.speak("Hello! This is a test of the selected voice and speed.")
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(theme.gradients.accent)
-                .foregroundColor(theme.colors.textPrimary)
-                .cornerRadius(theme.metrics.cornerRadius)
+                optionsDict: voiceOptions
+            ) { newValue in
+                ttsService.setVoice(newValue)
             }
-            .listRowBackground(theme.colors.surfaceLight)
+            
+            Divider().padding(.leading, 64)
+            
+            LiquidSliderRow(
+                icon: "speedometer",
+                color: .blue,
+                title: NSLocalizedString("speech_speed", comment: "Speech speed slider label"),
+                value: $ttsPercentage,
+                range: Constants.TTS.minPercentage...Constants.TTS.maxPercentage,
+                step: 10,
+                formatter: { "\(Int($0))%" },
+                onChange: { newValue in ttsService.setRate(newValue) }
+            )
+            
+            Divider().padding(.leading, 64)
+
+            LiquidSliderRow(
+                icon: "tuningfork",
+                color: .purple,
+                title: "Pitch",
+                value: $ttsPitch,
+                range: Constants.TTS.minPitch...Constants.TTS.maxPitch,
+                step: 0.1,
+                formatter: { "\(Int($0 * 100))%" },
+                onChange: { newValue in ttsService.setPitch(newValue) }
+            )
+            
+            Divider().padding(.leading, 64)
+
+            LiquidSliderRow(
+                icon: "speaker.wave.2.fill",
+                color: .pink,
+                title: "Volume",
+                value: $ttsVolume,
+                range: Constants.TTS.minVolume...Constants.TTS.maxVolume,
+                step: 0.1,
+                formatter: { "\(Int($0 * 100))%" },
+                onChange: { newValue in ttsService.setVolume(newValue) }
+            )
+            
+            Divider().padding(.leading, 64)
+            
+            LiquidSliderRow(
+                icon: "timer",
+                color: .orange,
+                title: "Pause",
+                value: Binding(get: { Float(ttsPause) }, set: { ttsPause = Double($0) }),
+                range: Float(Constants.TTS.minPause)...Float(Constants.TTS.maxPause),
+                step: 0.1,
+                formatter: { String(format: "%.1fs", $0) },
+                onChange: { newValue in ttsService.setPause(Double(newValue)) }
+            )
+            
+            Divider().padding(.leading, 64)
+
+            LiquidSettingsButton(
+                icon: "play.fill",
+                color: .green,
+                title: "Test Voice"
+            ) {
+                UIImpactFeedbackGenerator.lightImpact()
+                ttsService.speak("Hello! This is a test of the selected voice and speed.")
+            }
         }
     }
 
     private var aboutSection: some View {
-        Section(header: Text("About").foregroundColor(theme.colors.textPrimary).dynamicTypeSize(.large ... .accessibility5)) {
-            Text("English Thought")
-                .font(theme.metrics.headline)
-                .foregroundColor(theme.colors.textPrimary)
-                .dynamicTypeSize(.large ... .accessibility5)
-            Text(appVersion)
-                .foregroundColor(theme.colors.textSecondary)
-                .dynamicTypeSize(.large ... .accessibility5)
-            Text("Learn English patterns with spaced repetition")
-                .foregroundColor(theme.colors.textSecondary)
-                .font(theme.metrics.caption)
-                .dynamicTypeSize(.large ... .accessibility5)
+        LiquidSettingsSection(title: "About") {
+            LiquidSettingsRow(
+                icon: "info.circle",
+                iconColor: .gray,
+                title: "English Thought",
+                subtitle: "Version \(appVersion)"
+            ) {
+                 Text(NSLocalizedString("app_description", value: "Learn English patterns", comment: "Short app description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
         }
-        .listRowBackground(theme.colors.surfaceLight)
     }
 
     private var appVersion: String {

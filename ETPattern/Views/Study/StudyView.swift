@@ -92,15 +92,15 @@ struct StudyView: View {
                             // Strategy toggle not available in StudyView (uses fixed intelligent)
                         },
                         previousAction: {
-                            UIImpactFeedbackGenerator.lightImpact()
+                            UIImpactFeedbackGenerator.snap()
                             viewModel.previous()
                         },
                         nextAction: {
-                            UIImpactFeedbackGenerator.lightImpact()
+                            UIImpactFeedbackGenerator.snap()
                             viewModel.next()
                         },
                         closeAction: {
-                            UIImpactFeedbackGenerator.lightImpact()
+                            UIImpactFeedbackGenerator.snap()
                             viewModel.close()
                         },
                         isPreviousDisabled: viewModel.currentIndex == 0,

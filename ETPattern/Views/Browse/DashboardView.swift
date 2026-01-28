@@ -142,6 +142,7 @@ struct DailyProgressTile: View {
                 Text("\(completed)/\(goal)")
                     .font(.system(size: 44, weight: .bold, design: .rounded))
                     .foregroundStyle(.primary)
+                    .minimumScaleFactor(0.5)
                 
                 Text("Cards Reviewed")
                     .font(.caption)
@@ -192,7 +193,10 @@ struct ActionTile: View {
     let action: () -> Void
     
     var body: some View {
-        Button(action: action) {
+        Button {
+            UIImpactFeedbackGenerator.snap() // Snap!
+            action()
+        } label: {
             VStack(alignment: .leading) {
                 Image(systemName: icon)
                     .font(.title)
@@ -226,7 +230,10 @@ struct DeckListTile: View {
     var body: some View {
         HStack(spacing: 16) {
             // Visible AutoPlay Button (Left Side)
-            Button(action: onAutoPlay) {
+            Button {
+                UIImpactFeedbackGenerator.snap() // Snap!
+                onAutoPlay()
+            } label: {
                 VStack(spacing: 4) {
                     Image(systemName: "play.circle.fill")
                         .font(.title)
@@ -250,6 +257,7 @@ struct DeckListTile: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
             .onTapGesture {
+                UIImpactFeedbackGenerator.snap() // Snap!
                 onOpen()
             }
             

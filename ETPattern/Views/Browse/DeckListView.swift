@@ -96,6 +96,7 @@ struct DeckListView: View {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundColor(theme.colors.highlight)
                             .imageScale(.large)
+                            .transition(.scale)
                     }
                 }
             }
@@ -103,18 +104,17 @@ struct DeckListView: View {
             .padding(.horizontal, theme.metrics.deckCardHorizontalPadding)
             .background(
                 theme.gradients.card
-                    .opacity(viewModel.isSelected(cardSet) ? 1 : 0.85)
+                    .opacity(viewModel.isSelected(cardSet) ? 0.3 : 0.0) // Tint if selected
             )
-            .background(.ultraThinMaterial)
+            .liquidGlass()
             .overlay(
-                RoundedRectangle(cornerRadius: theme.metrics.cornerRadius)
+                RoundedRectangle(cornerRadius: 28)
                     .stroke(
                         viewModel.isSelected(cardSet)
-                            ? theme.colors.highlight.opacity(0.8) : theme.colors.surfaceLight,
-                        lineWidth: 1.5)
+                            ? theme.colors.highlight.opacity(0.8) : .clear,
+                        lineWidth: 2
+                    )
             )
-            .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cornerRadius, style: .continuous))
-            .shadow(color: theme.colors.shadow.opacity(0.3), radius: theme.metrics.shadowRadius, x: 0, y: theme.metrics.shadowY)
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("deckCard")

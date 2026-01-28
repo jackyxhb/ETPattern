@@ -63,6 +63,12 @@ extension UIImpactFeedbackGenerator {
         let generator = UIImpactFeedbackGenerator(style: .heavy)
         generator.impactOccurred()
     }
+
+    /// A crisp, sharp impact used for "Snap" interactions
+    static func snap() {
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred(intensity: 1.0)
+    }
 }
 
 extension UINotificationFeedbackGenerator {
@@ -101,6 +107,13 @@ extension View {
     func withErrorHaptic() -> some View {
         self.onTapGesture {
             UINotificationFeedbackGenerator().notificationOccurred(.error)
+        }
+    }
+
+    func withSnapHaptic(perform action: @escaping () -> Void) -> some View {
+        self.onTapGesture {
+            UIImpactFeedbackGenerator.snap()
+            action()
         }
     }
 

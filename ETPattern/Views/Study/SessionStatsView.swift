@@ -28,7 +28,7 @@ struct SessionStatsView: View {
                         
                         historySection
                     }
-                    .padding()
+                    .padding(.vertical)
                 }
             }
         }
@@ -55,11 +55,7 @@ struct SessionStatsView: View {
     }
 
     private var activitySection: some View {
-        VStack(alignment: .leading, spacing: theme.metrics.deckDetailCardSpacing) {
-            Text("Activity (Last 7 Days)")
-                .font(theme.metrics.subheadline.bold())
-                .foregroundColor(theme.colors.textSecondary)
-            
+        LiquidSettingsSection(title: "Activity (Last 7 Days)") {
             Chart {
                 ForEach(dailyActivity.sorted(by: { $0.key < $1.key }), id: \.key) { date, count in
                     BarMark(
@@ -67,22 +63,31 @@ struct SessionStatsView: View {
                         y: .value("Reviews", count)
                     )
                     .foregroundStyle(theme.gradients.accent)
-                    .cornerRadius(theme.metrics.chartBarCornerRadius)
+                    .cornerRadius(4)
                 }
             }
-            .frame(height: 100)
-            .padding(.top, 4)
+            .chartXAxis {
+                AxisMarks(values: .stride(by: .day)) {
+                    AxisValueLabel(format: .dateTime.weekday(), centered: true)
+                }
+            }
+            .chartYAxis {
+                AxisMarks {
+                    AxisGridLine()
+                    AxisValueLabel()
+                }
+            }
+            .frame(height: 140)
+            .padding(.vertical, 8)
         }
-        .padding()
-        .background(theme.colors.surface)
-        .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cornerRadius, style: .continuous))
     }
 
     private var historySection: some View {
-        VStack(alignment: .leading, spacing: theme.metrics.mediumSpacing) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("Study History")
-                .font(theme.metrics.subheadline.bold())
+                .font(.headline)
                 .foregroundColor(theme.colors.textSecondary)
+                .padding(.horizontal)
             
             if studySessions.isEmpty {
                 Text("No study sessions yet")
@@ -90,61 +95,71 @@ struct SessionStatsView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 40)
             } else {
-                ForEach(studySessions) { session in
-                    sessionCard(session)
+                LazyVStack(spacing: 12) {
+                    ForEach(studySessions) { session in
+                        sessionCard(session)
+                    }
                 }
+                .padding(.horizontal)
             }
         }
     }
 
     private func sessionCard(_ session: StudySession) -> some View {
-        VStack(alignment: .leading, spacing: theme.metrics.deckDetailCardSpacing) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(session.date, style: .date)
-                        .font(theme.metrics.headline)
+                        .font(.body.weight(.medium))
                         .foregroundColor(theme.colors.textPrimary)
                     Text(session.date, style: .time)
-                        .font(theme.metrics.caption)
+                        .font(.caption)
                         .foregroundColor(theme.colors.textSecondary)
                 }
                 Spacer()
                 accuracyBadge(for: session)
             }
 
-            HStack(spacing: theme.metrics.largeSpacing) {
+            Divider().opacity(0.3)
+
+            HStack(spacing: 0) {
                 statView(label: "Reviewed", value: "\(session.cardsReviewed)")
-                statView(label: "Correct", value: "\(session.correctCount)", color: theme.colors.success)
+                Spacer()
+                statView(label: "Correct", value: "\(session.correctCount)", color: .green)
+                Spacer()
                 statView(label: "Duration", value: durationText(for: session))
             }
         }
-        .padding()
-        .background(theme.colors.surfaceLight)
-        .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cornerRadius, style: .continuous))
+        .padding(16)
+        .liquidGlass() // Apply glass effect
     }
 
     private func statView(label: String, value: String, color: Color? = nil) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(label)
-                .font(theme.metrics.caption)
-                .foregroundColor(theme.colors.textSecondary)
+        VStack(spacing: 2) {
             Text(value)
-                .font(theme.metrics.subheadline.bold())
+                .font(.headline)
                 .foregroundColor(color ?? theme.colors.textPrimary)
+            Text(label)
+                .font(.caption2)
+                .textCase(.uppercase)
+                .foregroundColor(theme.colors.textSecondary)
         }
     }
-
+    
     private func accuracyBadge(for session: StudySession) -> some View {
         let text = accuracyText(for: session)
         let color = accuracyColor(for: session)
         
         return Text(text)
             .font(.caption.bold())
-            .padding(.horizontal, theme.metrics.standardSpacing)
-            .padding(.vertical, theme.metrics.smallSpacing)
-            .background(color.opacity(0.2))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(color.opacity(0.15))
             .foregroundColor(color)
             .clipShape(Capsule())
+            .overlay(
+                Capsule().strokeBorder(color.opacity(0.3), lineWidth: 1)
+            )
     }
 
     private func durationText(for session: StudySession) -> String {
