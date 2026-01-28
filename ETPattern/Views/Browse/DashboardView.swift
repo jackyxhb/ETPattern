@@ -27,10 +27,7 @@ struct DashboardView: View {
                     // Header
                     HStack {
                         VStack(alignment: .leading) {
-                            Text("Good Morning,")
-                                .font(.title3)
-                                .foregroundStyle(.secondary)
-                            Text(viewModel.userName)
+                            Text("Hi there")
                                 .font(.largeTitle.weight(.bold))
                                 .foregroundStyle(.primary)
                         }

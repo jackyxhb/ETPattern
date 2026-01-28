@@ -115,7 +115,7 @@ private struct LiquidDisclosureGroup<Content: View>: View {
     let theme: Theme
     let content: Content
     
-    @State private var isExpanded = true // Default to expanded for better visibility
+    @State private var isExpanded = false // Default to collapsed
     
     init(title: String, count: Int, theme: Theme, @ViewBuilder content: () -> Content) {
         self.title = title
