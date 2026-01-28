@@ -58,6 +58,7 @@ struct SettingsView: View {
                 
                 Form {
                     generalSection
+                    goalsSection
                     studyModeSection
                     appearanceSection
                     ttsSection
@@ -112,6 +113,23 @@ struct SettingsView: View {
             .foregroundColor(theme.colors.textPrimary)
         }
         .listRowBackground(theme.colors.surfaceLight)
+    }
+
+    private var goalsSection: some View {
+        SharedSettingsSliderSection(
+            label: "Daily Goal",
+            value: Binding(
+                get: { Float(StatsService.shared.dailyGoal) },
+                set: { StatsService.shared.dailyGoal = Int($0) }
+            ),
+            minValue: 10,
+            maxValue: 200,
+            step: 5,
+            minLabel: "10",
+            maxLabel: "200",
+            valueFormatter: { "\(Int($0)) cards" },
+            onChange: { _ in }
+        )
     }
 
     private var studyModeSection: some View {

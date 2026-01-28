@@ -12,6 +12,7 @@ protocol StatsServiceProtocol: Sendable {
     func getDailyReviewCount() -> Int
     func incrementDailyReviewCount()
     func resetDailyCountIfNeeded()
+    var dailyGoal: Int { get set }
 }
 
 @Observable
@@ -22,10 +23,16 @@ final class StatsService: StatsServiceProtocol {
     // Keys
     private let keyDailyCount = "stats.dailyReviewCount"
     private let keyLastReviewDate = "stats.lastReviewDate"
+    private let keyDailyGoal = "stats.dailyGoal"
     
     static let shared = StatsService()
     
     var dailyReviewCount: Int = 0
+    var dailyGoal: Int = 50 {
+        didSet {
+            userDefaults.set(dailyGoal, forKey: keyDailyGoal)
+        }
+    }
     
     init(userDefaults: UserDefaults = .standard, calendar: Calendar = .current) {
         self.userDefaults = userDefaults
@@ -33,6 +40,8 @@ final class StatsService: StatsServiceProtocol {
         resetDailyCountIfNeeded()
         // Initialize from storage
         self.dailyReviewCount = userDefaults.integer(forKey: keyDailyCount)
+        let storedGoal = userDefaults.integer(forKey: keyDailyGoal)
+        self.dailyGoal = storedGoal > 0 ? storedGoal : 50
     }
     
     func getDailyReviewCount() -> Int {

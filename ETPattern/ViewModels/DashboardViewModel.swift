@@ -19,7 +19,9 @@ final class DashboardViewModel {
     var totalCardsReviewedToday: Int {
         statsService.getDailyReviewCount()
     }
-    private(set) var dailyGoal: Int = 50
+    var dailyGoal: Int {
+        statsService.dailyGoal
+    }
     
     private let service: CardSetServiceProtocol
     private let statsService: StatsServiceProtocol
