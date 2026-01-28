@@ -122,7 +122,7 @@ I doubt...;;I doubt it will rain.<br>I doubt he knows.;;2-Skepticism
 
 ## 📜 Changelog
 
-### v2.1.0 - "The Brain Upgrade"
+### v2.2.0 - "The Brain Upgrade"
 
 - **Algorithm**: Replaced SM-2 with **FSRS v4** (Stability/Difficulty/State tracking).
 - **Cloud Sync**: Added robust configuration and sync status visibility in Settings.
