@@ -20,6 +20,8 @@ struct SettingsView: View {
     @State private var ttsPitch: Float = 0
     @State private var ttsVolume: Float = 0
     @State private var ttsPause: TimeInterval = 0
+    
+    @ObservedObject private var syncManager = CloudSyncManager.shared
 
     private let voiceOptions = [
         "en-US": NSLocalizedString("american_english", comment: "American English voice option"),
@@ -60,6 +62,7 @@ struct SettingsView: View {
                 ScrollView {
                     LazyVStack(spacing: 24) {
                         generalSection
+                        syncSection
                         // TODO: Migrate other sections
                         studyModeSection
                         appearanceSection
@@ -126,6 +129,47 @@ struct SettingsView: View {
         }
     }
 
+    private var syncSection: some View {
+        LiquidSettingsSection(title: "Cloud Sync") {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Sync Status")
+                        .font(.headline)
+                        .foregroundStyle(theme.colors.textPrimary)
+                    
+                    if syncManager.isSyncing {
+                        Text("Syncing...")
+                            .font(.caption)
+                            .foregroundStyle(.blue)
+                    } else if let error = syncManager.syncError {
+                        Text("Error: \(error.localizedDescription)")
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    } else if let date = syncManager.lastSyncDate {
+                        Text("Last synced: \(date.formattedDate())")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text("Waiting for sync...")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                
+                Spacer()
+                
+                if syncManager.isSyncing {
+                    ProgressView()
+                } else {
+                    Image(systemName: "icloud.and.arrow.down")
+                        .font(.title2)
+                        .foregroundStyle(.blue)
+                }
+            }
+            .padding()
+            .liquidGlass()
+        }
+    }
 
     private var studyModeSection: some View {
         LiquidSettingsSection(title: NSLocalizedString("study_mode", comment: "Study mode section header")) {
