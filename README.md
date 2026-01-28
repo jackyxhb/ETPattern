@@ -12,31 +12,33 @@
 
 ## ✨ Key Features (v2.1)
 
-### 🧠 Intelligent Spaced Repetition (SRS)
+### 🧠 Intelligent Spaced Repetition (FSRS v4)
 
-Upgrade from a simple binary system to a **4-Level Grading Engine** (Again, Hard, Good, Easy) powered by a custom **SM-2 Algorithm**.
+We've upgraded the app's brain to the **Free Spaced Repetition Scheduler (FSRS) v4**, the modern gold standard for memory retention.
 
-- **Intelligent Queue**: Prioritizes "Due" cards first, then "New" cards, ensuring you review what matters most.
-- **Detailed Metrics**: Tracks `easeFactor`, `lapses`, and `interval` for every card.
-- **Session History**: All `ReviewLogs` are persisted for future analytics.
+- **Adaptive Scheduling**: Calculates intervals based on memory **Stability (S)** and **Difficulty (D)**, not just fixed multipliers.
+- **State Tracking**: Tracks cards through `Learning`, `Review`, and `Relearning` stages.
+- **Efficiency**: "Easy" cards scale rapidly (jumps of 4 days -> 15 days+), while "Hard" cards are reviewed more frequently to ensure mastery.
 
 ### 💎 "Liquid Glass" Aesthetic
 
 A complete UI overhaul featuring a modern **Glassmorphism** design language.
 
 - **Depth**: Multi-layer shadows and `.ultraThinMaterial` backgrounds.
-- **Haptics**: Rich tactile feedback for every interaction (Success vs Warning).
+- **Haptics**: Rich tactile feedback (`snap`) for every interaction (Success vs Warning).
 - **Semantics**: A strict 4pt grid system and semantic color tokens via `Theme.swift`.
 - **Identity**: "Seamless Titanium" App Icon with industrial-grade detailing.
 
 ### ⚡️ Data Resilience & Cloud Engine
 
 - **SwiftData Persistence**: Fully migrated from Core Data to a robust, thread-safe SwiftData stack.
-- **CloudKit Sync**: Built-in support for seamless cross-device synchronization (iPhone/iPad).
+- **CloudKit Sync**:
+  - **Auto-Mirroring**: Seamless cross-device synchronization (iPhone/iPad).
+  - **Explicit Config**: Hardened persistence layer ensuring connection to the correct iCloud container.
+  - **Status UI**: Real-time sync logs visible in `Settings > Cloud Sync`.
 - **Self-Healing Import**:
   - **Auto-Repair**: Automatically detects and fixes duplicate data (>400 cards) on launch.
   - **Ghost Busters**: Smart `CSVImporter` filters out blank/malformed lines (`;;;;`) to keep decks clean.
-  - **Race-Free**: Serialized initialization logic prevents double-import bugs.
 
 ### 🗣️ Immersive Audio
 
@@ -58,7 +60,7 @@ The project follows a clean, layered architecture consolidated into a single Xco
 ```text
 ETPattern/
 ├── Models/           # SwiftData Entities (Card, CardSet, ReviewLog)
-├── Core/             # Pure Logic (SM-2 Algorithm, Constants)
+├── Core/             # Pure Logic (FSRS Algorithm, Constants)
 ├── Services/         # I/O & Logic (TTSService, CloudSync, CSV)
 ├── ViewModels/       # State Management (MainActor)
 ├── Views/            # SwiftUI Presentation (Theme-aware)
@@ -120,7 +122,13 @@ I doubt...;;I doubt it will rain.<br>I doubt he knows.;;2-Skepticism
 
 ## 📜 Changelog
 
-### v2.1.0 - "Unified & Simplified"
+### v2.1.0 - "The Brain Upgrade"
+
+- **Algorithm**: Replaced SM-2 with **FSRS v4** (Stability/Difficulty/State tracking).
+- **Cloud Sync**: Added robust configuration and sync status visibility in Settings.
+- **UI**: Complete "Liquid Glass" refactor with `snap` haptics and improved dark mode support.
+
+### v2.1.0 - "Unified & Simplified" (Legacy Refactor)
 
 - **Architecture**: Migrated from a hybrid SPM + Xcode to a pure, monolithic Xcode project.
 - **Cleanup**: Removed all `public` keywords and cross-module imports for easier internal maintenance.
