@@ -13,16 +13,16 @@ class SpacedRepetitionService {
 
     func updateCardDifficulty(_ card: Card, rating: DifficultyRating, in session: StudySession? = nil) {
         let previousInterval = card.interval
-        let previousEaseFactor = card.easeFactor
+        let previousEaseFactor = card.easeFactor // Legacy tracking
         
+        // Use new FSRS Logic (stateful)
         let result = SpacedRepetitionLogic.calculateNextReview(
-            currentInterval: card.interval,
-            currentEaseFactor: card.easeFactor,
+            card: card,
             rating: rating
         )
         
         let logger = Logger(subsystem: "com.jack.ETPattern", category: "SRS")
-        logger.info("[SRS] Card: \(card.cardName) | Rating: \(String(describing: rating)) | Interval: \(card.interval) -> \(result.interval)")
+        logger.info("[FSRS] Card: \(card.cardName) | Rating: \(String(describing: rating)) | S: \(card.stability) -> \(result.stability) | D: \(card.fsrsDifficulty) -> \(result.difficulty) | Int: \(card.interval) -> \(result.interval)")
         
         // Update card stats
         card.timesReviewed += 1
@@ -33,23 +33,25 @@ class SpacedRepetitionService {
         }
         card.lastReviewedDate = Date()
         
-        // Apply SRS results
+        // Apply FSRS results
         card.interval = result.interval
-        card.easeFactor = result.easeFactor
+        card.stability = result.stability
+        card.fsrsDifficulty = result.difficulty
+        card.state = result.state
+        card.scheduledDays = Int32(result.interval)
         
-        // Calculate next review date using Calendar for accuracy
-        if let nextDate = Calendar.current.date(byAdding: .day, value: Int(card.interval), to: Date()) {
-            card.nextReviewDate = nextDate
-        } else {
-            card.nextReviewDate = Date().addingTimeInterval(TimeInterval(card.interval * 86400))
-        }
+        // Safe mapping to legacy field for compatibility if needed (S replace EF?) or just leave EF alone
+        // card.easeFactor = result.stability // Optional: depending on if UI uses this
+        
+        // set nextReviewDate directly from result
+        card.nextReviewDate = result.scheduledDate
         
         // Create ReviewLog
         let reviewLog = ReviewLog(
             date: Date(),
             rating: rating,
             interval: result.interval,
-            easeFactor: result.easeFactor,
+            easeFactor: result.stability, // Storing Stability in legacy easeFactor column for logs
             previousInterval: previousInterval,
             previousEaseFactor: previousEaseFactor
         )

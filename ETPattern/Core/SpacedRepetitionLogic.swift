@@ -8,57 +8,42 @@
 import Foundation
 
 struct SpacedRepetitionLogic {
+    // Shared Scheduler Instance
+    private static let scheduler = FSRSScheduler()
+    
     struct ReviewResult {
         let interval: Int32
-        let easeFactor: Double
-        
-        init(interval: Int32, easeFactor: Double) {
-            self.interval = interval
-            self.easeFactor = easeFactor
-        }
+        let stability: Double
+        let difficulty: Double
+        let state: Int32
+        let scheduledDate: Date
     }
     
+    @MainActor
     static func calculateNextReview(
-        currentInterval: Int32,
-        currentEaseFactor: Double,
+        card: Card,
         rating: DifficultyRating
     ) -> ReviewResult {
-        var newInterval: Int32 = 1
-        var newEaseFactor: Double = currentEaseFactor
+        let now = Date()
         
-        // SM-2 inspired simplified logic
-        switch rating {
-        case .again:
-            newInterval = 1
-            newEaseFactor = max(1.3, currentEaseFactor - 0.2)
-            
-        case .hard:
-            // Slower growth for hard items
-            let calculated = Double(currentInterval) * 1.2
-            newInterval = Int32(max(calculated, Double(currentInterval) + 1))
-            newEaseFactor = max(1.3, currentEaseFactor - 0.15)
-            
-        case .good:
-            if currentInterval <= 1 {
-                newInterval = 4 // Standard jump for first success
-            } else {
-                newInterval = Int32(Double(currentInterval) * currentEaseFactor)
-            }
-            // Ease factor remains stable for "good"
-            
-        case .easy:
-            if currentInterval <= 1 {
-                newInterval = 7 // Aggressive jump for easy new items
-            } else {
-                let calculated = Double(currentInterval) * currentEaseFactor * 1.3
-                newInterval = Int32(max(calculated, Double(currentInterval) + 2))
-            }
-            newEaseFactor = min(2.5, currentEaseFactor + 0.15)
+        let info = scheduler.schedule(card: card, now: now, rating: rating)
+        
+        // Determine new state
+        // If Rating is 'Again', usually go to 'Relearning' or 'Learning'
+        // If 'Good'/'Easy' and was Learning, go to Review.
+        var newState = card.state
+        if rating == .again {
+            newState = 3 // Relearning
+        } else if card.state == 0 || card.state == 1 {
+            newState = 2 // Review
         }
         
-        // Cap interval to a reasonable max (e.g., 3650 days / 10 years)
-        newInterval = min(3650, newInterval)
-        
-        return ReviewResult(interval: newInterval, easeFactor: newEaseFactor)
+        return ReviewResult(
+            interval: Int32(info.interval),
+            stability: info.stability,
+            difficulty: info.difficulty,
+            state: newState,
+            scheduledDate: info.scheduledDate
+        )
     }
 }

@@ -26,6 +26,14 @@ final class Card {
     var lastReviewedDate: Date?
     var lapses: Int32 = 0
     
+    // MARK: - FSRS Properties
+    var stability: Double = 0.0
+    var fsrsDifficulty: Double = 0.0
+    var elapsedDays: Double = 0.0
+    var scheduledDays: Int32 = 0
+    var state: Int32 = 0 // 0=New, 1=Learning, 2=Review, 3=Relearning
+
+    
     var cardSet: CardSet?
 
     @Relationship(deleteRule: .nullify, inverse: \StudySession.reviewedCards)
@@ -62,7 +70,15 @@ final class Card {
         self.easeFactor = easeFactor
         self.timesReviewed = timesReviewed
         self.timesCorrect = timesCorrect
+        self.timesCorrect = timesCorrect
         self.lapses = 0
+        
+        // FSRS Defaults
+        self.stability = 0.0
+        self.fsrsDifficulty = 0.0
+        self.elapsedDays = 0.0
+        self.scheduledDays = 0
+        self.state = 0
     }
 }
 
