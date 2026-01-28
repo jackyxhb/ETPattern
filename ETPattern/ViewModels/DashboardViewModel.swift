@@ -16,14 +16,18 @@ final class DashboardViewModel {
     private(set) var error: Error?
     
     // Quick Actions
-    private(set) var totalCardsReviewedToday: Int = 0 // Mock for now
+    var totalCardsReviewedToday: Int {
+        statsService.getDailyReviewCount()
+    }
     private(set) var dailyGoal: Int = 50
     
     private let service: CardSetServiceProtocol
+    private let statsService: StatsServiceProtocol
     private weak var coordinator: AppCoordinator?
     
-    init(service: CardSetServiceProtocol, coordinator: AppCoordinator?) {
+    init(service: CardSetServiceProtocol, statsService: StatsServiceProtocol = StatsService.shared, coordinator: AppCoordinator?) {
         self.service = service
+        self.statsService = statsService
         self.coordinator = coordinator
     }
     
@@ -31,8 +35,6 @@ final class DashboardViewModel {
         isLoading = true
         do {
             decks = try await service.fetchCardSets()
-            // In a real app, we would also fetch "Today's Progress" from a StatsService
-            calculateMockStats()
             error = nil
         } catch {
             self.error = error
@@ -84,11 +86,6 @@ final class DashboardViewModel {
         coordinator?.presentFullScreen(.importCSV)
     }
     
-    // MARK: - Helper
-    private func calculateMockStats() {
-        // Placeholder for future logic
-        totalCardsReviewedToday = Int.random(in: 10...40)
-    }
     
     var userName: String {
         let deviceName = UIDevice.current.name

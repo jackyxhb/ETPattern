@@ -66,6 +66,9 @@ final class SessionService: SessionServiceProtocol {
         let logs = session.safeReviewLogs
         session.correctCount = Int32(logs.filter { $0.ratingValue >= 2 }.count)
         
+        // Increment daily global stats
+        StatsService.shared.incrementDailyReviewCount()
+        
         try modelContext.save()
     }
     

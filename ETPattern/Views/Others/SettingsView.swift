@@ -9,6 +9,7 @@ import SwiftUI
 import AVFoundation
 
 struct SettingsView: View {
+    @Environment(AppCoordinator.self) var coordinator
     @Environment(\.theme) var theme
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var ttsService: TTSService
@@ -56,6 +57,7 @@ struct SettingsView: View {
                 .themedGlassBackground()
                 
                 Form {
+                    generalSection
                     studyModeSection
                     appearanceSection
                     ttsSection
@@ -72,6 +74,44 @@ struct SettingsView: View {
             ttsVolume = ttsService.getCurrentVolume()
             ttsPause = ttsService.getCurrentPause()
         }
+    }
+
+    private var generalSection: some View {
+        Section(header: Text("General").foregroundColor(theme.colors.textPrimary)) {
+            Button {
+                dismiss() // Optimistically dismiss
+                // Perform navigation after a short delay to ensure sheet dismissal interaction doesn't conflict
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    coordinator.presentFullScreen(.sessionStats)
+                }
+            } label: {
+                HStack {
+                    Label("Usage Statistics", systemImage: "chart.bar")
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(theme.colors.textSecondary)
+                }
+            }
+            .foregroundColor(theme.colors.textPrimary)
+            
+            Button {
+                dismiss()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    coordinator.presentFullScreen(.onboarding)
+                }
+            } label: {
+                HStack {
+                    Label("Replay Onboarding", systemImage: "questionmark.circle")
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(theme.colors.textSecondary)
+                }
+            }
+            .foregroundColor(theme.colors.textPrimary)
+        }
+        .listRowBackground(theme.colors.surfaceLight)
     }
 
     private var studyModeSection: some View {
