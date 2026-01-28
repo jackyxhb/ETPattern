@@ -153,6 +153,9 @@ struct SettingsView: View {
                         Text("Waiting for sync...")
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                        Text(syncManager.statusLog)
+                            .font(.caption2)
+                            .foregroundStyle(.gray)
                     }
                 }
                 

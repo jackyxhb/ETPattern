@@ -54,8 +54,13 @@ struct PersistenceController {
         if inMemory {
             config = ModelConfiguration(isStoredInMemoryOnly: true)
         } else {
-            // Use local storage only
-            config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+            // Use local storage with explicit CloudKit Mirroring
+            config = ModelConfiguration(
+                "Default",
+                schema: schema,
+                isStoredInMemoryOnly: false,
+                cloudKitDatabase: .automatic
+            )
         }
 
         do {
