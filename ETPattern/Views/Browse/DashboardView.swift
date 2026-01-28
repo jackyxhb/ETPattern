@@ -99,9 +99,13 @@ struct DashboardView: View {
                         // Row 4+: Decks
                         LazyVStack(spacing: 12) {
                             ForEach(viewModel.decks) { deck in
-                                DeckListTile(deck: deck) {
-                                    viewModel.openDeck(deck)
-                                }
+                                    // Deck Tile
+                                    DeckListTile(
+                                        deck: deck,
+                                        onOpen: { viewModel.openDeck(deck) },
+                                        onAutoPlay: { viewModel.openAutoPlay(deck) },
+                                        onDelete: { Task { await viewModel.deleteDeck(deck) } }
+                                    )
                             }
                         }
                     }
@@ -215,27 +219,54 @@ struct ActionTile: View {
 
 struct DeckListTile: View {
     let deck: CardSet
-    let action: () -> Void
+    let onOpen: () -> Void
+    let onAutoPlay: () -> Void
+    let onDelete: () -> Void
     
     var body: some View {
-        Button(action: action) {
-            HStack {
-                VStack(alignment: .leading) {
-                    Text(deck.name)
-                        .font(.headline)
-                    Text("\(deck.safeCards.count) cards")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+        HStack(spacing: 16) {
+            // Visible AutoPlay Button (Left Side)
+            Button(action: onAutoPlay) {
+                VStack(spacing: 4) {
+                    Image(systemName: "play.circle.fill")
+                        .font(.title)
+                    Text("Auto")
+                        .font(.caption2.bold())
                 }
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
+                .foregroundStyle(.orange)
+                .frame(width: 50)
+            }
+            .buttonStyle(.plain)
+            
+            VStack(alignment: .leading) {
+                Text(deck.name)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                Text("\(deck.safeCards.count) cards")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            .padding()
-            .liquidGlass()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                onOpen()
+            }
+            
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding()
+        .liquidGlass()
+        .contextMenu {
+            Button(action: onAutoPlay) {
+                Label("Auto Play", systemImage: "play.circle")
+            }
+            
+            Button(role: .destructive, action: onDelete) {
+                Label("Delete Deck", systemImage: "trash")
+            }
         }
     }
 }

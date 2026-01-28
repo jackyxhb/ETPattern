@@ -54,7 +54,8 @@ struct SharedBottomControlBarView<MiddleContent: View>: View {
             progressBarView
             mainControlsView
         }
-        .background(theme.colors.surface)
+        .frame(maxWidth: .infinity)
+        .background(.ultraThinMaterial)
         .buttonStyle(.plain)
     }
 

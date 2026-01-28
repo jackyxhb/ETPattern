@@ -49,6 +49,14 @@ final class DashboardViewModel {
             self.error = error
         }
     }
+    func deleteDeck(_ deck: CardSet) async {
+        do {
+            try await service.deleteCardSet(deck)
+            await loadData()
+        } catch {
+            self.error = error
+        }
+    }
     
     // MARK: - Navigation Intents
     
@@ -58,13 +66,18 @@ final class DashboardViewModel {
     
     func showQuickStudy() {
         // Logic to find the best deck to study or a "Mixed" session
-        if let firstDeck = decks.first {
-            coordinator?.presentFullScreen(.study(firstDeck))
+        // Find the first deck that actually has cards
+        if let bestDeck = decks.first(where: { !$0.safeCards.isEmpty }) ?? decks.first {
+            coordinator?.presentFullScreen(.study(bestDeck))
         }
     }
     
     func openDeck(_ deck: CardSet) {
         coordinator?.presentSheet(.browse(deck))
+    }
+    
+    func openAutoPlay(_ deck: CardSet) {
+        coordinator?.presentFullScreen(.autoPlay(deck))
     }
     
     func showImport() {

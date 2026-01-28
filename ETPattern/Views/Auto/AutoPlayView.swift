@@ -4,29 +4,29 @@ import UIKit
 
 struct AutoPlayView: View {
     let cardSet: CardSet
+    let modelContext: ModelContext // Passed in via init, or could use Environment
 
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
     @Environment(\.theme) var theme
     @EnvironmentObject private var ttsService: TTSService
 
-    @StateObject private var sessionManager: SessionManager
-    @State private var currentCard: Card?
-    @State private var isFlipped = false
-    @State private var isPlaying = true
+    @State private var viewModel: AutoPlayViewModel?
+    
+    // Local state for animation/interaction, mirroring VM state where needed for transitions
     @State private var currentTask: Task<Void, Never>?
     @State private var resumePhase: AutoPlayPhase = .front
     @State private var speechToken = UUID()
     @State private var cardToken = UUID()
     @State private var activePhase: AutoPlayPhase = .front
-
+    
+    // Metrics
     private var fallbackFrontDelay: TimeInterval { theme.metrics.autoPlayFallbackFrontDelay }
     private var fallbackBackDelay: TimeInterval { theme.metrics.autoPlayFallbackBackDelay }
     private var interCardDelay: TimeInterval { theme.metrics.autoPlayInterCardDelay }
 
     init(cardSet: CardSet, modelContext: ModelContext) {
         self.cardSet = cardSet
-        _sessionManager = StateObject(wrappedValue: SessionManager(cardSet: cardSet, modelContext: modelContext))
+        self.modelContext = modelContext
     }
 
     var body: some View {
@@ -34,48 +34,62 @@ struct AutoPlayView: View {
             theme.gradients.background
                 .ignoresSafeArea()
 
-            VStack(spacing: theme.metrics.autoPlayViewSpacing) {
-                header
-
-                if sessionManager.getCards().isEmpty {
-                    emptyState
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    SharedCardDisplayView(
-                        frontText: currentCard?.front ?? "No front",
-                        backText: (currentCard?.back ?? "No back").replacingOccurrences(of: "<br>", with: "\n"),
-                        groupName: currentCard?.groupName ?? "",
-                        cardName: currentCard?.cardName ?? "",
-                        isFlipped: isFlipped,
-                        currentIndex: sessionManager.currentIndex,
-                        totalCards: sessionManager.getCards().count,
-                        cardId: (currentCard?.id).flatMap { Int($0) },
-                        showSwipeFeedback: false,
-                        swipeDirection: nil,
-                        theme: theme
-                    )
-                }
-            }
-            .padding(.horizontal, theme.metrics.autoPlayViewHorizontalPadding)
-            .safeAreaInset(edge: .bottom) {
-                bottomControlBar
+            if let viewModel = viewModel {
+                content(with: viewModel)
+            } else {
+                ProgressView()
             }
         }
         .onAppear {
-            sessionManager.prepareSession()
-            updateCurrentCard()
-            startPlaybackIfPossible()
+            if viewModel == nil {
+                let service = SessionService(modelContext: modelContext)
+                viewModel = AutoPlayViewModel(cardSet: cardSet, service: service, ttsService: ttsService)
+            }
+            Task {
+                await viewModel?.startSession()
+                startPlaybackIfPossible()
+            }
         }
         .onDisappear {
             stopPlayback()
-            sessionManager.saveProgress()
+            viewModel?.stopSession()
         }
-        .onChange(of: isPlaying) { _, playing in
-            if playing {
+        .onChange(of: viewModel?.isPlaying) { _, playing in
+            if playing == true {
                 disableIdleTimer()
             } else {
                 enableIdleTimer()
             }
+        }
+    }
+    
+    @ViewBuilder
+    private func content(with vm: AutoPlayViewModel) -> some View {
+        VStack(spacing: theme.metrics.autoPlayViewSpacing) {
+            header
+            
+            if vm.cards.isEmpty {
+                emptyState
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                SharedCardDisplayView(
+                    frontText: vm.currentCard?.front ?? "No front",
+                    backText: (vm.currentCard?.back ?? "No back").replacingOccurrences(of: "<br>", with: "\n"),
+                    groupName: vm.currentCard?.groupName ?? "",
+                    cardName: vm.currentCard?.cardName ?? "",
+                    isFlipped: vm.isFlipped,
+                    currentIndex: vm.currentIndex,
+                    totalCards: vm.cards.count,
+                    cardId: (vm.currentCard?.id).flatMap { Int($0) },
+                    showSwipeFeedback: false,
+                    swipeDirection: nil,
+                    theme: theme
+                )
+            }
+        }
+        .padding(.horizontal, theme.metrics.autoPlayViewHorizontalPadding)
+        .safeAreaInset(edge: .bottom) {
+            bottomControlBar(vm: vm)
         }
     }
 
@@ -98,43 +112,43 @@ struct AutoPlayView: View {
         )
     }
 
-    private var bottomControlBar: some View {
+    private func bottomControlBar(vm: AutoPlayViewModel) -> some View {
         SharedBottomControlBarView(
             strategyToggleAction: {
                 UIImpactFeedbackGenerator.lightImpact()
-                sessionManager.cycleStrategy()
-                updateCurrentCard()
+                vm.cycleStrategy()
+                // Update is implicit via observation
             },
             previousAction: {
                 UIImpactFeedbackGenerator.lightImpact()
-                goToPreviousCard()
+                goToPreviousCard(vm: vm)
             },
             nextAction: {
                 UIImpactFeedbackGenerator.lightImpact()
-                advanceToNextManually()
+                advanceToNextManually(vm: vm)
             },
             closeAction: {
                 UIImpactFeedbackGenerator.lightImpact()
-                dismissAuto()
+                dismissAuto(vm: vm)
             },
-            isPreviousDisabled: sessionManager.currentIndex == 0,
-            strategy: sessionManager.currentStrategy,
-            currentPosition: sessionManager.getCards().count > 0 ? sessionManager.currentIndex + 1 : 0,
-            totalCards: sessionManager.getCards().count,
+            isPreviousDisabled: vm.currentIndex == 0,
+            strategy: vm.currentStrategy,
+            currentPosition: vm.cards.count > 0 ? vm.currentIndex + 1 : 0,
+            totalCards: vm.cards.count,
             theme: theme,
-            previousHint: sessionManager.currentIndex == 0 ? "No previous card available" : "Go to previous card",
+            previousHint: vm.currentIndex == 0 ? "No previous card available" : "Go to previous card",
             nextHint: "Skip to next card"
         ) {
-            playPauseButton
+            playPauseButton(vm: vm)
         }
     }
 
-    private var playPauseButton: some View {
+    private func playPauseButton(vm: AutoPlayViewModel) -> some View {
         Button(action: {
             UIImpactFeedbackGenerator.mediumImpact()
-            togglePlayback()
+            togglePlayback(vm: vm)
         }) {
-            Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+            Image(systemName: vm.isPlaying ? "pause.fill" : "play.fill")
                 .font(theme.metrics.title)
                 .foregroundColor(theme.colors.textPrimary)
                 .frame(width: theme.metrics.autoPlayButtonSize, height: theme.metrics.autoPlayButtonSize)
@@ -142,21 +156,17 @@ struct AutoPlayView: View {
                 .clipShape(Circle())
                 .shadow(color: theme.colors.highlight.opacity(0.3), radius: theme.metrics.autoPlayButtonShadowRadius, x: 0, y: theme.metrics.autoPlayButtonShadowY)
         }
-        .accessibilityLabel(isPlaying ? "Pause" : "Play")
+        .accessibilityLabel(vm.isPlaying ? "Pause" : "Play")
     }
 
-
-
+    // MARK: - Playback Logic
+    // Note: Most state is now in VM, but animation sequencing remains in View
+    // because it handles strictly visual transitions (flips, delays).
+    
     private func startPlaybackIfPossible() {
-        guard !sessionManager.getCards().isEmpty else { return }
-        isPlaying = true
-        disableIdleTimer() // Prevent device sleep during auto-play
-
-        // If this is the start of a fresh session (not resuming), count the first card
-        if sessionManager.cardsPlayedInSession == 0 {
-            sessionManager.cardsPlayedInSession = 1
-        }
-
+        guard let vm = viewModel, !vm.cards.isEmpty else { return }
+        // vm.togglePlayback() // Already defaulted to true in VM init?
+        disableIdleTimer()
         continueFromResumePhase()
     }
 
@@ -171,32 +181,30 @@ struct AutoPlayView: View {
     }
 
     private func playFrontSide() {
-        guard isPlaying, !sessionManager.getCards().isEmpty else { return }
+        guard let vm = viewModel, vm.isPlaying, !vm.cards.isEmpty else { return }
         _ = beginCard()
         withAnimation(.smooth) {
-            isFlipped = false
+            vm.setFlipped(false)
         }
         speakPhase(.front)
     }
 
     private func flipToBack() {
-        guard isPlaying, !sessionManager.getCards().isEmpty else { return }
+        guard let vm = viewModel, vm.isPlaying, !vm.cards.isEmpty else { return }
         withAnimation(.smooth) {
-            isFlipped = true
+            vm.setFlipped(true)
         }
         speakPhase(.back)
     }
 
     private func moveToNextCard() {
-        guard isPlaying, !sessionManager.getCards().isEmpty else { return }
-        sessionManager.moveToNext()
-        updateCurrentCard()
-        sessionManager.saveProgress()
+        guard let vm = viewModel, vm.isPlaying, !vm.cards.isEmpty else { return }
+        vm.next()
         playFrontSide()
     }
 
-    private func advanceToNextManually() {
-        guard !sessionManager.getCards().isEmpty else { return }
+    private func advanceToNextManually(vm: AutoPlayViewModel) {
+        guard !vm.cards.isEmpty else { return }
 
         // Completely stop current speech and reset all state
         ttsService.stop()
@@ -209,35 +217,27 @@ struct AutoPlayView: View {
         activePhase = .front
 
         // Move to next card
-        sessionManager.moveToNext()
-        updateCurrentCard()
-        sessionManager.saveProgress()
+        vm.next()
 
         // Reset card state
         withAnimation(.smooth) {
-            isFlipped = false
+            vm.setFlipped(false)
         }
 
         // If playing, start fresh auto-play sequence for the new card
-        // Use a small delay to ensure TTS state is fully reset
-        if isPlaying {
+        if vm.isPlaying {
             currentTask = Task {
-                do {
-                    try await Task.sleep(for: .milliseconds(100))
-                    // Double-check we're still in the same state
-                    guard !Task.isCancelled, isPlaying, speechToken == newToken else { return }
-                    await MainActor.run {
-                        playFrontSide()
-                    }
-                } catch {
-                    // Task was cancelled, ignore
+                try? await Task.sleep(for: .milliseconds(100))
+                guard !Task.isCancelled, vm.isPlaying, speechToken == newToken else { return }
+                await MainActor.run {
+                    playFrontSide()
                 }
             }
         }
     }
 
-    private func goToPreviousCard() {
-        guard !sessionManager.getCards().isEmpty else { return }
+    private func goToPreviousCard(vm: AutoPlayViewModel) {
+        guard !vm.cards.isEmpty else { return }
 
         // Completely stop current speech and reset all state
         ttsService.stop()
@@ -250,63 +250,51 @@ struct AutoPlayView: View {
         activePhase = .front
 
         // Move to previous card
-        sessionManager.moveToPrevious()
-        updateCurrentCard()
-        sessionManager.saveProgress()
+        vm.previous()
 
         // Reset card state
         withAnimation(.smooth) {
-            isFlipped = false
+            vm.setFlipped(false)
         }
 
         // If playing, start fresh auto-play sequence for the new card
-        // Use a small delay to ensure TTS state is fully reset
-        if isPlaying {
+        if vm.isPlaying {
             currentTask = Task {
-                do {
-                    try await Task.sleep(for: .milliseconds(100))
-                    // Double-check we're still in the same state
-                    guard !Task.isCancelled, isPlaying, speechToken == newToken else { return }
-                    await MainActor.run {
-                        playFrontSide()
-                    }
-                } catch {
-                    // Task was cancelled, ignore
+                try? await Task.sleep(for: .milliseconds(100))
+                guard !Task.isCancelled, vm.isPlaying, speechToken == newToken else { return }
+                await MainActor.run {
+                    playFrontSide()
                 }
             }
         }
-
-        sessionManager.saveProgress()
     }
 
-    private func togglePlayback() {
-        if isPlaying {
-            pausePlayback()
-        } else {
-            isPlaying = true
+    private func togglePlayback(vm: AutoPlayViewModel) {
+        vm.togglePlayback()
+        if vm.isPlaying {
             disableIdleTimer()
             continueFromResumePhase()
+        } else {
+            pausePlayback()
         }
     }
 
     private func pausePlayback() {
-        isPlaying = false
-        resumePhase = isFlipped ? .back : .front
-        enableIdleTimer() // Allow device sleep when paused
+        guard let vm = viewModel else { return }
+        // vm.isPlaying is already false
+        resumePhase = vm.isFlipped ? .back : .front
+        enableIdleTimer()
         resetSpeechFlow()
-        sessionManager.saveProgress()
     }
 
     private func stopPlayback() {
-        isPlaying = false
-        enableIdleTimer() // Allow device sleep when stopped
+        viewModel?.stopSession()
+        enableIdleTimer()
         resetSpeechFlow()
-
     }
 
-    private func dismissAuto() {
+    private func dismissAuto(vm: AutoPlayViewModel) {
         stopPlayback()
-        sessionManager.saveProgress()
         dismiss()
     }
 
@@ -330,7 +318,7 @@ struct AutoPlayView: View {
         speechToken = UUID()
         cardToken = UUID()
         activePhase = .front
-        ttsService.stop()
+        // ttsService.stop() // handled in VM toggle
     }
 
     private func beginCard() -> UUID {
@@ -342,28 +330,23 @@ struct AutoPlayView: View {
         return token
     }
 
-    private func updateCurrentCard() {
-        currentCard = sessionManager.currentCard
-    }
-
     private func speakPhase(_ phase: AutoPlayPhase) {
         activePhase = phase
-        guard let currentCard = currentCard else { return }
+        guard let vm = viewModel, let currentCard = vm.currentCard else { return }
         let text = text(for: phase, at: currentCard).trimmingCharacters(in: .whitespacesAndNewlines)
         let currentCardToken = cardToken
 
         guard !text.isEmpty else {
             schedule(after: fallbackDelay(for: phase), token: currentCardToken) {
-                guard isPlaying, cardToken == currentCardToken, activePhase == phase else { return }
-                advance(from: phase)
+                guard let vm = self.viewModel, vm.isPlaying, self.cardToken == currentCardToken, self.activePhase == phase else { return }
+                self.advance(from: phase)
             }
             return
         }
 
         ttsService.speak(text) {
-            // Triple-check token and state are still valid before advancing
             Task { @MainActor in
-                guard self.isPlaying, self.cardToken == currentCardToken, self.activePhase == phase else { return }
+                guard let vm = self.viewModel, vm.isPlaying, self.cardToken == currentCardToken, self.activePhase == phase else { return }
                 self.advance(from: phase)
             }
         }
@@ -383,12 +366,12 @@ struct AutoPlayView: View {
         currentTask = Task {
             do {
                 try await Task.sleep(for: .seconds(interCardDelay))
-                guard !Task.isCancelled, isPlaying else { return }
+                guard let vm = self.viewModel, !Task.isCancelled, vm.isPlaying else { return }
                 await MainActor.run {
                     moveToNextCard()
                 }
             } catch {
-                // Task was cancelled, ignore
+                // Task was cancelled
             }
         }
     }

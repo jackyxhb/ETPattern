@@ -54,7 +54,7 @@ struct ContentView: View {
                 .fullScreenCover(item: $coordinator.fullScreenCover) { destination in
                     switch destination {
                     case .study(let deck):
-                        StudyView(cardSet: deck, modelContext: modelContext)
+                        StudyView(cardSet: deck)
                     case .autoPlay(let deck):
                         AutoPlayView(cardSet: deck, modelContext: modelContext)
                     case .masteryDashboard:

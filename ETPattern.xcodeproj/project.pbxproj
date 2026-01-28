@@ -10,12 +10,49 @@
 		22EC7D522ED5726F00C3DDDA /* Translation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 22EC7D512ED5726F00C3DDDA /* Translation.framework */; settings = {ATTRIBUTES = (Optional, ); }; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		221948A32F29E54000D6D0CE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 22EC7D462ED5726F00C3DDDA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 22EC7D4D2ED5726F00C3DDDA;
+			remoteInfo = ETPattern;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		2219489D2F29E54000D6D0CE /* ETPatternUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ETPatternUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		22EC7D4E2ED5726F00C3DDDA /* ETPattern.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ETPattern.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		22EC7D512ED5726F00C3DDDA /* Translation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Translation.framework; path = System/Library/Frameworks/Translation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		221948A82F29E59200D6D0CE /* Exceptions for "ETPatternUITests" folder in "ETPattern" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				TestRunner.swift,
+			);
+			target = 22EC7D4D2ED5726F00C3DDDA /* ETPattern */;
+		};
+		221948A92F29E59200D6D0CE /* Exceptions for "ETPatternUITests" folder in "ETPatternUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				TestRunner.swift,
+			);
+			target = 2219489C2F29E54000D6D0CE /* ETPatternUITests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		2219489E2F29E54000D6D0CE /* ETPatternUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				221948A82F29E59200D6D0CE /* Exceptions for "ETPatternUITests" folder in "ETPattern" target */,
+				221948A92F29E59200D6D0CE /* Exceptions for "ETPatternUITests" folder in "ETPatternUITests" target */,
+			);
+			path = ETPatternUITests;
+			sourceTree = "<group>";
+		};
 		22EC7D502ED5726F00C3DDDA /* ETPattern */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = ETPattern;
@@ -24,6 +61,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		2219489A2F29E54000D6D0CE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		22EC7D4B2ED5726F00C3DDDA /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -39,6 +83,7 @@
 			isa = PBXGroup;
 			children = (
 				22EC7D502ED5726F00C3DDDA /* ETPattern */,
+				2219489E2F29E54000D6D0CE /* ETPatternUITests */,
 				22EC7D532ED5726F00C3DDDA /* Frameworks */,
 				22EC7D4F2ED5726F00C3DDDA /* Products */,
 			);
@@ -48,6 +93,7 @@
 			isa = PBXGroup;
 			children = (
 				22EC7D4E2ED5726F00C3DDDA /* ETPattern.app */,
+				2219489D2F29E54000D6D0CE /* ETPatternUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -63,6 +109,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		2219489C2F29E54000D6D0CE /* ETPatternUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 221948A72F29E54000D6D0CE /* Build configuration list for PBXNativeTarget "ETPatternUITests" */;
+			buildPhases = (
+				221948992F29E54000D6D0CE /* Sources */,
+				2219489A2F29E54000D6D0CE /* Frameworks */,
+				2219489B2F29E54000D6D0CE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				221948A42F29E54000D6D0CE /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				2219489E2F29E54000D6D0CE /* ETPatternUITests */,
+			);
+			name = ETPatternUITests;
+			packageProductDependencies = (
+			);
+			productName = ETPatternUITests;
+			productReference = 2219489D2F29E54000D6D0CE /* ETPatternUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		22EC7D4D2ED5726F00C3DDDA /* ETPattern */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 22EC7D742ED5727300C3DDDA /* Build configuration list for PBXNativeTarget "ETPattern" */;
@@ -90,9 +159,13 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2610;
+				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
+					2219489C2F29E54000D6D0CE = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 22EC7D4D2ED5726F00C3DDDA;
+					};
 					22EC7D4D2ED5726F00C3DDDA = {
 						CreatedOnToolsVersion = 26.1.1;
 					};
@@ -113,11 +186,19 @@
 			projectRoot = "";
 			targets = (
 				22EC7D4D2ED5726F00C3DDDA /* ETPattern */,
+				2219489C2F29E54000D6D0CE /* ETPatternUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		2219489B2F29E54000D6D0CE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		22EC7D4C2ED5726F00C3DDDA /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -128,6 +209,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		221948992F29E54000D6D0CE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		22EC7D4A2ED5726F00C3DDDA /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -137,7 +225,55 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		221948A42F29E54000D6D0CE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 22EC7D4D2ED5726F00C3DDDA /* ETPattern */;
+			targetProxy = 221948A32F29E54000D6D0CE /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		221948A52F29E54000D6D0CE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F674YT87QV;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = JackXiao.ETPatternUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ETPattern;
+			};
+			name = Debug;
+		};
+		221948A62F29E54000D6D0CE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F674YT87QV;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = JackXiao.ETPatternUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ETPattern;
+			};
+			name = Release;
+		};
 		22EC7D722ED5727300C3DDDA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -346,6 +482,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		221948A72F29E54000D6D0CE /* Build configuration list for PBXNativeTarget "ETPatternUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				221948A52F29E54000D6D0CE /* Debug */,
+				221948A62F29E54000D6D0CE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		22EC7D492ED5726F00C3DDDA /* Build configuration list for PBXProject "ETPattern" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

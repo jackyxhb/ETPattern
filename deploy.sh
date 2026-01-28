@@ -18,7 +18,8 @@ xcodebuild -project "${PROJECT_NAME}.xcodeproj" \
            -sdk iphoneos \
            -destination "id=$DEVICE_ID" \
            -derivedDataPath "build" \
-           build | xcbeautify || xcodebuild -project "${PROJECT_NAME}.xcodeproj" -scheme "$SCHEME_NAME" -configuration "$CONFIGURATION" -sdk iphoneos -destination "id=$DEVICE_ID" -derivedDataPath "build" build
+           -allowProvisioningUpdates \
+           build | xcbeautify || xcodebuild -project "${PROJECT_NAME}.xcodeproj" -scheme "$SCHEME_NAME" -configuration "$CONFIGURATION" -sdk iphoneos -destination "id=$DEVICE_ID" -derivedDataPath "build" -allowProvisioningUpdates build
 
 if [ $? -ne 0 ]; then
     echo "❌ Build failed!"

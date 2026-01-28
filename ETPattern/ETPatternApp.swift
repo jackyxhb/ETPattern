@@ -80,6 +80,11 @@ class AppInitManager: ObservableObject {
     func initializeApp() async {
         statusMessage = "Preparing learning materials..."
         
+        #if DEBUG
+        // TestRunner disabled - use Xcode Test target for unit tests
+        // await TestRunner.shared.runAllTests()
+        #endif
+        
         // Wait for persistence to verify/seed data
         // Uses force: false to respect existing data, but ensures check happens
         let result = await PersistenceController.shared.initializeBundledCardSets(force: false)
