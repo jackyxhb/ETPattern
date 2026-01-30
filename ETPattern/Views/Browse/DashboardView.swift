@@ -48,16 +48,19 @@ struct DashboardView: View {
                     .padding(.top)
                     
                     // Bento Grid
-                    VStack(spacing: 12) {
+                    Grid(horizontalSpacing: 12, verticalSpacing: 12) {
                         // Row 1: Main Stats (2x2)
-                        DailyProgressTile(
-                            completed: viewModel.totalCardsReviewedToday,
-                            goal: viewModel.dailyGoal
-                        )
-                        .frame(height: 180)
+                        GridRow {
+                            DailyProgressTile(
+                                completed: viewModel.totalCardsReviewedToday,
+                                goal: viewModel.dailyGoal
+                            )
+                            .frame(minHeight: 180)
+                            .gridCellColumns(2) // Spans entire width
+                        }
                         
                         // Row 2: Actions (1x1 + 1x1)
-                        HStack(spacing: 12) {
+                        GridRow {
                             ActionTile(
                                 icon: "bolt.fill",
                                 title: "Quick Study",
@@ -81,28 +84,34 @@ struct DashboardView: View {
                         .frame(height: 140)
                         
                         // Row 3: Deck List Header
-                        HStack {
-                            Text("Your Decks")
-                                .font(.headline)
-                            Spacer()
-                            Button("Import") {
-                                viewModel.showImport()
+                        GridRow {
+                            HStack {
+                                Text("Your Decks")
+                                    .font(.headline)
+                                Spacer()
+                                Button("Import") {
+                                    viewModel.showImport()
+                                }
+                                .font(.subheadline)
                             }
-                            .font(.subheadline)
+                            .padding(.top, 8)
+                            .gridCellColumns(2)
                         }
-                        .padding(.horizontal)
-                        .padding(.top, 8)
                         
                         // Row 4+: Decks
-                        LazyVStack(spacing: 12) {
-                            ForEach(viewModel.decks) { deck in
-                                    // Deck Tile
-                                    DeckListTile(
-                                        deck: deck,
-                                        onOpen: { viewModel.openDeck(deck) },
-                                        onAutoPlay: { viewModel.openAutoPlay(deck) },
-                                        onDelete: { Task { await viewModel.deleteDeck(deck) } }
-                                    )
+                        // Note: Grid really wants static rows, but we can iterate.
+                        // However, strictly, LazyStack inside GridRow is complex.
+                        // For a pure Bento Grid, we usually have fixed slots.
+                        // But for a list, we can use a ForEach producing GridRows.
+                        ForEach(viewModel.decks) { deck in
+                            GridRow {
+                                DeckListTile(
+                                    deck: deck,
+                                    onOpen: { viewModel.openDeck(deck) },
+                                    onAutoPlay: { viewModel.openAutoPlay(deck) },
+                                    onDelete: { Task { await viewModel.deleteDeck(deck) } }
+                                )
+                                .gridCellColumns(2)
                             }
                         }
                     }
@@ -178,7 +187,7 @@ struct DailyProgressTile: View {
         }
         .frame(maxWidth: .infinity)
         .padding(24)
-        .liquidGlass()
+        .bentoTileStyle()
     }
 }
 
@@ -191,7 +200,7 @@ struct ActionTile: View {
     
     var body: some View {
         Button {
-            UIImpactFeedbackGenerator.snap() // Snap!
+            // Feedback handled by sensoryFeedback or button style
             action()
         } label: {
             VStack(alignment: .leading) {
@@ -213,7 +222,7 @@ struct ActionTile: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
-            .liquidGlass()
+            .bentoTileStyle()
         }
     }
 }
@@ -228,7 +237,7 @@ struct DeckListTile: View {
         HStack(spacing: 16) {
             // Visible AutoPlay Button (Left Side)
             Button {
-                UIImpactFeedbackGenerator.snap() // Snap!
+                // Feedback handled by sensoryFeedback or button style
                 onAutoPlay()
             } label: {
                 VStack(spacing: 4) {
@@ -254,7 +263,7 @@ struct DeckListTile: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
             .onTapGesture {
-                UIImpactFeedbackGenerator.snap() // Snap!
+                // Feedback handled by sensoryFeedback or button style
                 onOpen()
             }
             
@@ -263,7 +272,7 @@ struct DeckListTile: View {
                 .foregroundStyle(.secondary)
         }
         .padding()
-        .liquidGlass()
+        .bentoTileStyle()
         .contextMenu {
             Button(action: onAutoPlay) {
                 Label("Auto Play", systemImage: "play.circle")

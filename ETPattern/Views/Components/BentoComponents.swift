@@ -15,9 +15,9 @@ struct LiquidGlassModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .background(.ultraThinMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: theme.metrics.cornerRadius, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                RoundedRectangle(cornerRadius: theme.metrics.cornerRadius, style: .continuous)
                     .stroke(theme.colors.outline, lineWidth: 0.5)
             )
             .shadow(color: theme.colors.shadow.opacity(0.2), radius: 10, x: 0, y: 5)

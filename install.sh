@@ -40,7 +40,7 @@ else
         echo "💻 Found booted simulator: $DESTINATION_ID"
     else
         # 3. Fallback to default simulator
-        IPHONE_SIM="$(xcrun simctl list devices available | grep "iPhone 16" | head -n 1 || true)"
+        IPHONE_SIM="$(xcrun simctl list devices available | grep -E "iPhone 17|iPhone 16" | head -n 1 || true)"
         if [[ -z "$IPHONE_SIM" ]]; then
             echo "❌ No suitable device or simulator found."
             exit 1

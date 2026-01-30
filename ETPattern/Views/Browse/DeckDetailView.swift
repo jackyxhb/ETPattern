@@ -22,7 +22,7 @@ struct DeckDetailView: View {
                 // Custom header for sheet presentation
                 HStack {
                     Text(cardSet.name)
-                        .font(.title2.bold()) // Stronger title
+                        .font(theme.metrics.title2.bold()) // Stronger title
                         .foregroundColor(theme.colors.textPrimary)
                     Spacer()
                     Button(action: { dismiss() }) {

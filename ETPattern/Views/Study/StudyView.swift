@@ -31,7 +31,7 @@ struct StudyView: View {
                     HStack {
                         VStack(alignment: .leading) {
                             Text(cardSet.name)
-                                .font(.title3.bold())
+                                .font(theme.metrics.title2.bold())
                                 .foregroundStyle(.primary)
                             Text("Session Progress: \(viewModel.sessionProgress)")
                                 .font(.caption)

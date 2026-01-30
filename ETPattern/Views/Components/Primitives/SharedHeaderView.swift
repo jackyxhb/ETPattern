@@ -16,7 +16,7 @@ struct SharedHeaderView: View {
         HStack {
             VStack(alignment: .leading, spacing: theme.metrics.sharedHeaderSpacing) {
                 Text(title)
-                    .font(theme.metrics.title.weight(.bold))
+                    .font(theme.metrics.title2.weight(.bold))
                     .foregroundColor(theme.colors.textPrimary)
                 Text(subtitle)
                     .font(theme.metrics.subheadline)

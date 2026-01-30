@@ -4,22 +4,21 @@
 PROJECT_NAME="ETPattern"
 SCHEME_NAME="ETPattern"
 # iPhone 16 Plus
-DEVICE_ID="00008140-000654E61107001C"
+DEVICE_ID="DF43C240-77E2-5017-8EFD-EEF171B58686"
 CONFIGURATION="Debug"
 BUNDLE_ID="com.jackxhb.ETPattern"
 
 echo "🚀 Starting deployment to device ($DEVICE_ID)..."
 
 # 1. Build the app
-echo "📦 Building $SCHEME_NAME..."
-xcodebuild -project "${PROJECT_NAME}.xcodeproj" \
+set -o pipefail && xcodebuild -project "${PROJECT_NAME}.xcodeproj" \
            -scheme "$SCHEME_NAME" \
            -configuration "$CONFIGURATION" \
            -sdk iphoneos \
-           -destination "id=$DEVICE_ID" \
+           -destination "generic/platform=iOS" \
            -derivedDataPath "build" \
            -allowProvisioningUpdates \
-           build | xcbeautify || xcodebuild -project "${PROJECT_NAME}.xcodeproj" -scheme "$SCHEME_NAME" -configuration "$CONFIGURATION" -sdk iphoneos -destination "id=$DEVICE_ID" -derivedDataPath "build" -allowProvisioningUpdates build
+           build | xcbeautify || xcodebuild -project "${PROJECT_NAME}.xcodeproj" -scheme "$SCHEME_NAME" -configuration "$CONFIGURATION" -sdk iphoneos -destination "generic/platform=iOS" -derivedDataPath "build" -allowProvisioningUpdates build
 
 if [ $? -ne 0 ]; then
     echo "❌ Build failed!"
