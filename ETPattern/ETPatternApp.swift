@@ -16,12 +16,7 @@ struct ETPatternApp: App {
     @Environment(\.colorScheme) var systemColorScheme
 
     var currentTheme: Theme {
-        switch themeManager.currentTheme {
-        case .light: return Theme.light
-        case .dark: return Theme.dark
-        case .system:
-            return systemColorScheme == .dark ? Theme.dark : Theme.light
-        }
+        themeManager.theme
     }
 
     init() {
