@@ -10,37 +10,30 @@
 
 ---
 
-## ✨ Key Features (v2.3)
+## ✨ Key Features (v2.4)
 
-### 🧩 Bento Grid Architecture
+### 🌎 Context-Aware Translation (AI Integration)
 
-A complete dashboard redesign following the **Modern iOS "Liquid & Grid" System**.
+Native integration with the **iOS Translation API** (2025/2026 spec) for instant comprehension.
 
-- **Modularity**: Views are built as independent "Tiles" within a flexible Bento Grid.
-- **Auto Play Flow**: A dedicated high-priority tile automatically finds the best deck and starts an automated session instantly.
-- **Simplified Navigation**: Removed manual clutter (manual deck input) to focus on pure learning efficiency.
+- **Dual-Face Translation**: English content on both the front and back of cards is automatically translated into the user's system language (Chinese).
+- **Sentence-Level Precision**: The AI segments complex patterns into clear, understandable sentences for maximum learning efficiency.
+- **Privacy First**: Translations happen via on-device machine learning, keeping your data private.
 
-### 💎 Refined "Liquid Glass" Aesthetic
+### 📐 Adaptive Study Architecture
 
-Utilizes the **Liquid Glass** aesthetic (2026 spec) for maximum visual depth and premium feel.
+A smart UI designed to handle the variable length of translations and extra context.
 
-- **Material Depth**: Consistent `.ultraThinMaterial` backgrounds with subtle inner strokes.
-- **Squircle Standards**: Standardized **28pt** primary containers and **20pt** nested elements.
-- **Focused Themes**: Removed "System" theme choice to provide two manually tuned, high-performance visions: **Dark** and **Light**.
-- **Interactive Motion**: Fluid, interruptible spring animations for all transitions.
+- **Internal Scrolling**: Cards now feature intelligent internal scrolling (`CardFace`), ensuring that long examples and translations never break the navigation or dashboard layout.
+- **Dynamic Controls**: Control bars auto-adjust and "shrink-to-fit" based on the card state, keeping interaction buttons always within reach.
+- **Pixel-Perfect Alignment**: Strict horizontal margin alignment (8pt) across **Study**, **Auto Play**, and **Deck Preview** modes.
 
-### 🧠 Intelligent Spaced Repetition (FSRS v4.5)
+### 🧠 Strategic Mastery Toggle
 
-The modern gold standard for card scheduling.
+The primary learning interface now features a unified strategy cycling system.
 
-- **Adaptive Scheduling**: Calculates intervals based on memory **Stability (S)** and **Difficulty (D)**.
-- **Efficiency**: "Easy" cards scale rapidly while "Hard" items are surfaced with precision to ensure 90%+ retention.
-
-### ⚡️ Data Resilience & Cloud Engine
-
-- **SwiftData Persistence**: Robust, thread-safe persistence with CloudKit auto-mirroring.
-- **Private by Design**: All data stays in your private iCloud container; no third-party tracking.
-- **Self-Healing**: Automatic duplicate detection and malformed CSV repair on launch.
+- **Instant Switching**: Toggle between **Sequential**, **Random**, and **Intelligent (SRS)** ordering directly from the bottom control bar in all modes.
+- **Animated Haptics**: Every strategy shift is accompanied by "snap" haptic feedback and fluid UI transitions.
 
 ---
 
@@ -57,9 +50,9 @@ ETPattern/
 ├── Models/           # SwiftData Entities (Card, CardSet, ReviewLog)
 ├── ViewModels/       # @Observable State Management
 ├── ViewControllers/  # Coordinators & Routers (Navigation Logic)
-├── Services/         # I/O (TTSService, CloudSync, CSV)
+├── Services/         # I/O (TTSService, CloudSync, Translation)
 ├── Views/            # SwiftUI "Passive UI" Components
-│   ├── Components/   # Reusable Bento Tiles & Glass Modifiers
+│   ├── Components/   # Reusable Bento Tiles & CardFace Components
 │   └── Others/       # Settings, Onboarding, and Splash
 ├── Utilities/        # Theme Definitions & Metrics
 └── Resources/        # Assets, Strings, and Bundled CSVs
@@ -72,7 +65,7 @@ ETPattern/
 ### Prerequisites
 
 - Xcode 16.0+
-- iOS 18.0+ Device/Simulator
+- iOS 18.0+ Device/Simulator (Apple Silicon Mac for translation on simulator)
 - Swift 6.0 Toolchain
 
 ### Deployment
@@ -86,6 +79,22 @@ ETPattern/
 ---
 
 ## 📜 Changelog
+
+### v2.4.0 - "The Context Update"
+
+- **Translation Engine**:
+  - Integrated **Apple Translation API** into `CardFace`.
+  - Added support for multi-line translation on both card faces.
+- **UI & Layout**:
+  - Implemented **Internally Scrollable Cards** to handle long translations.
+  - Aligned all card margins (8pt) across **Study**, **Auto Play**, and **DeckDetail**.
+  - Refined **Header Logic**: Group names are now persistent on both sides of the card.
+- **Features**:
+  - Enabled **Strategy Cycling** (Sequential/Random/Intelligent) in StudyView.
+  - Linked **UIImpactFeedback** to all primary control interactions.
+- **Maintainability**:
+  - Migrated all layout constants into the centralized `Theme` system.
+  - Refactored `StudyView` and `LiquidCard` to use a unified `CardFace` component.
 
 ### v2.3.0 - "Liquid & Grid" Refactor
 
