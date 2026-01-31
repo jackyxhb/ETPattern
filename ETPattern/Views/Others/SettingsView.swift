@@ -11,6 +11,7 @@ import AVFoundation
 struct SettingsView: View {
     @Environment(AppCoordinator.self) var coordinator
     @Environment(\.theme) var theme
+    @EnvironmentObject private var themeManager: ThemeManager
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var ttsService: TTSService
     @State private var selectedVoice: String = Constants.TTS.defaultVoice
@@ -71,6 +72,7 @@ struct SettingsView: View {
                 }
             }
         }
+        .preferredColorScheme(themeManager.colorScheme)
         .onAppear {
             // ... (keep same onAppear logic)
             let stored = UserDefaults.standard.string(forKey: "selectedVoice") ?? Constants.TTS.defaultVoice
@@ -197,10 +199,10 @@ struct SettingsView: View {
                 title: NSLocalizedString("theme", comment: "Theme selection label"),
                 options: AppTheme.allCases.map { $0.rawValue },
                 selection: Binding(
-                    get: { ThemeManager.shared.currentTheme.rawValue },
+                    get: { themeManager.currentTheme.rawValue },
                     set: { newValue in
                         if let theme = AppTheme(rawValue: newValue) {
-                            ThemeManager.shared.currentTheme = theme
+                            themeManager.currentTheme = theme
                         }
                     }
                 ),
