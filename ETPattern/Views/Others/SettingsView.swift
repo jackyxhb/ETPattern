@@ -62,11 +62,9 @@ struct SettingsView: View {
                 ScrollView {
                     LazyVStack(spacing: 24) {
                         generalSection
-                        syncSection
-                        // TODO: Migrate other sections
-                        studyModeSection
                         appearanceSection
                         ttsSection
+                        syncSection
                         aboutSection
                     }
                     .padding(.vertical)
@@ -88,27 +86,29 @@ struct SettingsView: View {
 
     private var generalSection: some View {
         LiquidSettingsSection(title: "General") {
-            LiquidSettingsButton(
-                icon: "chart.bar.fill",
-                color: .blue,
-                title: "Usage Statistics"
-            ) {
-                dismiss()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    coordinator.presentFullScreen(.sessionStats)
-                }
+            // Moved from studyModeSection
+            LiquidPickerRow(
+                icon: "arrow.triangle.2.circlepath",
+                color: .teal,
+                title: NSLocalizedString("study_mode", comment: "Study mode label"),
+                options: orderOptionsKeys,
+                selection: $cardOrderMode,
+                optionsDict: orderOptionsDict
+            ) { newValue in
+                UserDefaults.standard.set(newValue, forKey: "cardOrderMode")
             }
-            Divider().padding(.leading, 64)
             
-            LiquidSettingsButton(
-                icon: "graduationcap.fill",
-                color: .purple,
-                title: "Replay Onboarding"
-            ) {
-                dismiss()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    coordinator.presentFullScreen(.onboarding)
-                }
+            Divider().padding(.leading, 64)
+
+            LiquidPickerRow(
+                icon: "play.circle",
+                color: .green,
+                title: NSLocalizedString("auto_play_mode", comment: "Auto play mode section header"),
+                options: orderOptionsKeys,
+                selection: $autoPlayOrderMode,
+                optionsDict: orderOptionsDict
+            ) { newValue in
+                UserDefaults.standard.set(newValue, forKey: "autoPlayOrderMode")
             }
             
             Divider().padding(.leading, 64)
@@ -126,6 +126,19 @@ struct SettingsView: View {
                 formatter: { "\(Int($0)) cards" },
                 onChange: { _ in }
             )
+            
+            Divider().padding(.leading, 64)
+            
+            LiquidSettingsButton(
+                icon: "chart.bar.fill",
+                color: .blue,
+                title: "Usage Statistics"
+            ) {
+                dismiss()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    coordinator.presentFullScreen(.sessionStats)
+                }
+            }
         }
     }
 
@@ -174,33 +187,7 @@ struct SettingsView: View {
         }
     }
 
-    private var studyModeSection: some View {
-        LiquidSettingsSection(title: NSLocalizedString("study_mode", comment: "Study mode section header")) {
-            LiquidPickerRow(
-                icon: "arrow.triangle.2.circlepath",
-                color: .teal,
-                title: NSLocalizedString("card_order", comment: "Card order label"),
-                options: orderOptionsKeys,
-                selection: $cardOrderMode,
-                optionsDict: orderOptionsDict
-            ) { newValue in
-                UserDefaults.standard.set(newValue, forKey: "cardOrderMode")
-            }
-            
-            Divider().padding(.leading, 64)
 
-            LiquidPickerRow(
-                icon: "play.circle",
-                color: .green,
-                title: NSLocalizedString("auto_play_mode", comment: "Auto play mode section header"),
-                options: orderOptionsKeys,
-                selection: $autoPlayOrderMode,
-                optionsDict: orderOptionsDict
-            ) { newValue in
-                UserDefaults.standard.set(newValue, forKey: "autoPlayOrderMode")
-            }
-        }
-    }
 
     private var appearanceSection: some View {
         LiquidSettingsSection(title: NSLocalizedString("appearance", comment: "Appearance section header")) {
@@ -311,6 +298,19 @@ struct SettingsView: View {
                  Text(NSLocalizedString("app_description", value: "Learn English patterns", comment: "Short app description"))
                     .font(.caption)
                     .foregroundColor(.secondary)
+            }
+            
+            Divider().padding(.leading, 64)
+            
+            LiquidSettingsButton(
+                icon: "graduationcap.fill",
+                color: .purple,
+                title: "Replay Onboarding"
+            ) {
+                dismiss()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    coordinator.presentFullScreen(.onboarding)
+                }
             }
         }
     }

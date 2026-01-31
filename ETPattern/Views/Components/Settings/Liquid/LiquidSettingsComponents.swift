@@ -69,6 +69,8 @@ struct LiquidSettingsRow<Content: View>: View {
                 Text(title)
                     .font(.body)
                     .foregroundColor(theme.colors.textPrimary)
+                    .lineLimit(1)
+                    .layoutPriority(1)
                 
                 if let subtitle = subtitle {
                     Text(subtitle)

@@ -69,6 +69,8 @@ struct LiquidPickerRow: View {
                     Text(optionsDict[selection] ?? selection)
                         .font(.subheadline)
                         .foregroundColor(theme.colors.highlight)
+                        .lineLimit(1)
+                        .layoutPriority(1)
                     Image(systemName: "chevron.up.chevron.down")
                         .font(.caption)
                         .foregroundColor(.secondary)

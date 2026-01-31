@@ -25,12 +25,12 @@
 
 /* Settings */
 "study_mode" = "Study Mode";
-"auto_play_mode" = "Auto Play Mode";
+"auto_play_mode" = "Auto Mode";
 "card_order" = "Card Order";
 "text_to_speech" = "Text-to-Speech";
 "voice" = "Voice";
-"speech_speed" = "Speech Speed";
-"speech_speed_value" = "Speech Speed: %d%%";
+"speech_speed" = "Speed";
+"speech_speed_value" = "Speed: %d%%";
 
 /* Voice Options */
 "american_english" = "American English (en-US)";
