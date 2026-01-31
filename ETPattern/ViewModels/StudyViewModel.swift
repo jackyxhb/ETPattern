@@ -27,6 +27,10 @@ final class StudyViewModel {
     private(set) var cards: [Card] = []
     private(set) var currentIndex: Int = 0
     
+    var currentStrategy: StudyStrategy {
+        session?.strategy ?? .intelligent
+    }
+    
     init(
         cardSet: CardSet,
         service: SessionServiceProtocol,
@@ -141,7 +145,28 @@ final class StudyViewModel {
         coordinator?.dismissFullScreen()
     }
     
+    func cycleStrategy() {
+        guard let session = session else { return }
+        
+        let all = StudyStrategy.allCases
+        if let currentIdx = all.firstIndex(of: session.strategy) {
+            let nextIdx = (currentIdx + 1) % all.count
+            let newStrategy = all[nextIdx]
+            
+            Task {
+                try? await service.updateStrategy(for: session, to: newStrategy)
+                await loadCards()
+            }
+        }
+    }
+    
     // MARK: - Helpers
+    
+    private func loadCards() async {
+        guard let session = session else { return }
+        self.cards = service.fetchCards(for: session)
+        updateCurrentCard()
+    }
     
     private func readCurrentCard() {
         guard let card = currentCard else { return }

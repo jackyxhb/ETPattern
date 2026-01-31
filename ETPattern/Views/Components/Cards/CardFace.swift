@@ -28,15 +28,17 @@ struct CardFace: View {
 
             VStack(alignment: .leading, spacing: theme.metrics.cardFaceContentSpacing) {
                 header
-                Spacer(minLength: 0)
-
-                if isFront {
-                    frontContentView
-                } else {
-                    backContent
+                
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: theme.metrics.cardFaceContentSpacing) {
+                        if isFront {
+                            frontContentView
+                        } else {
+                            backContent
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
                 }
-
-                Spacer(minLength: 0)
             }
             .padding(theme.metrics.cardFacePadding)
 
@@ -50,14 +52,11 @@ struct CardFace: View {
 
     @ViewBuilder
     private var translationOverlay: some View {
-        // Capture sentences synchronously before entering async context
-        let sentencesToTranslate = viewModel.sentences
-        
         Color.clear
-            .safeAppTranslationTask { session in
-                // Perform all translations in the translationTask's natural context
-                // Session is only used here, not passed to any other actor
+            .safeAppTranslationTask(id: viewModel.sentences.joined()) { session in
+                let sentencesToTranslate = viewModel.sentences
                 var newTranslations: [String: String] = [:]
+                
                 for sentence in sentencesToTranslate {
                     do {
                         let response = try await session.translate(sentence)
@@ -67,9 +66,10 @@ struct CardFace: View {
                     }
                 }
                 
-                // Update ViewModel on main actor after all translations complete
-                await MainActor.run {
-                    self.viewModel.updateTranslations(newTranslations)
+                if !newTranslations.isEmpty {
+                    await MainActor.run {
+                        self.viewModel.updateTranslations(newTranslations)
+                    }
                 }
             }
     }
@@ -123,40 +123,21 @@ struct CardFace: View {
 
     private var header: some View {
         HStack {
-            if let cardId = cardId {
-                Text("\(cardId)/\(max(totalCards, 1))")
-                    .font(.caption.monospacedDigit())
-                    .foregroundColor(theme.colors.textSecondary)
-                    .padding(.horizontal, theme.metrics.cardFaceHeaderHorizontalPadding)
-                    .padding(.vertical, theme.metrics.cardFaceHeaderVerticalPadding)
-                    .background(theme.colors.surfaceLight)
-                    .clipShape(Capsule())
-                    .dynamicTypeSize(.large ... .accessibility5)
-            } else {
-                Text("?/\(max(totalCards, 1))")
-                    .font(.caption.monospacedDigit())
-                    .foregroundColor(theme.colors.textSecondary)
-                    .padding(.horizontal, theme.metrics.cardFaceHeaderHorizontalPadding)
-                    .padding(.vertical, theme.metrics.cardFaceHeaderVerticalPadding)
-                    .background(theme.colors.surfaceLight)
-                    .clipShape(Capsule())
-                    .dynamicTypeSize(.large ... .accessibility5)
-            }
+            // Card ID Badge
+            Text("\(cardId ?? 0)/\(max(totalCards, 1))")
+                .font(.caption.monospacedDigit())
+                .foregroundColor(theme.colors.textSecondary)
+                .padding(.horizontal, theme.metrics.cardFaceHeaderHorizontalPadding)
+                .padding(.vertical, theme.metrics.cardFaceHeaderVerticalPadding)
+                .background(theme.colors.surfaceLight)
+                .clipShape(Capsule())
+                .dynamicTypeSize(.large ... .accessibility5)
 
             Spacer()
 
-            if isFront && !groupName.isEmpty {
+            // Group Name Badge (Always visible if present)
+            if !groupName.isEmpty {
                 Text(groupName)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundColor(theme.colors.highlight)
-                    .lineLimit(1)
-                    .padding(.horizontal, theme.metrics.cardFaceHeaderHorizontalPadding)
-                    .padding(.vertical, theme.metrics.cardFaceHeaderVerticalPadding)
-                    .background(theme.colors.surfaceMedium)
-                    .clipShape(Capsule())
-                    .dynamicTypeSize(.large ... .accessibility5)
-            } else if !isFront && !pattern.isEmpty {
-                Text(pattern)
                     .font(.subheadline.weight(.semibold))
                     .foregroundColor(theme.colors.highlight)
                     .lineLimit(1)

@@ -26,7 +26,7 @@ struct StudyView: View {
                 .ignoresSafeArea()
             
             if let viewModel {
-                VStack(spacing: 20) {
+                VStack(spacing: theme.metrics.autoPlayViewSpacing) {
                     // Header
                     HStack {
                         VStack(alignment: .leading) {
@@ -40,20 +40,23 @@ struct StudyView: View {
                         
                         Spacer()
                     }
-                    .padding(.horizontal)
-                    .padding(.top)
+                    .padding(.horizontal, theme.metrics.autoPlayViewHorizontalPadding)
+                    
+                    Spacer(minLength: 0)
                     
                     // Card Area
                     if let card = viewModel.currentCard {
                         LiquidCard(
                             front: card.front,
                             back: card.back,
+                            cardID: card.id,
+                            groupName: card.groupName,
                             isFlipped: viewModel.isFlipped,
+                            totalCards: viewModel.cards.count,
                             onTap: {
                                 viewModel.flip()
                             }
                         )
-                        .padding()
                         .transition(.scale.combined(with: .opacity))
                         .id(card.id)
                         
@@ -61,10 +64,10 @@ struct StudyView: View {
                         ProgressView()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
-                        // Empty State (Session Complete or Empty Deck)
-                        VStack(spacing: 16) {
+                        // ... empty state ...
+                        VStack(spacing: theme.metrics.emptyStateTextSpacing) {
                             Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 64))
+                                .font(.system(size: theme.metrics.emptyStateIconSize))
                                 .foregroundStyle(.green)
                             Text("Session Complete!")
                                 .font(.title2.bold())
@@ -75,21 +78,23 @@ struct StudyView: View {
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .liquidGlass()
-                        .padding()
+                        .padding(theme.metrics.contentHorizontalPadding)
                     }
                     
-                    // Rating Controls (only when flipped)
                     if viewModel.isFlipped {
                         LiquidControls { rating in
                             viewModel.rateCard(rating)
                         }
+                        .padding(.horizontal, theme.metrics.cardFaceOuterPadding)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }
+                .padding(.vertical, theme.metrics.cardDisplayVerticalPadding)
                 .safeAreaInset(edge: .bottom) {
                     SharedBottomControlBarView(
                         strategyToggleAction: {
-                            // Strategy toggle not available in StudyView (uses fixed intelligent)
+                            UIImpactFeedbackGenerator.snap()
+                            viewModel.cycleStrategy()
                         },
                         previousAction: {
                             UIImpactFeedbackGenerator.snap()
@@ -104,7 +109,7 @@ struct StudyView: View {
                             viewModel.close()
                         },
                         isPreviousDisabled: viewModel.currentIndex == 0,
-                        strategy: .intelligent,
+                        strategy: viewModel.currentStrategy,
                         currentPosition: viewModel.currentIndex + 1,
                         totalCards: viewModel.cards.count,
                         theme: theme,

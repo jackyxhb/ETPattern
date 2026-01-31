@@ -170,6 +170,19 @@ struct Theme {
         let buttonPadding: CGFloat = 16.0
         let sliderHeight: CGFloat = 44.0
         
+        // Bento Grid metrics
+        let bentoSpacing: CGFloat = 12.0
+        let bentoPadding: CGFloat = 16.0
+        
+        // Rating Bar metrics
+        let ratingBarPadding: CGFloat = 6.0
+        let ratingBarCornerRadius: CGFloat = 24.0
+        let ratingButtonVerticalPadding: CGFloat = 8.0
+        let ratingButtonHorizontalPadding: CGFloat = 12.0
+        let ratingBarShadowRadius: CGFloat = 10.0
+        let ratingBarShadowY: CGFloat = 5.0
+        let ratingBarSpacing: CGFloat = 8.0
+        
         // ContentView specific metrics
         let contentHorizontalPadding: CGFloat = 16.0
         let contentTopPadding: CGFloat = 20.0
@@ -294,7 +307,7 @@ struct Theme {
         let deckDetailCardRowPadding: CGFloat = 16.0
         let deckDetailCardShadowRadius: CGFloat = 12.0
         let deckDetailCardShadowY: CGFloat = 8.0
-        let deckDetailPreviewHorizontalPadding: CGFloat = 16.0
+        let deckDetailPreviewHorizontalPadding: CGFloat = 0.0
         
         // SplashView metrics
         let splashSpacing: CGFloat = 18.0

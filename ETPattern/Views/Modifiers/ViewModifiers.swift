@@ -108,19 +108,16 @@ extension View {
     }
 
     @ViewBuilder
-    func safeAppTranslationTask(action: @escaping (TranslationSession) async -> Void) -> some View {
-        #if targetEnvironment(simulator)
-        self
-        #else
+    func safeAppTranslationTask<T: Equatable>(id: T? = nil, action: @escaping (TranslationSession) async -> Void) -> some View {
         self.translationTask(
             TranslationSession.Configuration(
                 source: Locale.Language(identifier: "en"),
                 target: Locale.Language(identifier: "zh")
-            )
-        ) { session in
-            await action(session)
-        }
-        #endif
+            ),
+            action: { session in
+                await action(session)
+            }
+        )
     }
 }
 
