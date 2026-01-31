@@ -71,14 +71,12 @@ struct DashboardView: View {
                             }
                             
                             ActionTile(
-                                icon: "plus.circle.fill",
-                                title: "New Deck",
-                                subtitle: "Create",
-                                color: .green
+                                icon: "play.square.stack.fill",
+                                title: "Auto Play",
+                                subtitle: "Start",
+                                color: .orange
                             ) {
-                                Task {
-                                    await viewModel.createDeck(name: "New Deck \(Date().formatted(date: .omitted, time: .shortened))")
-                                }
+                                viewModel.startGlobalAutoPlay()
                             }
                         }
                         .frame(height: 140)
@@ -89,10 +87,10 @@ struct DashboardView: View {
                                 Text("Your Decks")
                                     .font(.headline)
                                 Spacer()
-                                Button("Import") {
+                                /* Button("Import") {
                                     viewModel.showImport()
                                 }
-                                .font(.subheadline)
+                                .font(.subheadline) */
                             }
                             .padding(.top, 8)
                             .gridCellColumns(2)
@@ -108,7 +106,6 @@ struct DashboardView: View {
                                 DeckListTile(
                                     deck: deck,
                                     onOpen: { viewModel.openDeck(deck) },
-                                    onAutoPlay: { viewModel.openAutoPlay(deck) },
                                     onDelete: { Task { await viewModel.deleteDeck(deck) } }
                                 )
                                 .gridCellColumns(2)
@@ -230,27 +227,10 @@ struct ActionTile: View {
 struct DeckListTile: View {
     let deck: CardSet
     let onOpen: () -> Void
-    let onAutoPlay: () -> Void
     let onDelete: () -> Void
     
     var body: some View {
         HStack(spacing: 16) {
-            // Visible AutoPlay Button (Left Side)
-            Button {
-                // Feedback handled by sensoryFeedback or button style
-                onAutoPlay()
-            } label: {
-                VStack(spacing: 4) {
-                    Image(systemName: "play.circle.fill")
-                        .font(.title)
-                    Text("Auto")
-                        .font(.caption2.bold())
-                }
-                .foregroundStyle(.orange)
-                .frame(width: 50)
-            }
-            .buttonStyle(.plain)
-            
             VStack(alignment: .leading) {
                 Text(deck.name)
                     .font(.headline)
@@ -274,10 +254,6 @@ struct DeckListTile: View {
         .padding()
         .bentoTileStyle()
         .contextMenu {
-            Button(action: onAutoPlay) {
-                Label("Auto Play", systemImage: "play.circle")
-            }
-            
             Button(role: .destructive, action: onDelete) {
                 Label("Delete Deck", systemImage: "trash")
             }

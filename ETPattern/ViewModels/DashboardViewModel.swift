@@ -84,6 +84,13 @@ final class DashboardViewModel {
         coordinator?.presentFullScreen(.autoPlay(deck))
     }
     
+    func startGlobalAutoPlay() {
+        // Find the first deck that actually has cards
+        if let bestDeck = decks.first(where: { !$0.safeCards.isEmpty }) {
+            coordinator?.presentFullScreen(.autoPlay(bestDeck))
+        }
+    }
+    
     func showImport() {
         coordinator?.presentFullScreen(.importCSV)
     }
